@@ -1,0 +1,13 @@
+4
+5
+ababa
+3 4 5 2 1
+5
+ababa
+2 1 4 5 3
+10
+codeforces
+8 6 1 7 5 2 9 3 10 4
+9
+abcabcabc
+4 5 6 7 8 9 1 2 3

@@ -1,0 +1,2 @@
+runner 1 is traveling at 10.5 meters per second and has already covered 100.0 meters
+runner 2 is traveling at 9.3 meters per second and has already covered 300 meters

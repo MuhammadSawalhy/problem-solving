@@ -1,0 +1,11 @@
+2
+3 5
+o p r d t
+i i i i e
+f f s e d
+
+4 3
+o p r
+o k r
+i i u
+f f s
