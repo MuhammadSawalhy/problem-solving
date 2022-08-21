@@ -1,0 +1,5 @@
+acbdefghijklmnopqrstuvwxyz
+2
+abc
+acb
+1

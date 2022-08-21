@@ -1,0 +1,15 @@
+7
+4
+aabb
+5
+ababb
+6
+ababbc
+6
+abaaba
+12
+babacbcbcaca
+14
+aaaabbcaaaabbc
+1
+a

@@ -1,0 +1,10 @@
+18 8
+assiutinupperegypt
+substr 1 6
+sort 5 8
+pop_back
+back
+reverse 1 6
+front
+push_back i
+print 4

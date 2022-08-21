@@ -8,3 +8,4 @@
 !*.txt
 !.gitignore
 !commit.sh
+cmake-build-debug/
