@@ -6,6 +6,7 @@
 !*.py
 !*.java
 !*.txt
+!*.snippets
 !.gitignore
 !commit.sh
 cmake-build-debug/
