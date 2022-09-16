@@ -21,7 +21,6 @@ typedef unsigned long long ull;
 #define pop_cnt(x) (__builtin_popcountll(x))
 #define LSB(x) (__builtin_ffsll(x) - 1)
 #define MSB(x) (64 - __builtin_clzll(x) - 1)
-#define int ll
 
 template <class T> inline void clear(T *arr, int val, int n) { while(n--) arr[n] = val; }
 // clang-format on
@@ -31,28 +30,20 @@ int t_case;
 void solve() {
   int n, k;
   cin >> n >> k;
-  vector<int> a(n);
-  for (int &i : a)
+  vector<ll> a(n);
+  for (ll &i : a)
     cin >> i;
 
   int cnt = 0;
-  std::cerr << "--------" << std::endl;
-  debug(a);
-  bool ok;
-  for (int i = 0; i < n - k; i++) {
-    ok = true;
-    for (int j = i; j < i + k; j++) {
-      if (a[j] >= a[j + 1] << 1) {
-        ok = false;
-        break;
-      }
-    }
-    if (ok) {
-      debug(i);
-      cnt++;
+  int lasti = 0;
+  for (int i = 1; i < n; i++) {
+    if (a[i] << 1 <= a[i - 1]) {
+      cnt += max(0, i - lasti - k);
+      lasti = i;
     }
   }
 
+  cnt += max(0, n - lasti - k);
   std::cout << cnt << std::endl;
 }
 

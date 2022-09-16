@@ -1,3 +1,9 @@
+//============================================================================
+// Problem     : 12461 - Airplane
+// Author      : Muahmmad Assawalhy
+// Date        : 01-09-22
+//============================================================================
+
 #include <bits/stdc++.h>
 
 using namespace std;
@@ -16,34 +22,21 @@ typedef unsigned long long ull;
 typedef vector<int> vi;
 typedef vector<bool> vb;
 
-#define int ll
 #define all(a) a.begin(), a.end()
 #define rall(a) a.rbegin(), a.rend()
 #define sz(x) (ll)(x).size()
-#define sum(v) accumulate(all(v), 0)
 
 void solve() {
-  int start = 1, end = 1e6;
-
-  string ans;
-  while (start < end) {
-    int mid = (start + end + 1) >> 1;
-    cout << mid << endl;
-    cin >> ans;
-    if (ans == ">=") {
-      start = mid;
-    } else {
-      end = mid - 1;
-    }
+  int n;
+  while (cin >> n) {
+    if (n == 0) break;
+    cout << "1/2" << endl;
   }
-
-  std::cout << "! " << end << std::endl;
 }
 
-int32_t main() {
+int main() {
   ios_base::sync_with_stdio(false);
   cin.tie(NULL);
-  int t_case;
   solve();
   return 0;
 }

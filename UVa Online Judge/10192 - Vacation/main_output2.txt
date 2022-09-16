@@ -1,0 +1,3 @@
+Case #1: you can visit at most 5 cities.
+Case #2: you can visit at most 5 cities.
+Case #3: you can visit at most 14 cities.

@@ -1,58 +1,68 @@
+//============================================================================
+// Problem     : F. 3SUM
+// Author      : Muahmmad Assawalhy
+// Date        : 31-08-22
+//============================================================================
+
 #include <bits/stdc++.h>
 
 using namespace std;
 
-// clang-format off
 #ifndef ONLINE_JUDGE
 #include "/home/ms/myp/problem-solving/debug.hpp"
 #else
-#define debug(x...)
-#define debug_arr(arr, n)
+#define debug(...)
+#define debug_itr(...)
+#define debug_bits(...)
 #endif
 
 typedef long long ll;
 typedef unsigned long ul;
 typedef unsigned long long ull;
+typedef vector<int> vi;
+typedef vector<bool> vb;
 
-#define f(i, a, b) for (ll i = a; i < b; i++)
 #define all(a) a.begin(), a.end()
 #define rall(a) a.rbegin(), a.rend()
 #define sz(x) (ll)(x).size()
-#define pop_cnt(x) (__builtin_popcountll(x))
-#define LSB(x) (__builtin_ffsll(x) - 1)
-#define MSB(x) (64 - __builtin_clzll(x) - 1)
-#define int ll
 
-template <class T> inline void clear(T *arr, int val, int n) { while(n--) arr[n] = val; }
-// clang-format on
-
-int t_case;
+const int N = 2e5 + 1;
 int n;
+int a[N];
 
 void solve() {
   cin >> n;
-  vector<ull> a(n);
-  for (auto &i : a)
-    cin >> i;
+  map<int, int> fr;
+  vector<int> nums;
   for (int i = 0; i < n; i++) {
-    for (int j = 0; j < i; j++) {
-      for (int k = 0; k < j; k++) {
-        if ((a[i] + a[j] + a[k]) % 10 == 3) {
-          std::cout << "YES" << std::endl;
+    cin >> a[i];
+    int d = a[i] % 10;
+    if (fr[d] == 3)
+      continue;
+    nums.push_back(d);
+    fr[d]++;
+  }
+
+  for (int i = 0; i < nums.size(); i++) {
+    for (int j = i + 1; j < nums.size(); j++) {
+      for (int k = j + 1; k < nums.size(); k++) {
+        if ((nums[i] + nums[j] + nums[k]) % 10 == 3) {
+          cout << "YES" << endl;
           return;
         }
       }
     }
   }
 
-  std::cout << "NO" << std::endl;
+  cout << "NO" << endl;
 }
 
-int32_t main() {
+int main() {
   ios_base::sync_with_stdio(false);
   cin.tie(NULL);
-  cin >> t_case;
-  while (t_case--)
+  int t_cases;
+  cin >> t_cases;
+  while (t_cases--)
     solve();
   return 0;
 }

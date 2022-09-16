@@ -1,0 +1,12 @@
+1
+5 5
+aaaaa
+abaabc
+cbbaca
+abccba
+abca
+aaaaa abca
+cbbaca abccba
+abaabc abccba
+abccba abca
+abaabc abccba

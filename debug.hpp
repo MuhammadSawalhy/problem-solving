@@ -25,6 +25,7 @@ template <typename T> void __print(const list<T> &x);
 template <typename T> void __print(const vector<T> &x);
 template <typename T> void __print(const array<T, 2> &x);
 template <typename T> void __print(const array<T, 3> &x);
+template <typename T> void __print(const array<T, 4> &x);
 template <typename T> void __print(const valarray<T> &x);
 template <typename T> void __print(const vector<vector<T>> &x);
 template <typename T, typename V> void __print(const map<T, V> &x);
@@ -97,6 +98,11 @@ template <typename T> void __print(const array<T, 2> &x) {
 }
 
 template <typename T> void __print(const array<T, 3> &x) {
+  vector<T> v(begin(x), end(x));
+  __print(v);
+}
+
+template <typename T> void __print(const array<T, 4> &x) {
   vector<T> v(begin(x), end(x));
   __print(v);
 }
