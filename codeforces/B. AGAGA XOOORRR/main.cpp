@@ -26,23 +26,58 @@ int a[2000];
 void solve() {
   cin >> n;
 
-  for (int i = 0; i < n; i++) {
+  for (int i = 0; i < n; i++)
     cin >> a[i];
+
+  int x = 0, y;
+  for (int i = 0; i < n - 1; i++) {
+    x ^= a[i];
+    y = 0;
+    int j = i + 1;
+
+    while (j <= n) {
+      if (j == n) {
+        if (x == y) {
+          cout << "YES" << endl;
+          return;
+        }
+        break;
+      }
+
+      if (y == x) {
+        y = 0;
+      }
+
+      y ^= a[j];
+      j++;
+    }
   }
 
-  if (n == 2) {
-    n = 3;
-    a[2] = 0;
+  x = 0;
+  for (int i = n - 1; i > 0; i--) {
+    x ^= a[i];
+    y = 0;
+    int j = i - 1;
+
+    while (j >= -1) {
+      if (j == -1) {
+        if (x == y) {
+          cout << "YES" << endl;
+          return;
+        }
+        break;
+      }
+
+      if (y == x) {
+        y = 0;
+      }
+
+      y ^= a[j];
+      j--;
+    }
   }
 
-  for (int i = n - 2; i >= 2; i--) {
-    a[i] ^= a[i + 1];
-  }
-
-  if ((a[0] ^ a[1]) == a[2] || (a[0] == a[1] && a[0] == a[2]))
-    cout << "YES" << endl;
-  else
-    cout << "NO" << endl;
+  cout << "NO" << endl;
 }
 
 int main() {
@@ -50,6 +85,9 @@ int main() {
   cin.tie(NULL);
   int t_cases;
   cin >> t_cases;
+  map<int, double> m;
+  for (int i = 0; i < 2e8; i++)
+    m[1] = cos(acos(0));
   while (t_cases--)
     solve();
   return 0;

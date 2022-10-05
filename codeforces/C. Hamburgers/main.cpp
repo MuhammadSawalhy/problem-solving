@@ -80,9 +80,51 @@ void solve() {
   cout << n << endl;
 }
 
+void bs() {
+  string recipe;
+  cin >> recipe;
+  int rb = 0, rs = 0, rc = 0;
+  int nb, ns, nc;
+  int pb, ps, pc;
+  long long r;
+  for (int i = 0; i < (int)recipe.size(); i++) {
+    if (recipe[i] == 'B')
+      rb++;
+    if (recipe[i] == 'S')
+      rs++;
+    if (recipe[i] == 'C')
+      rc++;
+  }
+  cin >> nb >> ns >> nc;
+  cin >> pb >> ps >> pc;
+  cin >> r;
+
+  auto valid = [&](long long num) {
+    long long p = max(num * rb - nb, 0LL) * pb + max(num * rs - ns, 0LL) * ps +
+                  max(num * rc - nc, 0LL) * pc;
+    return p <= r;
+  };
+
+  long long s = 0, e = 1;
+  while (valid(e))
+    e *= 2;
+  while (s < e) {
+    long long mid = (s + e + 1) >> 1;
+    debug(s, e, mid);
+    if (valid(mid)) {
+      s = mid;
+    } else {
+      e = mid - 1;
+    }
+  }
+
+  cout << s << endl;
+}
+
 int main() {
   ios_base::sync_with_stdio(false);
   cin.tie(NULL);
-  solve();
+  // solve();
+  bs();
   return 0;
 }

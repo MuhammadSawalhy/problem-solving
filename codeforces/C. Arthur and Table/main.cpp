@@ -27,72 +27,134 @@ typedef unsigned long long ull;
 
 // clang-format off
 template <typename T> struct segtree {
-  size_t n;
+  int n;
   vector<T> tree;
-  bool updating;
-  T default_value;
+  vector<T> updates;
+  vector<T> count;
+  bool updating = false;
+  bool is_delta_update = false;
   function<T(T, T)> operation;
+  T default_value;
 
-  segtree(size_t n, T default_value = 0, function<T(T, T)> operation = [](T l, T r) { return l + r; }) {
+  segtree(int n, T default_value = 0,
+          function<T(T, T)> operation = [](T l, T r) { return l + r; }) {
     // Ceil it to the next pow of 2. Expected issue when "n" is
     // so huge that the next pow of 2 can't fit in 64 bits. This
     // is equivalent to: "pow(2, ceil(log(n)))"
+    int _n = n;
     if (__builtin_popcountll(n) > 1)
       n = 1ull << (64 - __builtin_clzll(n));
     this->n = n;
     this->operation = operation;
     this->default_value = default_value;
     tree.assign(n << 1, default_value);
+    updates.assign(n << 1, 0);
+    count.assign(n << 1, 0);
+    for (int i = n; i < n + _n; i++)
+      count[i] = 1;
+    for (int i = n - 1; i >= 1; i--)
+      count[i] = count[i << 1] + count[i << 1 | 1];
   }
 
-  segtree(vector<T> &v, T default_value = 0, function<T(T, T)> operation = [](T l, T r) { return l + r; }) {
-    // Ceil it to the next pow of 2. Expected issue when "n" is
-    // so huge that the next pow of 2 can't fit in 64 bits. This
-    // is equivalent to: "pow(2, ceil(log(n)))"
+  segtree(vector<T> &v, T default_value = 0,
+          function<T(T, T)> operation = [](T l, T r) { return l + r; }) {
     segtree(v.size(), default_value, operation);
-    for (size_t i = 0; i < v.size(); i++) {
-      update(i, v[i]);
+    for (int i = 0; i < v.size(); i++) {
+      u(i, v[i]);
     }
   }
 
-  T q(size_t node, size_t node_low, size_t node_high, size_t query_low,
-      size_t query_high, T &v) {
+  T q(int node, int node_low, int node_high, int query_low,
+      int query_high, T &v, T comulative_update = 0) {
     if (query_high >= node_high && query_low <= node_low) {
-      if (updating)
+      if (updating) {
         tree[node] = v;
-      return tree[node];
+        updates[node] -= comulative_update;
+        comulative_update = 0;
+      }
+      if (is_delta_update) {
+        tree[node] += v; // consider for itself and parents
+        updates[node] += v; // to consider for childern
+      }
+      return tree[node] + comulative_update;
     }
 
     if (query_high < node_low || node_high < query_low) {
-      if (updating)
-        return tree[node];
+      if (updating || is_delta_update)
+        return tree[node] + comulative_update;
       else
         return default_value;
     }
 
-    size_t end_of_left = (node_high + node_low) >> 1;
-    const T &l = q(node << 1, node_low, end_of_left, query_low, query_high, v);
+    comulative_update += updates[node];
+
+    int mid = (node_high + node_low) >> 1;
+    const T &l = q(node << 1, node_low, mid, query_low, query_high, v, comulative_update);
     const T &r =
-        q(node << 1 | 1, end_of_left + 1, node_high, query_low, query_high, v);
+      q(node << 1 | 1, mid + 1, node_high, query_low, query_high, v, comulative_update);
     const T &val = operation(l, r);
 
-    if (updating)
+    if (updating || is_delta_update)
       tree[node] = val;
 
     return val;
   }
 
-  T query(size_t query_low, size_t query_high) {
-    // default_value has nothing to do here, it is just a must to pass this
-    // argument
-    return q(1, 0, (tree.size() >> 1) - 1, query_low, query_high,
-             default_value);
+  T query(int l, int r) {
+    // default_value has nothing to do here, it is just a must to pass this argument
+    l = get_correct_index(l);
+    r = get_correct_index(r);
+    T val = q(1, 0, n - 1, l, r, default_value);
+    return val;
   }
 
-  void update(size_t i, T val) {
+  void u(int i, T val) {
     updating = true;
-    q(1, 0, (tree.size() >> 1) - 1, i, i, val);
+    q(1, 0, n - 1, i, i, val);
     updating = false;
+  }
+
+  void update(int i, T val) {
+    i = get_correct_index(i);
+    u(i, val);
+  }
+
+  void delta_update(int l, int r, T val) {
+    is_delta_update = true;
+    q(1, 0, n - 1, l, r, val);
+    is_delta_update = false;
+  }
+
+  // You can't use delta_update with erase
+  void e(int k) {
+    u(k, default_value);
+    count[n + k] = 0;
+    for (int i = (n + k) >> 1; i >= 1; i >>= 1)
+      count[i] = count[i << 1] + count[i << 1 | 1];
+  }
+
+  // You can't use delta_update with erase
+  void erase(int k) {
+    k = get_correct_index(k);
+    e(k);
+  }
+
+  // with upperbounding
+  int gci(int i, int node, int node_low, int node_high) {
+    if (node_low == node_high) return node_low;
+    int mid = (node_low + node_high) >> 1;
+    int l = node << 1, r = node << 1 | 1;
+    if (count[r] >= i)
+      // go to the right if there exist enough nodes
+      return gci(i, r, mid + 1, node_high);
+    else
+      // otherwise go to the left and subtract the right
+      return gci(i - count[r], l, node_low, mid);
+  }
+
+  int get_correct_index(int i) {
+    assert(i >= 0 && i < count[1]);
+    return gci(count[1] - i, 1, 0, n - 1);
   }
 };
 // clang-format on
@@ -121,14 +183,10 @@ int main() {
   sort(all(costs), greater<int>());
 
   segtree<int> segcosts(n);
-  segtree<int> segcount(n);
   vector<bool> deleted(n);
 
   for (int i = 0; i < n; i++)
     segcosts.update(i, costs[i]);
-
-  for (int i = 0; i < n; i++)
-    segcount.update(i, 1);
 
   int c = 0;
   int ans = INT_MAX;
@@ -148,8 +206,7 @@ int main() {
         for (; j < k; j++) {
           if (!deleted[j]) {
             // delete and break;
-            segcosts.update(j, 0);
-            segcount.update(j, 0);
+            segcosts.e(j);
             y += cost;
             cnt++;
             i++;
@@ -166,13 +223,10 @@ int main() {
 
     int x = 0;
 
-    if (i + cnt - 1 < n) {
+    if (cnt - 1 < segcosts.count[1]) {
       // use segtrees to get the min value for x
       // I need to keep (cnt - 1) only
-      int j = segcount.search(segcount.tree[1] - (cnt - 1));
-      x = segcosts.query(j, n - 1);
-      debug(j);
-      debug(segcount.tree);
+      x = segcosts.query(cnt - 1, segcosts.count[1] - 1);
     }
 
     ans = min(c + x, ans);

@@ -1,5 +1,7 @@
 *
 !*/
+!*.c
+!*.sh
 !*.cpp
 !*.hpp
 !*.cpp
@@ -8,5 +10,4 @@
 !*.txt
 !*.snippets
 !.gitignore
-!commit.sh
 cmake-build-debug/

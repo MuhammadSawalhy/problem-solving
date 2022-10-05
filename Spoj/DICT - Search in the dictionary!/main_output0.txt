@@ -1,0 +1,6 @@
+Case #1:
+setter
+setting
+settings
+Case #2:
+No match.

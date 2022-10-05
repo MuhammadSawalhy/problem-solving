@@ -1,0 +1,5 @@
+4
+aeiou
+abxy
+aebcdefghij
+abcdeeafg

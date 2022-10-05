@@ -14,12 +14,14 @@ int main(int argc, char *argv[]) {
 endsnippet
 
 snippet code_is_prime "brute force primality test" b
-bool is_prime(int n) {
+bool is_prime(long long n) {
+  if (n < 2)
+    return false;
   if (n == 2)
     return true;
   if (n % 2 == 0)
     return false;
-  for (int i = 3; i * i <= n; i += 2)
+  for (long long i = 3; i * i <= n; i += 2)
     if (n % i == 0)
       return false;
   return true;
@@ -148,7 +150,7 @@ endsnippet
 snippet code_union_find "union find data structure" b
 struct union_find {
   vector<int> rank, parent;
-  # int forests;
+  int forests;
 
   union_find(int n) {
     forests = n;
@@ -248,9 +250,7 @@ endsnippet
 snippet comp "competitive programming template" b
 // Date: `!v strftime('%d-%m-%y')`
 #include <bits/stdc++.h>
-
 using namespace std;
-
 #ifndef ONLINE_JUDGE
 #include "/home/ms/myp/problem-solving/debug.hpp"
 #else
@@ -259,14 +259,20 @@ using namespace std;
 #define debug_bits(...)
 #endif
 
+void solve() {
+  ${0}
+}
+
 int main() {
   ios_base::sync_with_stdio(false);
   cin.tie(NULL), cout.tie(NULL);
-  int t_cases = 1;
-  cin >> t_cases;
-  while (t_cases--) {
-    ${0}
+
+  int t = 1;
+  cin >> t;
+  while (t--) {
+    solve();
   }
+
   return 0;
 }
 endsnippet
@@ -341,15 +347,15 @@ snippet code_segtree "segment tree data structure" b
 template <typename T> struct segtree {
   int n;
   vector<T> tree;
-  vector<T> updates;
-  vector<T> applied_updates;
-  vector<T> count;
+  vector<long long> updates;
+  vector<long long> applied_updates;
+  vector<long long> count;
   bool updating = false;
   bool is_delta_update = false;
-  T update_value;
+  long long update_value;
   T default_value;
   function<T(T, T)> operation;
-  function<void(int, T)> delta_update_node = [](int node, T delta) {};
+  function<void(int, long long)> delta_update_node = [](int node, long long delta) {};
   // for sum we will do this
   // [](int node, T delta) {
   //   tree[node] += delta * count[node];
@@ -385,7 +391,7 @@ template <typename T> struct segtree {
   }
 
   T q(int node, int node_low, int node_high, int query_low,
-      int query_high, T comulative_update = 0) {
+      int query_high, long long comulative_update = 0) {
 
     comulative_update += updates[node];
 
@@ -436,19 +442,19 @@ template <typename T> struct segtree {
     return val;
   }
 
-  void u(int i, T val) {
+  void u(int i, long long val) {
     updating = true;
     update_value = val;
     q(1, 0, n - 1, i, i);
     updating = false;
   }
 
-  void update(int i, T val) {
+  void update(int i, long long val) {
     i = get_correct_index(i);
     u(i, val);
   }
 
-  void delta_update(int l, int r, T val) {
+  void delta_update(int l, int r, long long val) {
     is_delta_update = true;
     update_value = val;
     q(1, 0, n - 1, l, r);
@@ -506,7 +512,7 @@ private:
 public:
   int x;
   Z(int x = 0) : x(norm(x)) {}
-  Z(ll x) : x(norm(x % mod)) {}
+  Z(long long x) : x(norm(x % mod)) {}
   int val() const { return x; }
   Z operator-() const { return Z(norm(mod - x)); }
   Z inv() const {
@@ -523,7 +529,7 @@ public:
     return res;
   }
   Z &operator*=(const Z &rhs) {
-    x = ll(x) * rhs.x % mod;
+    x = (long long)x * rhs.x % mod;
     return *this;
   }
   Z &operator+=(const Z &rhs) {
@@ -556,7 +562,7 @@ public:
     return res;
   }
   friend std::istream &operator>>(std::istream &is, Z &a) {
-    ll v;
+    long long v;
     is >> v;
     a = Z(v);
     return is;
@@ -603,21 +609,28 @@ struct union_find {
 };
 endsnippet
 
-snippet code_matexpo "matrix exponentiation" b
-constexpr int mod = 1e9 + 7;
+snippet code_matrix "matrix exponentiation" b
+constexpr long long mod = 1e9 + 7;
 
-typedef vector<vector<ll>> vvll;
+typedef vector<vector<long long>> vvll;
 struct matrix {
   vvll mat;
-  matrix(vvll mat) : mat(mat){};
+  int n, m;
 
-  matrix operator*(matrix m) {
-    assert(mat[0].size() == m.mat.size());
-    matrix mult = vvll(mat.size(), vector<long long>(m.mat[0].size()));
-    for (int i = 0; i < mat.size(); i++) {
-      for (int j = 0; j < m.mat[0].size(); j++) {
-        for (int k = 0; k < m.mat.size(); k++) {
-          mult.mat[i][j] += mat[i][k] * m.mat[k][j] % mod;
+  matrix(vvll mat) : mat(mat) {
+    n = mat.size();
+    m = mat[0].size();
+  }
+
+  matrix(int n, int m) : n(n), m(m) { mat = vvll(n, vector<long long>(m)); }
+
+  matrix operator*(matrix other) {
+    assert(m == other.n);
+    matrix mult = vvll(n, vector<long long>(other.m));
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < other.m; j++) {
+        for (int k = 0; k < m; k++) {
+          mult.mat[i][j] += mat[i][k] * other.mat[k][j] % mod;
           mult.mat[i][j] %= mod;
         }
       }
@@ -625,19 +638,72 @@ struct matrix {
     return mult;
   }
 
-  matrix power(long long n) {
+  matrix operator+(matrix other) {
+    assert(m == other.m && n == other.n);
+    matrix s = mat;
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < m; j++) {
+        s.mat[i][j] += other.mat[i][j];
+        s.mat[i][j] %= mod;
+      }
+    }
+    return s;
+  }
+
+  matrix operator-(matrix other) {
+    assert(m == other.m && n == other.n);
+    matrix s = mat;
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < m; j++) {
+        s.mat[i][j] -= other.mat[i][j];
+        s.mat[i][j] %= mod;
+      }
+    }
+    return s;
+  }
+
+  matrix power(long long p) {
     // start with identity matrix
-    matrix res(vvll(mat.size(), vector<ll>(mat.size())));
-    for (int i = 0; i < mat.size(); i++)
-      res.mat[i][i] = 1;
+    matrix res = identity(n);
     matrix m = *this;
-    while (n) {
-      if (n & 1)
+    while (p) {
+      if (p & 1)
         res = res * m;
       m = m * m;
-      n >>= 1;
+      p >>= 1;
     }
     return res;
+  }
+
+  long long det() {
+    assert(n == m);
+    if (n == 2)
+      return mat[0][0] * mat[1][1] - mat[1][0] * mat[0][1];
+    long long d = 0;
+    int sign = 1;
+    for (int i = 0; i < n; i++) {
+      matrix submat(n - 1, n - 1);
+      for (int j = 0; j < n - 1; j++) {
+        int x = 0;
+        for (int k = 0; k < n; k++) {
+          if (i == k)
+            continue;
+          submat.mat[j][x++] = mat[j + 1][k];
+        }
+      }
+      debug(sign * mat[0][i], submat.mat);
+      d += sign * mat[0][i] * submat.det();
+      sign *= -1;
+    }
+
+    return d;
+  }
+
+  static matrix identity(int size) {
+    matrix I = vvll(size, vector<long long>(size));
+    for (int i = 0; i < size; i++)
+      I.mat[i][i] = 1;
+    return I;
   }
 };
 endsnippet
@@ -657,4 +723,41 @@ struct scanner {
     return u;
   }
 };
+endsnippet
+
+snippet code_pascal "pascal triagle, useful for combinations" b
+vector<vector<Z>> pascal;
+void build_pascal(int d) {
+  pascal = {{1}};
+  while (d--) {
+    vector<Z> &lastrow = pascal.back();
+    int s = lastrow.size();
+    vector<Z> newrow(s + 1);
+    newrow.front() = 1;
+    newrow.back() = 1;
+    for (int i = 1; i < s; i++)
+      newrow[i] = lastrow[i] + lastrow[i - 1];
+    pascal.push_back(newrow);
+  }
+}
+endsnippet
+
+snippet code_choose "choose elements from  a vector (combinations)" b
+template <class T>
+void choose(int cnt, vector<T> &v, vector<vector<T>> &res, int i = 0,
+            vector<T> choosen = vector<T>()) {
+
+  if (cnt == 0) {
+    res.push_back(choosen);
+    return;
+  }
+
+  if (i >= (int)v.size())
+    return;
+
+  choosen.push_back(v[i]);
+  choose(cnt - 1, v, res, i + 1, choosen);
+  choosen.pop_back();
+  choose(cnt, v, res, i + 1, choosen);
+}
 endsnippet

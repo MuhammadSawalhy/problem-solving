@@ -137,6 +137,4 @@ void debug_bits(T val, int splitby = 4, int numofbits = 16) {
   cerr << endl;
 }
 
-#define debug(x...)                                                            \
-  cerr << #x << " = ";                                                         \
-  _print(x)
+#define debug(x...) cerr << #x << " = ", _print(x)
