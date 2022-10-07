@@ -2,14 +2,8 @@
 
 using namespace std;
 
-#define ull unsigned long long
-#define ll long long
-#define vi vector<int>
-#define vb vector<bool>
-#define pii pair<int, int>
-
 void solve() {
-
+    cout << max({1, 2, 3, 4}) << endl;
 }
 
 int main() {
@@ -18,9 +12,11 @@ int main() {
 #ifndef ONLINE_JUDGE
     freopen("/home/ms/myp/problem-solving/input", "r", stdin);
 #endif
+
     int t;
     cin >> t;
     while (t--)
         solve();
+
     return 0;
 }

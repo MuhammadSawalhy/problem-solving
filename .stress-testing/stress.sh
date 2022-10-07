@@ -1,6 +1,7 @@
 #!/bin/bash
 
 compile() {
+  echo compiling: "$1"
   g++ "$1" -o "${1%.*}"
 }
 
