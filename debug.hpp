@@ -10,107 +10,89 @@ constexpr string_view BITS = "BITS>>>>";
 int indent_level = 1;
 string indent_str = "\t";
 
-void indent() {
+void indent(ostream& os) {
   int i = indent_level;
   while (i--) {
-    cerr << indent_str;
+    os << indent_str;
   }
 }
-
-void print(char x) { cerr << '\'' << x << '\''; }
-void print(bool x) { cerr << (x ? "true" : "false"); }
-void print(const char *x) { cerr << '\"' << x << '\"'; }
-void print(const std::string &x) { cerr << '\"' << x << '\"'; }
 
 // to make it visible to other print
-template <typename T> void print(const set<T> &x);
-template <typename T> void print(const list<T> &x);
-template <typename T> void print(const vector<T> &x);
-template <typename T> void print(const array<T, 2> &x);
-template <typename T> void print(const array<T, 3> &x);
-template <typename T> void print(const array<T, 4> &x);
-template <typename T> void print(const valarray<T> &x);
-template <typename T> void print(const vector<vector<T>> &x);
-template <typename T, typename V> void print(const map<T, V> &x);
-template <typename T, typename V> void print(const pair<T, V> &x);
+template <typename T> ostream& operator<<(ostream& os, const set<T> &x);
+template <typename T> ostream& operator<<(ostream& os, const list<T> &x);
+template <typename T> ostream& operator<<(ostream& os, const valarray<T> &x);
+template <typename T> ostream& operator<<(ostream& os, const vector<vector<T>> &x);
+template <typename T, typename V> ostream& operator<<(ostream& os, const map<T, V> &x);
+template <typename T, typename V> ostream& operator<<(ostream& os, const pair<T, V> &x);
+template <typename T> ostream& operator<<(ostream& os, const vector<T> &x);
+template <typename T, size_t SIZE> ostream& operator<<(ostream& os, const array<T, SIZE> &x);
 
-template <typename T> void print(const T &x) { cerr << x; }
-
-template <typename T, typename V> void print(const pair<T, V> &x) {
-  cerr << '{';
-  print(x.first);
-  cerr << ", ";
-  print(x.second);
-  cerr << '}';
+template <typename T, typename V>
+ostream& operator<<(ostream& os, const pair<T, V> &x) {
+  os << '{' << x.first << ", " << x.second << '}';
+  return os;
 }
 
-template <typename T, typename V> void print(const map<T, V> &x) {
-  cerr << '{' << endl;
+template <typename T, typename V>
+ostream& operator<<(ostream& os, const map<T, V> &x) {
+  os << '{' << endl;
   indent_level++;
   for (const auto &[key, val] : x) {
-    indent();
-    print(key);
-    cerr << ": ";
-    print(val);
-    cerr << "," << endl;
+    indent(os);
+    os << key << ": " << val << ", " << endl;
   }
   indent_level--;
-  indent();
-  cerr << '}';
+  indent(os);
+  os << '}';
+  return os;
 }
 
-template <typename T> void print(const vector<T> &x) {
+template <typename T>
+ostream& operator<<(ostream& os, const vector<T> &x) {
   int f = 0;
-  cerr << '[';
+  os << '[';
   for (const auto &i : x)
-    cerr << (f++ ? ", " : ""), print(i);
-  cerr << ']';
+    os << (f++ ? ", " : "") << i;
+  os << ']';
+  return os;
 }
 
-template <typename T> void print(const vector<vector<T>> &x) {
-  cerr << '[';
+template <typename T>
+ostream& operator<<(ostream& os, const vector<vector<T>> &x) {
+  os << '[';
   indent_level++;
   for (const auto &i : x) {
-    cerr << endl;
-    indent();
+    os << endl;
+    indent(os);
     print(i);
-    cerr << ",";
+    os << ",";
   }
-  cerr << endl;
+  os << endl;
   indent_level--;
-  indent();
-  cerr << ']';
+  indent(os);
+  os << ']';
+  return os;
 }
 
-template <typename T> void print(const set<T> &x) {
+template <typename T>
+ostream& operator<<(ostream& os, const set<T> &x) {
   int f = 0;
-  cerr << '{';
+  os << '{';
   for (const auto &i : x)
-    cerr << (f++ ? ", " : ""), print(i);
-  cerr << '}';
+    os << (f++ ? ", " : "") << i;
+  os << '}';
+  return os;
 }
 
-template <typename T> void print(const list<T> &x) {
+template <typename T, size_t SIZE>
+ostream& operator<<(ostream& os, const array<T, SIZE> &x) {
   vector<T> v(begin(x), end(x));
-  print(v);
+  os << v;
+  return os;
 }
 
-template <typename T> void print(const array<T, 2> &x) {
-  vector<T> v(begin(x), end(x));
-  print(v);
-}
-
-template <typename T> void print(const array<T, 3> &x) {
-  vector<T> v(begin(x), end(x));
-  print(v);
-}
-
-template <typename T> void print(const array<T, 4> &x) {
-  vector<T> v(begin(x), end(x));
-  print(v);
-}
-
-template <typename T> void print(const valarray<T> &x) {
+template <typename T>
+ostream& operator<<(ostream& os, const valarray<T> &x) {
   vector<T> v(begin(x), end(x));
   print(v);
 }
@@ -118,7 +100,7 @@ template <typename T> void print(const valarray<T> &x) {
 template <typename RandomIt> void debug_itr(RandomIt start, RandomIt end) {
   cerr << '[';
   for (RandomIt it = start; it != end; it++)
-    cerr << (it != start ? ", " : ""), print(*it);
+    cerr << (it != start ? ", " : "") << *it;
   cerr << ']' << endl;
 }
 
@@ -133,7 +115,7 @@ void debug_bits(T val, int splitby = 4, int numofbits = 16) {
 
 void debug_all() { cerr << endl; }
 template <typename T, typename... V> void debug_all(T t, V... v) {
-  print(t);
+  cerr << t;
   if (sizeof...(v))
     cerr << ", ";
   debug_all(v...);

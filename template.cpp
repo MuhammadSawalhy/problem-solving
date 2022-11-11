@@ -2,8 +2,14 @@
 
 using namespace std;
 
+#define debug(...)
+#define ll long long
+#ifndef ONLINE_JUDGE
+#include "debug.hpp"
+#endif
+
 void solve() {
-    cout << max({1, 2, 3, 4}) << endl;
+    
 }
 
 int main() {

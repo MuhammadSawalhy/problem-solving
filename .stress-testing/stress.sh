@@ -1,11 +1,19 @@
 #!/bin/bash
 
+if [ ! -t 0 ]; then
+  cat > stress-in
+  delta --side-by-side \
+   <(./stress < stress-in 2>/dev/null) \
+   <(./main < stress-in 2>/dev/null)
+  exit 0
+fi
+
 compile() {
   echo compiling: "$1"
-  g++ "$1" -o "${1%.*}"
+  g++ -DLOCAL "$1" -o "${1%.*}"
 }
 
-compile brute-force.cpp
+compile stress.cpp
 compile main.cpp
 compile gen.cpp
 
@@ -13,9 +21,9 @@ compile gen.cpp
   # echo "i"
 i=0
 while true; do
-  echo "$((i++))"
+  echo "$((++i))"
   ./gen "$i" > stress-in
-  delta --side-by-side --line-numbers \
-   <(./brute-force < stress-in 2>/dev/null) \
+  delta --side-by-side \
+   <(./stress < stress-in 2>/dev/null) \
    <(./main < stress-in 2>/dev/null) || break
 done

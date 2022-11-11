@@ -1,26 +1,24 @@
-// Date: 05-10-22
+// Date: 10-11-2022
 #include <bits/stdc++.h>
+
 using namespace std;
-#ifndef ONLINE_JUDGE
-#include "/home/ms/myp/problem-solving/debug.hpp"
-#else
+
 #define debug(...)
-#define debug_itr(...)
-#define debug_bits(...)
+#define ll long long
+#define all(v) v.begin(), v.end()
+#ifdef LOCAL
+#include "debug.hpp"
 #endif
 
 void solve() {
-  int n, k;
-  cin >> n >> k;
-  int ans = 0;
-  cout << ans << endl;
+  
 }
 
 int main() {
   ios_base::sync_with_stdio(false);
   cin.tie(NULL), cout.tie(NULL);
 
-  int t = 1;
+  int t;
   cin >> t;
   while (t--)
     solve();
