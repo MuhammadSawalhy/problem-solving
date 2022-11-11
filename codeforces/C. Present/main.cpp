@@ -1,5 +1,6 @@
 // Date: 25-09-22
 #include <bits/stdc++.h>
+#define ll long long
 using namespace std;
 #ifndef ONLINE_JUDGE
 #include "/home/ms/myp/problem-solving/debug.hpp"
@@ -10,154 +11,150 @@ using namespace std;
 #endif
 
 // clang-format off
+template <typename T> struct Node {
+  T value = 0;
+  ll relative_update = 0;
+  bool pending_update = false;
+  Node(){};
+  Node(T value) : value(value){};
+
+  void update(T &val) {
+    value = val;
+    relative_update = 0;
+    pending_update = true;
+  }
+
+  void relupdate(T &val) {
+    relative_update += val;
+  }
+
+  void propagate(int node, vector<Node<T>> &tree) {
+    int left = node << 1, right = node << 1 | 1;
+    int sz = tree.size();
+
+    if (pending_update) {
+      if (left < sz) {
+        tree[left].value = value;
+        tree[left].relative_update = 0;
+        tree[left].pending_update = true;
+      }
+      if (right < sz) {
+        tree[right].value = value;
+        tree[right].relative_update = 0;
+        tree[right].pending_update = true;
+      }
+      pending_update = false;
+    }
+
+    value.first += relative_update;
+    if (left < sz)
+      tree[left].relative_update += relative_update;
+    if (right < sz)
+      tree[right].relative_update += relative_update;
+    relative_update = 0;
+  }
+};
+
+template<class T>
+ostream& operator<<(ostream &cout, const Node<T> &n) {
+  cout << "(value: " << n.value << ", rel: " << n.relative_update << ")";
+  return cout;
+}
+
 template <typename T> struct segtree {
   int n;
-  vector<T> tree;
-  vector<long long> updates;
-  vector<long long> applied_updates;
-  vector<long long> count;
-  bool updating = false;
-  bool is_delta_update = false;
-  long long update_value;
   T default_value;
+  vector<Node<T>> tree;
   function<T(T, T)> operation;
-  function<void(int, long long)> delta_update_node = [](int node, long long delta) {};
-  // for sum we will do this
-  // [](int node, T delta) {
-  //   tree[node] += delta * count[node];
-  // };
 
-  segtree(int n, T default_value = 0,
-          function<T(T, T)> operation = [](T l, T r) { return l + r; }) {
-    // Ceil it to the next pow of 2. Expected issue when "n" is
-    // so huge that the next pow of 2 can't fit in 64 bits. This
-    // is equivalent to: "pow(2, ceil(log(n)))"
+  segtree(
+      int n, T default_value,
+      function<T(T, T)> operation = [](T l, T r) { return l + r; }) {
     int _n = n;
     if (__builtin_popcountll(n) > 1)
-      n = 1ull << (64 - __builtin_clzll(n));
+      n = 1 << (64 - __builtin_clzll(n));
     this->n = n;
     this->operation = operation;
     this->default_value = default_value;
     tree.assign(n << 1, default_value);
-    updates.assign(n << 1, 0);
-    applied_updates.assign(n << 1, 0);
-    count.assign(n << 1, 0);
-    for (int i = n; i < n + _n; i++)
-      count[i] = 1;
-    for (int i = n - 1; i >= 1; i--)
-      count[i] = count[i << 1] + count[i << 1 | 1];
-  }
-
-  segtree(vector<T> &v, T default_value = 0,
-          function<T(T, T)> operation = [](T l, T r) { return l + r; }) {
-    segtree(v.size(), default_value, operation);
-    for (int i = 0; i < v.size(); i++) {
-      u(i, v[i]);
-    }
-  }
-
-  T q(int node, int node_low, int node_high, int query_low,
-      int query_high, long long comulative_update = 0) {
-
-    comulative_update += updates[node];
-
-    if (query_high >= node_high && query_low <= node_low) {
-      if (updating) {
-        // this should be customized with delta updates
-        tree[node] = {update_value, query_low};
-        applied_updates[node] = comulative_update;
-      }
-      if (is_delta_update) {
-        updates[node] += update_value; // to consider for childern in the future
-        comulative_update += update_value; // consider for himself now
-      }
-      delta_update_node(node, comulative_update - applied_updates[node]);
-      applied_updates[node] = comulative_update;
-      return tree[node];
-    }
-
-    if (query_high < node_low || node_high < query_low) {
-      if (updating || is_delta_update) {
-        delta_update_node(node, comulative_update - applied_updates[node]);
-        applied_updates[node] = comulative_update;
-        return tree[node];
-      }
-      else
-        return default_value;
-    }
-
-    int mid = (node_high + node_low) >> 1;
-    const T &l = q(node << 1, node_low, mid, query_low, query_high, comulative_update);
-    const T &r =
-      q(node << 1 | 1, mid + 1, node_high, query_low, query_high, comulative_update);
-    const T &val = operation(l, r);
-
-    if (updating || is_delta_update) {
-      tree[node] = val;
-      // don't consider my comulative_update as my left and right did this already
-      applied_updates[node] = comulative_update;
-    }
-
-    return val;
   }
 
   T query(int l, int r) {
-    l = get_correct_index(l);
-    r = get_correct_index(r);
-    T val = q(1, 0, n - 1, l, r);
-    return val;
+    return query(1, 0, n - 1, l, r);
   }
 
-  void u(int i, long long val) {
-    updating = true;
-    update_value = val;
-    q(1, 0, n - 1, i, i);
-    updating = false;
+  void update(int i, int j, T val) {
+    update(1, 0, n - 1, i, j, val);
   }
 
-  void update(int i, long long val) {
-    i = get_correct_index(i);
-    u(i, val);
+  void update(int i, T val) {
+    update(i, i, val);
   }
 
-  void delta_update(int l, int r, long long val) {
-    is_delta_update = true;
-    update_value = val;
-    q(1, 0, n - 1, l, r);
-    is_delta_update = false;
+  void relative_update(int i, int j, ll val) {
+    relative_update(1, 0, n - 1, i, j, val);
   }
 
-  void e(int k) {
-    u(k, default_value);
-    count[n + k] = 0;
-    for (int i = (n + k) >> 1; i >= 1; i >>= 1)
-      count[i] = count[i << 1] + count[i << 1 | 1];
+private:
+  T query(int node, int node_low, int node_high, int query_low, int query_high) {
+    tree[node].propagate(node, tree);
+    if (query_high >= node_high && query_low <= node_low) return tree[node].value;
+    if (query_high < node_low || node_high < query_low) return default_value;
+
+    int mid = (node_high + node_low) >> 1;
+    const T &l = query(node << 1, node_low, mid, query_low, query_high);
+    const T &r = query(node << 1 | 1, mid + 1, node_high, query_low, query_high);
+
+    return operation(l, r);
   }
 
-  // You can't use delta_update with erase
-  void erase(int k) {
-    k = get_correct_index(k);
-    e(k);
+  void update(int node, int node_low, int node_high,
+           int query_low, int query_high, T &val) {
+    tree[node].propagate(node, tree);
+    if (query_high < node_low || node_high < query_low) return;
+    if (query_high >= node_high && query_low <= node_low) {
+      tree[node].update(val);
+      tree[node].propagate(node, tree);
+      return;
+    }
+
+    int mid = (node_high + node_low) >> 1;
+    update(node << 1, node_low, mid, query_low, query_high, val);
+    update(node << 1 | 1, mid + 1, node_high, query_low, query_high, val);
+    tree[node] = operation(tree[node << 1].value, tree[node << 1 | 1].value);
   }
 
-  // with upperbounding
-  int gci(int i, int node, int node_low, int node_high) {
-    if (node_low == node_high) return node_low;
-    int mid = (node_low + node_high) >> 1;
-    int l = node << 1, r = node << 1 | 1;
-    if (count[r] >= i)
-      // go to the right if there exist enough nodes
-      return gci(i, r, mid + 1, node_high);
-    else
-      // otherwise go to the left and subtract the right
-      return gci(i - count[r], l, node_low, mid);
-  }
+  void relative_update(int node, int node_low, int node_high,
+           int query_low, int query_high, T &val) {
+    tree[node].propagate(node, tree);
+    if (query_high < node_low || node_high < query_low) return;
+    if (query_high >= node_high && query_low <= node_low) {
+      tree[node].relupdate(val);
+      tree[node].propagate(node, tree);
+      return;
+    }
 
-  int get_correct_index(int i) {
-    assert(i >= 0 && i < count[1]);
-    return gci(count[1] - i, 1, 0, n - 1);
+    int mid = (node_high + node_low) >> 1;
+    relative_update(node << 1, node_low, mid, query_low, query_high, val);
+    relative_update(node << 1 | 1, mid + 1, node_high, query_low, query_high, val);
+    tree[node] = operation(tree[node << 1].value, tree[node << 1 | 1].value);
   }
 };
+
+segtree<ll> sum_segtree(int n) {
+  segtree<ll> sg(n, 0, [](ll l, ll r) { return l + r; });
+  return sg;
+}
+
+segtree<ll> max_segtree(int n) {
+  segtree<ll> sg(n, LONG_LONG_MIN, [](ll l, ll r) { return max(l, r); });
+  return sg;
+}
+
+segtree<ll> min_segtree(int n) {
+  segtree<ll> sg(n, LONG_LONG_MAX, [](ll l, ll r) { return min(l, r); });
+  return sg;
+}
 // clang-format on
 
 void solve() {
@@ -166,14 +163,11 @@ void solve() {
   segtree<pair<long long, int>> a(n, {LONG_LONG_MAX, -1}, [](auto l, auto r) {
     return l.first <= r.first ? l : r;
   });
-  a.delta_update_node = [&a](int node, long long del) {
-    a.tree[node] = {a.tree[node].first + del, a.tree[node].second};
-  };
 
   for (int i = 0; i < n; i++) {
     int b;
     cin >> b;
-    a.update(i, b);
+    a.update(i, {b, i});
   }
 
   while (m--) {
@@ -187,7 +181,7 @@ void solve() {
       j = n - 1;
     }
 
-    a.delta_update(i, j, 1LL);
+    a.relative_update(i, j, 1LL);
   }
 
   cout << a.query(0, n - 1).first << endl;

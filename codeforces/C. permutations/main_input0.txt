@@ -1,0 +1,8 @@
+9 6
+yqcnsfzpp
+prev_permutation 7
+next_permutation 5
+prev_permutation 9
+prev_permutation 6
+prev_permutation 7
+next_permutation 1

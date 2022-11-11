@@ -28,6 +28,7 @@ void solve(int s, int e, int flag, long long res) {
     if (flag)
       Map[res]++;
     else
+      // if we didn't use mod, it is x / res
       ans += Map[x * pow(res, val - 2) % val];
   } else {
     for (int i = 0; i < 6; i++)
@@ -51,8 +52,9 @@ int main() {
       }
     }
 
-    solve(0, n / 2, 1, 1);
-    solve(n / 2, n, 0, 1);
+    // divide and conqer
+    solve(0, n / 2, 1, 1); // (6 ^ 7) is good
+    solve(n / 2, n, 0, 1); // complete
     cout << ans << endl;
   }
   return 0;

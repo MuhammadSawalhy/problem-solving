@@ -1,0 +1,31 @@
+2
+4 w x y z
+4 a b c d
+3
+a x
+x c
+b z
+3
+4 a b c d
+4 e f g h
+4 w x y z
+3
+a g
+g x
+b y
+2
+2 a b
+2 c d
+1
+c b
+5
+1 a
+1 b
+1 c
+1 d
+2 e f
+3
+a b
+b c
+d f
+0

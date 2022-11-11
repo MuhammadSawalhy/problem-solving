@@ -1,0 +1,8 @@
+Case 1, 8 concurrent events:
+(w,a) (w,b)
+Case 2, 32 concurrent events:
+(a,e) (a,f)
+Case 3, 3 concurrent events:
+(a,c) (a,d)
+Case 4, 10 concurrent events:
+(a,d) (a,e)
