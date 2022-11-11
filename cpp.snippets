@@ -901,3 +901,43 @@ ll mod_inv(ll a, ll b) {
   return 1 < a ? b - mod_inv(b % a, a) * b / a : 1;
 }
 endsnippet
+
+snippet code_trie "trie data structure" b
+constexpr int MAX_SIZE = 2;
+struct trie {
+  trie *child[MAX_SIZE];
+  bool is_leaf = false;
+  int count = 0;
+  char value;
+
+  trie() {
+    for (int i = 0; i < MAX_SIZE; i++) {
+      child[i] = nullptr;
+    }
+  }
+
+  ~trie() {
+    for (int i = 0; i < MAX_SIZE; i++) {
+      if (child[i] == nullptr)
+        continue;
+      delete child[i];
+    }
+  }
+
+  trie *insert(const char *str) {
+    count++;
+    if (*str == '\0') {
+      is_leaf = true;
+      return this;
+    }
+
+    assert(*str != '\0');
+    int cur = *str - 'a';
+    if (child[cur] == nullptr) {
+      child[cur] = new trie();
+      child[cur]->value = *str;
+    }
+    return child[cur]->insert(str + 1, xy);
+  }
+};
+endsnippet
