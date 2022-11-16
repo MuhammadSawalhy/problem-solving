@@ -931,13 +931,12 @@ struct trie {
       return this;
     }
 
-    assert(*str != '\0');
     int cur = *str - 'a';
     if (child[cur] == nullptr) {
       child[cur] = new trie();
       child[cur]->value = *str;
     }
-    return child[cur]->insert(str + 1, xy);
+    return child[cur]->insert(str + 1);
   }
 };
 endsnippet

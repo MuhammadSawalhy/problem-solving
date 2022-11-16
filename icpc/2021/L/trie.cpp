@@ -40,7 +40,6 @@ struct trie {
       return this;
     }
 
-    assert(*str != '\0');
     int cur = *str - 'a';
     if (child[cur] == nullptr) {
       child[cur] = new trie();
