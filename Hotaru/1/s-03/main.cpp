@@ -6,7 +6,7 @@ using namespace std;
 #define debug(...)
 #define ll long long
 #define all(v) v.begin(), v.end()
-#ifdef LOCAL
+#ifdef SAWALHY
 #include "debug.hpp"
 #endif
 
@@ -20,7 +20,7 @@ struct Char {
 int main() {
   ios_base::sync_with_stdio(false);
   cin.tie(NULL), cout.tie(NULL);
-  // #ifdef LOCAL
+  // #ifdef SAWALHY
   //   freopen("input", "r", stdin);
   //   freopen("output", "w", stdout);
   // #endif

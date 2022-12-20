@@ -3,7 +3,7 @@
 using namespace std;
 
 // clang-format off
-#ifndef LOCAL
+#ifndef SAWALHY
 // and placeholder
 #define debug1(...) 0
 #define debug2(...) 0

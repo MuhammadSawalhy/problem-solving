@@ -10,7 +10,7 @@ fi
 
 compile() {
   echo compiling: "$1"
-  g++ -DLOCAL "$1" -o "${1%.*}"
+  g++ -DSAWALHY "$1" -o "${1%.*}"
 }
 
 compile stress.cpp

@@ -8,7 +8,7 @@ using namespace std;
 
 #define debug(...)
 #define ll long long
-#ifdef LOCAL
+#ifdef SAWALHY
 #include "debug.hpp"
 #endif
 

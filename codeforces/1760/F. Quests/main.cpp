@@ -6,7 +6,7 @@ using namespace std;
 #define debug(...)
 #define ll long long
 #define all(v) v.begin(), v.end()
-#ifdef LOCAL
+#ifdef SAWALHY
 #include "debug.hpp"
 #endif
 
