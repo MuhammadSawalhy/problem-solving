@@ -2,22 +2,22 @@
 
 using namespace std;
 
-int gen(int a, int b) { return a + rand() % (b - a + 1); }
+int gen(int a = 1, int b = 10) { return a + rand() % (b - a + 1); }
 
 int main(int argc, char *argv[]) {
-  srand(atoi(argv[1]));
-  int t = 1;
-  cout << t << endl;
-  while (t--) {
-    int n;
-    n = gen(2, 10);
-    cout << n << endl;
+    srand(atoi(argv[1]));
+    int t = 1;
+    cout << t << endl;
+    while (t--) {
+        int n;
+        n = gen();
+        cout << n << endl;
 
-    while (n--) {
-      cout << gen(1, 10) << " ";
+        while (n--) {
+            cout << gen() << " ";
+        }
+        cout << endl;
     }
-    cout << endl;
-  }
 
-  return 0;
+    return 0;
 }

@@ -1,4 +1,4 @@
-// Date: 10-11-2022
+// Date: 11-12-2022
 #include <bits/stdc++.h>
 
 using namespace std;
@@ -11,17 +11,17 @@ using namespace std;
 #endif
 
 void solve() {
-  
+    
 }
 
 int main() {
-  ios_base::sync_with_stdio(false);
-  cin.tie(NULL), cout.tie(NULL);
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL), cout.tie(NULL);
 
-  int t;
-  cin >> t;
-  while (t--)
-    solve();
+    int t;
+    cin >> t;
+    while (t--)
+        solve();
 
-  return 0;
+    return 0;
 }

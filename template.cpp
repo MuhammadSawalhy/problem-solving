@@ -4,7 +4,7 @@ using namespace std;
 
 #define debug(...)
 #define ll long long
-#ifndef ONLINE_JUDGE
+#ifdef LOCAL
 #include "debug.hpp"
 #endif
 

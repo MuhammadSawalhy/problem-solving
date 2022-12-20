@@ -8,8 +8,8 @@ snippet cpp
 using namespace std;
 
 int main(int argc, char *argv[]) {
-  ${1}
-  return 0;
+    ${1}
+    return 0;
 }
 endsnippet
 
@@ -18,79 +18,79 @@ int ${1:n};
 cin >> ${1};
 ll ${2:a}[${1}];
 for (int i = 0; i < ${1}; i++) {
-  cin >> ${2}[i];
+    cin >> ${2}[i];
 }
 endsnippet
 
 snippet code_is_prime "brute force primality test" b
 bool is_prime(ll n) {
-  if (n < 2)
-    return false;
-  if (n == 2)
+    if (n < 2)
+        return false;
+    if (n == 2)
+        return true;
+    if (n % 2 == 0)
+        return false;
+    for (ll i = 3; i * i <= n; i += 2)
+        if (n % i == 0)
+            return false;
     return true;
-  if (n % 2 == 0)
-    return false;
-  for (ll i = 3; i * i <= n; i += 2)
-    if (n % i == 0)
-      return false;
-  return true;
 }
 endsnippet
 
 snippet code_miller_rabin_ptest "Miller & Rabin probabilistic primality test" b
 bool miller_rabin_ptest(unsigned ll n, int k = 3) {
-  if (n < 2) return false;
-  if (n == 2) return true;
+    if (n < 2) return false;
+    if (n == 2) return true;
 
-  while (k--) {
-    int a = rand() % (n - 2) + 2;
-    int p = n - 1;
-    int r = 1;
+    while (k--) {
+        int a = rand() % (n - 2) + 2;
+        int p = n - 1;
+        int r = 1;
 
-    while (p) {
-      if (p & 1)
-        r = r * a % n;
-      a = a * a % n;
-      p >>= 1;
+        while (p) {
+            if (p & 1)
+                r = r * a % n;
+            a = a * a % n;
+            p >>= 1;
+        }
+
+        if (r != 1) return false;
     }
 
-    if (r != 1) return false;
-  }
-
-  prime_memo[n] = 1;
-  return true; // probably
+    prime_memo[n] = 1;
+    return true; // probably
 }
 endsnippet
 
 snippet code_primefact
 map<ll, ll>
 get_prime_factors(ll n) {
-  map<ll, ll> result;
-  int r = 0;
+    map<ll, ll> result;
+    int r = 0;
 
-  while (n % 2 == 0) {
-    r++;
-    n = n / 2;
-  }
-
-  if (r > 0)
-    result[2] = r;
-
-  int sqn = sqrt(n);
-  for (int i = 3; i <= sqn; i += 2) {
-    r = 0;
-    while (n % i == 0) {
-      r++;
-      n = n / i;
+    while (n % 2 == 0) {
+        r++;
+        n = n / 2;
     }
+
     if (r > 0)
-      result[i] = r;
-  }
+        result[2] = r;
 
-  if (n > 2)
-    result[n] = 1;
+    int sqn = sqrt(n);
+    for (int i = 3; i <= sqn; i += 2) {
+        r = 0;
+        while (n % i == 0) {
+            r++;
+            n = n / i;
+        }
+        if (r > 0)
+            result[i] = r;
+    }
 
-  return result;
+    if (n > 2)
+        result[n] = 1;
+
+    return result;
 }
 endsnippet
 
@@ -99,161 +99,161 @@ std::vector<int> phi(${1:n} + 1);
 std::iota(phi.begin(), phi.end(), 0);
 
 for (int i = 1; i <= ${2:$1}; i++) {
-  for (int j = i << 1; j <= ${2:$1}; j += i)
-    phi[j] -= phi[i];
+    for (int j = i << 1; j <= ${2:$1}; j += i)
+        phi[j] -= phi[i];
 }
 endsnippet
 
 snippet code_sieve "Sieve's algorithm to mark numbers as primes and composites" b
 void sieve(vector<bool> &is_prime) {
-  is_prime[1] = false;
-  is_prime[0] = false;
-  int s = is_prime.size();
-  for (int i = 4; i < s; i += 2)
-    is_prime[i] = false;
-  for (int i = 3; i * i < s; i += 2) {
-    if (is_prime[i]) {
-      for (int j = i * i; j < s; j += i + i)
-        is_prime[j] = false;
+    is_prime[1] = false;
+    is_prime[0] = false;
+    int s = is_prime.size();
+    for (int i = 4; i < s; i += 2)
+        is_prime[i] = false;
+    for (int i = 3; i * i < s; i += 2) {
+        if (is_prime[i]) {
+            for (int j = i * i; j < s; j += i + i)
+                is_prime[j] = false;
+        }
     }
-  }
 }
 endsnippet
 
 snippet code_dijkstra "Dijkstra's TSP algorithm" b
 double dijkstra(int s, int e) {
-  double dist[n + 1];
-  int prev[n + 1];
-  fill(dist, dist + n + 1, 1e20);
+    double dist[n + 1];
+    int prev[n + 1];
+    fill(dist, dist + n + 1, 1e20);
 
-  typedef pair<double, int> item;
-  priority_queue<item, deque<item>, greater<item>> qu;
-  qu.push({0, s});
+    typedef pair<double, int> item;
+    priority_queue<item, deque<item>, greater<item>> qu;
+    qu.push({0, s});
 
-  while (!qu.empty()) {
-    auto [d, p] = qu.top();
-    qu.pop();
+    while (!qu.empty()) {
+        auto [d, p] = qu.top();
+        qu.pop();
 
-    // skip if there exist a shorter path to here
-    if (dist[p] < d)
-      continue;
+        // skip if there exist a shorter path to here
+        if (dist[p] < d)
+            continue;
 
-    for (int i = 1; i <= n; i++) {
-      if (i == p)
-        continue;
-      double dpp = calc_dist(p, i);
-      // if there exist a shorter path to "i" passing through "p"
-      if (dist[i] > dpp + d) {
-        prev[i] = p;
-        dist[i] = dpp + d;
-        qu.push({dist[i], i});
-      }
+        for (int i = 1; i <= n; i++) {
+            if (i == p)
+                continue;
+            double dpp = calc_dist(p, i);
+            // if there exist a shorter path to "i" passing through "p"
+            if (dist[i] > dpp + d) {
+                prev[i] = p;
+                dist[i] = dpp + d;
+                qu.push({dist[i], i});
+            }
+        }
     }
-  }
 
-  // for (int i = e; i != s; i = prev[i]) cerr << i << " <- ";
-  // cerr << s << endl;
+    // for (int i = e; i != s; i = prev[i]) cerr << i << " <- ";
+    // cerr << s << endl;
 
-  return dist[e];
+    return dist[e];
 }
 endsnippet
 
 snippet code_union_find "union find data structure" b
 struct union_find {
-  vector<int> rank, parent;
-  int forests;
+    vector<int> rank, parent;
+    int forests;
 
-  union_find(int n) {
-    forests = n;
-    rank = vector<int>(n);
-    parent = vector<int>(n);
-    for (int i = 0; i < n; i++)
-      parent[i] = i;
-  }
+    union_find(int n) {
+        forests = n;
+        rank = vector<int>(n);
+        parent = vector<int>(n);
+        for (int i = 0; i < n; i++)
+            parent[i] = i;
+    }
 
-  bool connected(int x, int y) { return find(x) == find(y); }
+    bool connected(int x, int y) { return find(x) == find(y); }
 
-  int find(int x) {
-    if (parent[x] == x)
-      return x;
-    return parent[x] = find(parent[x]);
-  }
+    int find(int x) {
+        if (parent[x] == x)
+            return x;
+        return parent[x] = find(parent[x]);
+    }
 
-  bool uni(int x, int y) {
-    x = find(x), y = find(y);
-    if (x == y)
-      return false;
-    if (rank[y] > rank[x])
-      swap(x, y);
-    parent[y] = x;
-    if (rank[x] == rank[y])
-      rank[x]++;
-    return true;
-  }
+    bool uni(int x, int y) {
+        x = find(x), y = find(y);
+        if (x == y)
+            return false;
+        if (rank[y] > rank[x])
+            swap(x, y);
+        parent[y] = x;
+        if (rank[x] == rank[y])
+            rank[x]++;
+        return true;
+    }
 };
 endsnippet
 
 snippet code_mst_kruskal "MST (minimum spanning tree), Kruskal's algorithm" b
 struct union_find {
-  vector<int> rank, parent;
-  int forests;
+    vector<int> rank, parent;
+    int forests;
 
-  union_find(int n) {
-    forests = n;
-    rank = vector<int>(n);
-    parent = vector<int>(n);
-    for (int i = 0; i < n; i++)
-      parent[i] = i;
-  }
+    union_find(int n) {
+        forests = n;
+        rank = vector<int>(n);
+        parent = vector<int>(n);
+        for (int i = 0; i < n; i++)
+            parent[i] = i;
+    }
 
-  bool connected(int x, int y) { return find(x) == find(y); }
+    bool connected(int x, int y) { return find(x) == find(y); }
 
-  int find(int x) {
-    if (parent[x] == x)
-      return x;
-    return parent[x] = find(parent[x]);
-  }
+    int find(int x) {
+        if (parent[x] == x)
+            return x;
+        return parent[x] = find(parent[x]);
+    }
 
-  bool uni(int x, int y) {
-    x = find(x), y = find(y);
-    if (x == y)
-      return false;
-    if (rank[y] > rank[x])
-      swap(x, y);
-    parent[y] = x;
-    if (rank[x] == rank[y])
-      rank[x]++;
-    return true;
-  }
+    bool uni(int x, int y) {
+        x = find(x), y = find(y);
+        if (x == y)
+            return false;
+        if (rank[y] > rank[x])
+            swap(x, y);
+        parent[y] = x;
+        if (rank[x] == rank[y])
+            rank[x]++;
+        return true;
+    }
 };
 
 struct edge {
-  int from, to;
-  double w;
-  edge(int from, int to, double weight) : from(from), to(to), w(weight) {}
-  bool operator<(edge &e) { return w < e.w; }
+    int from, to;
+    double w;
+    edge(int from, int to, double weight) : from(from), to(to), w(weight) {}
+    bool operator<(edge &e) { return w < e.w; }
 };
 
 pair<double, vector<edge>> mst_kruskal(vector<edge> edges, int v) {
-  union_find uf(v + 1);
-  double cost = 0;
-  vector<edge> mst_edges;
+    union_find uf(v + 1);
+    double cost = 0;
+    vector<edge> mst_edges;
 
-  sort(edges.rbegin(), edges.rend());
+    sort(edges.rbegin(), edges.rend());
 
-  while (!edges.empty()) {
-    auto &e = edges.back();
-    edges.pop_back();
-    if (uf.uni(e.from, e.to)) {
-      cost += e.w;
-      mst_edges.push_back(e);
-    }
-  };
+    while (!edges.empty()) {
+        auto &e = edges.back();
+        edges.pop_back();
+        if (uf.uni(e.from, e.to)) {
+            cost += e.w;
+            mst_edges.push_back(e);
+        }
+    };
 
-  if (mst_edges.size() != v - 1)
-    return {INFINITY, {}};
+    if (mst_edges.size() != v - 1)
+        return {INFINITY, {}};
 
-  return {cost, mst_edges};
+    return {cost, mst_edges};
 }
 endsnippet
 
@@ -263,28 +263,28 @@ snippet comp "competitive programming template" b
 #include <bits/stdc++.h>
 
 using namespace std;
+using ll = long long;
 
-#define debug(...)
-#define ll long long
 #define all(v) v.begin(), v.end()
-#ifdef LOCAL
+#define debug(...)
+#ifdef SAWALHY
 #include "debug.hpp"
 #endif
 
 void solve() {
-  ${0}
+    ${0}
 }
 
 int main() {
-  ios_base::sync_with_stdio(false);
-  cin.tie(NULL), cout.tie(NULL);
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL), cout.tie(NULL);
 
-  int t;
-  cin >> t;
-  while (t--)
-    solve();
+    int t;
+    cin >> t;
+    while (t--)
+        solve();
 
-  return 0;
+    return 0;
 }
 endsnippet
 
@@ -319,16 +319,16 @@ endsnippet
 
 snippet code_geo_intersect_segments "intersect point between two segements, computational geometry" b
 bool intersect_segments(point a, point b, point c, point d, point & intersect) {
-  double d1 = cp(a - b, d - c), d2 = cp(a - c, d - c), d3 = cp(a - b, a - c);
-  if (fabs(d1) < EPS)
-    return false;  // Parllel || identical
+    double d1 = cp(a - b, d - c), d2 = cp(a - c, d - c), d3 = cp(a - b, a - c);
+    if (fabs(d1) < EPS)
+        return false;  // Parllel || identical
 
-  double t1 = d2 / d1, t2 = d3 / d1;
-  intersect = a + (b - a) * t1;
+    double t1 = d2 / d1, t2 = d3 / d1;
+    intersect = a + (b - a) * t1;
 
-  if (t1 < -EPS || t2 < -EPS || t2 > 1 + EPS)
-    return false;  // e.g. ab is ray, cd is segment ... change to whatever
-  return true;
+    if (t1 < -EPS || t2 < -EPS || t2 > 1 + EPS)
+        return false;  // e.g. ab is ray, cd is segment ... change to whatever
+    return true;
 }
 endsnippet
 
@@ -338,281 +338,298 @@ snippet code_geo_ccw "is counter close wise (CCW), given three points" b
 // cw = -1 => angle < 0 or collinear after p0
 // Undefined = 0 => Collinar in range [a, b]. Be careful here
 int ccw(point a, point b, point c) {
-  point v1(b - a), v2(c - a);
-  double t = cp(v1, v2);
+    point v1(b - a), v2(c - a);
+    double t = cp(v1, v2);
 
-  if (t > +EPS)
-    return +1;
-  if (t < -EPS)
-    return -1;
-  if (v1.X * v2.X < -EPS || v1.Y * v2.Y < -EPS)
-    return -1;
-  if (norm(v1) < norm(v2) - EPS)
-    return +1;
-  return 0;
+    if (t > +EPS)
+        return +1;
+    if (t < -EPS)
+        return -1;
+    if (v1.X * v2.X < -EPS || v1.Y * v2.Y < -EPS)
+        return -1;
+    if (norm(v1) < norm(v2) - EPS)
+        return +1;
+    return 0;
 }
 endsnippet
 
 snippet code_segtree "segment tree data structure" b
 // clang-format off
 template <typename T> struct Node {
-  T value = 0;
-  ll relative_update = 0;
-  bool pending_update = false;
-  Node(){};
-  Node(T value) : value(value){};
+    T value = 0;
+    ll relative_update = 0;
+    bool pending_update = false;
+    Node(){};
+    Node(T value) : value(value){};
 
-  void update(T &val) {
-    value = val;
-    relative_update = 0;
-    pending_update = true;
-  }
-
-  void relupdate(T &val) {
-    relative_update += val;
-  }
-
-  void propagate(int node, vector<Node<T>> &tree) {
-    int left = node << 1, right = node << 1 | 1;
-    int sz = tree.size();
-
-    if (pending_update) {
-      if (left < sz) {
-        tree[left].value = value;
-        tree[left].relative_update = 0;
-        tree[left].pending_update = true;
-      }
-      if (right < sz) {
-        tree[right].value = value;
-        tree[right].relative_update = 0;
-        tree[right].pending_update = true;
-      }
-      pending_update = false;
+    void update(T &val) {
+        value = val;
+        relative_update = 0;
+        pending_update = true;
     }
 
-    value += relative_update;
-    if (left < sz)
-      tree[left].relative_update += relative_update;
-    if (right < sz)
-      tree[right].relative_update += relative_update;
-    relative_update = 0;
-  }
+    void relupdate(T &val) {
+        relative_update += val;
+    }
+
+    void propagate(int node, vector<Node<T>> &tree) {
+        int left = node << 1, right = node << 1 | 1;
+        int sz = tree.size();
+
+        if (pending_update) {
+            if (left < sz) {
+                tree[left].value = value;
+                tree[left].relative_update = 0;
+                tree[left].pending_update = true;
+            }
+            if (right < sz) {
+                tree[right].value = value;
+                tree[right].relative_update = 0;
+                tree[right].pending_update = true;
+            }
+            pending_update = false;
+        }
+
+        value += relative_update;
+        if (left < sz)
+            tree[left].relative_update += relative_update;
+        if (right < sz)
+            tree[right].relative_update += relative_update;
+        relative_update = 0;
+    }
 };
 
 template<class T>
 ostream& operator<<(ostream &cout, const Node<T> &n) {
-  cout << "(value: " << n.value << ", rel: " << n.relative_update << ")";
-  return cout;
+    cout << "(value: " << n.value << ", rel: " << n.relative_update << ")";
+    return cout;
 }
 
 template <typename T> struct segtree {
-  int n;
-  T default_value;
-  vector<Node<T>> tree;
-  function<T(T, T)> operation;
+    int n;
+    T default_value;
+    vector<Node<T>> tree;
+    function<T(T, T)> operation;
 
-  segtree(
-      int n, T default_value,
-      function<T(T, T)> operation = [](T l, T r) { return l + r; }) {
-    int _n = n;
-    if (__builtin_popcountll(n) > 1)
-      n = 1 << (64 - __builtin_clzll(n));
-    this->n = n;
-    this->operation = operation;
-    this->default_value = default_value;
-    tree.assign(n << 1, default_value);
-  }
+    segtree(int n, T default_value, function<T(T, T)> operation) {
+        if (__popcount(n) > 1)
+            n = 1 << (64 - __popcount(n));
+        this->n = n;
+        this->operation = operation;
+        this->default_value = default_value;
+        tree.assign(n << 1, default_value);
+    }
 
-  T query(int l, int r) {
-    return query(1, 0, n - 1, l, r);
-  }
+    T query(int l, int r) {
+        return query(1, 0, n - 1, l, r);
+    }
 
-  void update(int i, int j, T val) {
-    update(1, 0, n - 1, i, j, val);
-  }
+    void update(int i, int j, T val) {
+        update(1, 0, n - 1, i, j, val);
+    }
 
-  void update(int i, T val) {
-    update(i, i, val);
-  }
+    void update(int i, T val) {
+        update(i, i, val);
+    }
 
-  void relative_update(int i, int j, ll val) {
-    relative_update(1, 0, n - 1, i, j, val);
-  }
+    void relative_update(int i, int j, ll val) {
+        relative_update(1, 0, n - 1, i, j, val);
+    }
 
 private:
-  T query(int node, int node_low, int node_high, int query_low, int query_high) {
-    tree[node].propagate(node, tree);
-    if (query_high >= node_high && query_low <= node_low) return tree[node].value;
-    if (query_high < node_low || node_high < query_low) return default_value;
+    T query(int node, int node_low, int node_high, int query_low, int query_high) {
+        tree[node].propagate(node, tree);
+        if (query_high >= node_high && query_low <= node_low) return tree[node].value;
+        if (query_high < node_low || node_high < query_low) return default_value;
 
-    int mid = (node_high + node_low) >> 1;
-    const T &l = query(node << 1, node_low, mid, query_low, query_high);
-    const T &r = query(node << 1 | 1, mid + 1, node_high, query_low, query_high);
+        int mid = (node_high + node_low) >> 1;
+        const T &l = query(node << 1, node_low, mid, query_low, query_high);
+        const T &r = query(node << 1 | 1, mid + 1, node_high, query_low, query_high);
 
-    return operation(l, r);
-  }
-
-  void update(int node, int node_low, int node_high,
-           int query_low, int query_high, T &val) {
-    tree[node].propagate(node, tree);
-    if (query_high < node_low || node_high < query_low) return;
-    if (query_high >= node_high && query_low <= node_low) {
-      tree[node].update(val);
-      tree[node].propagate(node, tree);
-      return;
+        return operation(l, r);
     }
 
-    int mid = (node_high + node_low) >> 1;
-    update(node << 1, node_low, mid, query_low, query_high, val);
-    update(node << 1 | 1, mid + 1, node_high, query_low, query_high, val);
-    tree[node] = operation(tree[node << 1].value, tree[node << 1 | 1].value);
-  }
+    void update(int node, int node_low, int node_high,
+                     int query_low, int query_high, T &val) {
+        tree[node].propagate(node, tree);
+        if (query_high < node_low || node_high < query_low) return;
+        if (query_high >= node_high && query_low <= node_low) {
+            tree[node].update(val);
+            tree[node].propagate(node, tree);
+            return;
+        }
 
-  void relative_update(int node, int node_low, int node_high,
-           int query_low, int query_high, T &val) {
-    tree[node].propagate(node, tree);
-    if (query_high < node_low || node_high < query_low) return;
-    if (query_high >= node_high && query_low <= node_low) {
-      tree[node].relupdate(val);
-      tree[node].propagate(node, tree);
-      return;
+        int mid = (node_high + node_low) >> 1;
+        update(node << 1, node_low, mid, query_low, query_high, val);
+        update(node << 1 | 1, mid + 1, node_high, query_low, query_high, val);
+        tree[node] = operation(tree[node << 1].value, tree[node << 1 | 1].value);
     }
 
-    int mid = (node_high + node_low) >> 1;
-    relative_update(node << 1, node_low, mid, query_low, query_high, val);
-    relative_update(node << 1 | 1, mid + 1, node_high, query_low, query_high, val);
-    tree[node] = operation(tree[node << 1].value, tree[node << 1 | 1].value);
-  }
+    void relative_update(int node, int node_low, int node_high,
+                     int query_low, int query_high, T &val) {
+        tree[node].propagate(node, tree);
+        if (query_high < node_low || node_high < query_low) return;
+        if (query_high >= node_high && query_low <= node_low) {
+            tree[node].relupdate(val);
+            tree[node].propagate(node, tree);
+            return;
+        }
+
+        int mid = (node_high + node_low) >> 1;
+        relative_update(node << 1, node_low, mid, query_low, query_high, val);
+        relative_update(node << 1 | 1, mid + 1, node_high, query_low, query_high, val);
+        tree[node] = operation(tree[node << 1].value, tree[node << 1 | 1].value);
+    }
 };
-
-segtree<ll> sum_segtree(int n) {
-  segtree<ll> sg(n, 0, [](ll l, ll r) { return l + r; });
-  return sg;
-}
-
-segtree<ll> max_segtree(int n) {
-  segtree<ll> sg(n, LONG_LONG_MIN, [](ll l, ll r) { return max(l, r); });
-  return sg;
-}
-
-segtree<ll> min_segtree(int n) {
-  segtree<ll> sg(n, LONG_LONG_MAX, [](ll l, ll r) { return min(l, r); });
-  return sg;
-}
 // clang-format on
 endsnippet
 
-snippet code_mod "modular arithmetics stolen from Jiangly" b
-constexpr int mod = 1000000007;
+snippet code_segtree_sum
+segtree<ll> ${0:sg}(n, 0, [](ll l, ll r) { return l + r; });
+endsnippet
 
+snippet code_segtree_max
+segtree<ll> ${0:sg}(n, LONG_LONG_MIN, [](ll l, ll r) { return max(l, r); });
+endsnippet
+
+snippet code_segtree_min
+segtree<ll> ${0:sg}(n, LONG_LONG_MAX, [](ll l, ll r) { return min(l, r); });
+endsnippet
+
+snippet code_mint "modular arithmetics stolen from Jiangly" b
+constexpr int MOD = ${1:1000000007}; // 998244353
+
+template<int mod = MOD>
 struct Z {
 private:
-  // assume -P <= x < 2P
-  int norm(int x) const {
-    if (x < 0)
-      x += mod;
-    if (x >= mod)
-      x -= mod;
-    return x;
-  }
+    // assume -P <= x < 2P, (it's faster)
+    int norm(int x) const {
+        if (x < 0)
+            x += mod;
+        if (x >= mod)
+            x -= mod;
+        return x;
+    }
 
 public:
-  int x;
-  Z(int x = 0) : x(norm(x)) {}
-  Z(ll x) : x(norm(x % mod)) {}
-  int val() const { return x; }
-  Z operator-() const { return Z(norm(mod - x)); }
-  Z inv() const {
-    assert(x != 0);
-    return power(mod - 2);
-  }
-  Z power(Z b) const {
-    Z res = 1;
-    Z a = x;
-    for (; b.x; a *= a, b.x >>= 1) {
-      if (b.x % 2)
-        res *= a;
+    int x;
+    Z(int x = 0) : x(norm(x)) {}
+    Z(ll x) : x(norm(x % mod)) {}
+    int val() const { return x; }
+    Z operator-() const { return Z(norm(mod - x)); }
+    Z inv() const {
+        assert(x != 0);
+        return power(mod - 2);
     }
-    return res;
-  }
-  Z &operator*=(const Z &rhs) {
-    x = (ll)x * rhs.x % mod;
-    return *this;
-  }
-  Z &operator+=(const Z &rhs) {
-    x = norm(x + rhs.x);
-    return *this;
-  }
-  Z &operator-=(const Z &rhs) {
-    x = norm(x - rhs.x);
-    return *this;
-  }
-  Z &operator/=(const Z &rhs) { return *this *= rhs.inv(); }
-  friend Z operator*(const Z &lhs, const Z &rhs) {
-    Z res = lhs;
-    res *= rhs;
-    return res;
-  }
-  friend Z operator+(const Z &lhs, const Z &rhs) {
-    Z res = lhs;
-    res += rhs;
-    return res;
-  }
-  friend Z operator-(const Z &lhs, const Z &rhs) {
-    Z res = lhs;
-    res -= rhs;
-    return res;
-  }
-  friend Z operator/(const Z &lhs, const Z &rhs) {
-    Z res = lhs;
-    res /= rhs;
-    return res;
-  }
-  friend std::istream &operator>>(std::istream &is, Z &a) {
-    ll v;
-    is >> v;
-    a = Z(v);
-    return is;
-  }
-  friend std::ostream &operator<<(std::ostream &os, const Z &a) {
-    return os << a.val();
-  }
+    Z power(ll b) const {
+        Z res = 1, a = x;
+        while (b) {
+            if (b & 1) res *= a;
+            a *= a;
+            b >>= 1;
+        }
+        return res;
+    }
+    Z &operator*=(const Z &rhs) {
+        x = (ll)x * rhs.x % mod;
+        return *this;
+    }
+    Z &operator+=(const Z &rhs) {
+        x = norm(x + rhs.x);
+        return *this;
+    }
+    Z &operator-=(const Z &rhs) {
+        x = norm(x - rhs.x);
+        return *this;
+    }
+    Z &operator/=(const Z &rhs) { return *this *= rhs.inv(); }
+    friend Z operator*(const Z &lhs, const Z &rhs) {
+        Z res = lhs;
+        res *= rhs;
+        return res;
+    }
+    friend Z operator+(const Z &lhs, const Z &rhs) {
+        Z res = lhs;
+        res += rhs;
+        return res;
+    }
+    friend Z operator-(const Z &lhs, const Z &rhs) {
+        Z res = lhs;
+        res -= rhs;
+        return res;
+    }
+    friend Z operator/(const Z &lhs, const Z &rhs) {
+        Z res = lhs;
+        res /= rhs;
+        return res;
+    }
+    friend std::istream &operator>>(std::istream &is, Z &a) {
+        ll v;
+        is >> v;
+        a = Z(v);
+        return is;
+    }
+    friend std::ostream &operator<<(std::ostream &os, const Z &a) {
+        return os << a.val();
+    }
 };
+
+using Z = mint<>;
+endsnippet
+
+snippet code_comb "modular combinations" b
+vector<Z> fact = {1};
+vector<Z> fact_inv = {1};
+
+void build_fact(int n = 1e6) {
+    while ((int) fact.size() < n + 1)
+        fact.push_back(fact.back() * (int) fact.size());
+    fact_inv.resize(fact.size());
+    fact_inv.back() = fact.back().inv();
+    for (int j = fact_inv.size() - 2; fact_inv[j].x == 0; j--)
+        fact_inv[j] = fact_inv[j + 1] * (j + 1);
+}
+
+Z choose(int n, int r) {
+    if (r > n || r < 0) return 0;
+    if ((int) fact.size() < n + 1) build_fact(n);
+    return fact[n] * fact_inv[r] * fact_inv[n - r];
+}
 endsnippet
 
 snippet code_dsu "disjoint set union" b
 struct union_find {
-  vector<int> rank, parent;
-  int forests;
+    vector<int> rank, parent;
+    int forests;
 
-  union_find(int n) {
-    forests = n;
-    rank = vector<int>(n);
-    parent = vector<int>(n);
-    for (int i = 0; i < n; i++)
-      parent[i] = i;
-  }
+    union_find(int n) {
+        forests = n;
+        rank = vector<int>(n);
+        parent = vector<int>(n);
+        for (int i = 0; i < n; i++)
+            parent[i] = i;
+    }
 
-  bool connected(int x, int y) { return find(x) == find(y); }
+    bool connected(int x, int y) { return find(x) == find(y); }
 
-  int find(int x) {
-    if (parent[x] == x)
-      return x;
-    return parent[x] = find(parent[x]);
-  }
+    int find(int x) {
+        if (parent[x] == x)
+            return x;
+        return parent[x] = find(parent[x]);
+    }
 
-  bool uni(int x, int y) {
-    x = find(x), y = find(y);
-    if (x == y)
-      return false;
-    if (rank[y] > rank[x])
-      swap(x, y);
-    forests--;
-    parent[y] = x;
-    if (rank[x] == rank[y])
-      rank[x]++;
-    return true;
-  }
+    bool uni(int x, int y) {
+        x = find(x), y = find(y);
+        if (x == y)
+            return false;
+        if (rank[y] > rank[x])
+            swap(x, y);
+        forests--;
+        parent[y] = x;
+        if (rank[x] == rank[y])
+            rank[x]++;
+        return true;
+    }
 };
 endsnippet
 
@@ -621,322 +638,322 @@ constexpr ll mod = 1e9 + 7;
 
 typedef vector<vector<ll>> vvll;
 struct matrix {
-  vvll mat;
-  int n, m;
+    vvll mat;
+    int n, m;
 
-  matrix(vvll mat) : mat(mat) {
-    n = mat.size();
-    m = mat[0].size();
-  }
+    matrix(vvll mat) : mat(mat) {
+        n = mat.size();
+        m = mat[0].size();
+    }
 
-  matrix(int n, int m) : n(n), m(m) { mat = vvll(n, vector<ll>(m)); }
+    matrix(int n, int m) : n(n), m(m) { mat = vvll(n, vector<ll>(m)); }
 
-  matrix operator*(matrix other) {
-    assert(m == other.n);
-    matrix mult = vvll(n, vector<ll>(other.m));
-    for (int i = 0; i < n; i++) {
-      for (int j = 0; j < other.m; j++) {
-        for (int k = 0; k < m; k++) {
-          mult.mat[i][j] += mat[i][k] * other.mat[k][j] % mod;
-          mult.mat[i][j] %= mod;
+    matrix operator*(matrix other) {
+        assert(m == other.n);
+        matrix mult = vvll(n, vector<ll>(other.m));
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < other.m; j++) {
+                for (int k = 0; k < m; k++) {
+                    mult.mat[i][j] += mat[i][k] * other.mat[k][j] % mod;
+                    mult.mat[i][j] %= mod;
+                }
+            }
         }
-      }
+        return mult;
     }
-    return mult;
-  }
 
-  matrix operator+(matrix other) {
-    assert(m == other.m && n == other.n);
-    matrix s = mat;
-    for (int i = 0; i < n; i++) {
-      for (int j = 0; j < m; j++) {
-        s.mat[i][j] += other.mat[i][j];
-        s.mat[i][j] %= mod;
-      }
-    }
-    return s;
-  }
-
-  matrix operator-(matrix other) {
-    assert(m == other.m && n == other.n);
-    matrix s = mat;
-    for (int i = 0; i < n; i++) {
-      for (int j = 0; j < m; j++) {
-        s.mat[i][j] -= other.mat[i][j];
-        s.mat[i][j] %= mod;
-      }
-    }
-    return s;
-  }
-
-  matrix power(ll p) {
-    // start with identity matrix
-    matrix res = identity(n);
-    matrix m = *this;
-    while (p) {
-      if (p & 1)
-        res = res * m;
-      m = m * m;
-      p >>= 1;
-    }
-    return res;
-  }
-
-  ll det() {
-    assert(n == m);
-    if (n == 2)
-      return mat[0][0] * mat[1][1] - mat[1][0] * mat[0][1];
-    ll d = 0;
-    int sign = 1;
-    for (int i = 0; i < n; i++) {
-      matrix submat(n - 1, n - 1);
-      for (int j = 0; j < n - 1; j++) {
-        int x = 0;
-        for (int k = 0; k < n; k++) {
-          if (i == k)
-            continue;
-          submat.mat[j][x++] = mat[j + 1][k];
+    matrix operator+(matrix other) {
+        assert(m == other.m && n == other.n);
+        matrix s = mat;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                s.mat[i][j] += other.mat[i][j];
+                s.mat[i][j] %= mod;
+            }
         }
-      }
-      debug(sign * mat[0][i], submat.mat);
-      d += sign * mat[0][i] * submat.det();
-      sign *= -1;
+        return s;
     }
 
-    return d;
-  }
+    matrix operator-(matrix other) {
+        assert(m == other.m && n == other.n);
+        matrix s = mat;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                s.mat[i][j] -= other.mat[i][j];
+                s.mat[i][j] %= mod;
+            }
+        }
+        return s;
+    }
 
-  static matrix identity(int size) {
-    matrix I = vvll(size, vector<ll>(size));
-    for (int i = 0; i < size; i++)
-      I.mat[i][i] = 1;
-    return I;
-  }
+    matrix power(ll p) {
+        // start with identity matrix
+        matrix res = identity(n);
+        matrix m = *this;
+        while (p) {
+            if (p & 1)
+                res = res * m;
+            m = m * m;
+            p >>= 1;
+        }
+        return res;
+    }
+
+    ll det() {
+        assert(n == m);
+        if (n == 2)
+            return mat[0][0] * mat[1][1] - mat[1][0] * mat[0][1];
+        ll d = 0;
+        int sign = 1;
+        for (int i = 0; i < n; i++) {
+            matrix submat(n - 1, n - 1);
+            for (int j = 0; j < n - 1; j++) {
+                int x = 0;
+                for (int k = 0; k < n; k++) {
+                    if (i == k)
+                        continue;
+                    submat.mat[j][x++] = mat[j + 1][k];
+                }
+            }
+            debug(sign * mat[0][i], submat.mat);
+            d += sign * mat[0][i] * submat.det();
+            sign *= -1;
+        }
+
+        return d;
+    }
+
+    static matrix identity(int size) {
+        matrix I = vvll(size, vector<ll>(size));
+        for (int i = 0; i < size; i++)
+            I.mat[i][i] = 1;
+        return I;
+    }
 };
 endsnippet
 
 snippet code_scanner "fast input scanner" b
 char in[1 << 24];
 struct scanner {
-  char const *o;
-  scanner() : o(in) { load(); }
-  void load() { in[fread(in, 1, sizeof(in) - 4, stdin)] = 0; }
-  unsigned readInt() {
-    unsigned u = 0;
-    while (*o && *o <= 32)
-      ++o;
-    while (*o >= '0' && *o <= '9')
-      u = u * 10 + (*o++ - '0');
-    return u;
-  }
+    char const *o;
+    scanner() : o(in) { load(); }
+    void load() { in[fread(in, 1, sizeof(in) - 4, stdin)] = 0; }
+    unsigned readInt() {
+        unsigned u = 0;
+        while (*o && *o <= 32)
+            ++o;
+        while (*o >= '0' && *o <= '9')
+            u = u * 10 + (*o++ - '0');
+        return u;
+    }
 };
 endsnippet
 
 snippet code_pascal "pascal triagle, useful for combinations" b
 vector<vector<Z>> pascal;
 void build_pascal(int d) {
-  pascal = {{1}};
-  while (d--) {
-    vector<Z> &lastrow = pascal.back();
-    int s = lastrow.size();
-    vector<Z> newrow(s + 1);
-    newrow.front() = 1;
-    newrow.back() = 1;
-    for (int i = 1; i < s; i++)
-      newrow[i] = lastrow[i] + lastrow[i - 1];
-    pascal.push_back(newrow);
-  }
+    pascal = {{1}};
+    while (d--) {
+        vector<Z> &lastrow = pascal.back();
+        int s = lastrow.size();
+        vector<Z> newrow(s + 1);
+        newrow.front() = 1;
+        newrow.back() = 1;
+        for (int i = 1; i < s; i++)
+            newrow[i] = lastrow[i] + lastrow[i - 1];
+        pascal.push_back(newrow);
+    }
 }
 endsnippet
 
 snippet code_choose "choose elements from  a vector (combinations)" b
 template <class T>
 void choose(int cnt, vector<T> &v, vector<vector<T>> &res, int i = 0,
-            vector<T> choosen = vector<T>()) {
+                        vector<T> choosen = vector<T>()) {
 
-  if (cnt == 0) {
-    res.push_back(choosen);
-    return;
-  }
+    if (cnt == 0) {
+        res.push_back(choosen);
+        return;
+    }
 
-  if (i >= (int)v.size())
-    return;
+    if (i >= (int)v.size())
+        return;
 
-  choosen.push_back(v[i]);
-  choose(cnt - 1, v, res, i + 1, choosen);
-  choosen.pop_back();
-  choose(cnt, v, res, i + 1, choosen);
+    choosen.push_back(v[i]);
+    choose(cnt - 1, v, res, i + 1, choosen);
+    choosen.pop_back();
+    choose(cnt, v, res, i + 1, choosen);
 }
 endsnippet
 
 snippet code_bigint "Description" b
 class bigint {
 public:
-  vector<int> digits;
+    vector<int> digits;
 
-  bigint(ll value = 0) { set_value(value); }
+    bigint(ll value = 0) { set_value(value); }
 
-  bigint(string s) {
-    digits.resize(s.size());
-    for (int i = (int)s.size() - 1; i >= 0; i--) {
-      digits[i] = s[(int)s.size() - 1 - i] - '0';
+    bigint(string s) {
+        digits.resize(s.size());
+        for (int i = (int)s.size() - 1; i >= 0; i--) {
+            digits[i] = s[(int)s.size() - 1 - i] - '0';
+        }
     }
-  }
 
-  template <typename RandomIt> bigint(RandomIt begin, RandomIt end) {
-    digits.assign(begin, end);
-  }
-
-  void set_value(ll value) {
-    digits.clear();
-    while (value) {
-      digits.push_back(value % 10);
-      value /= 10;
+    template <typename RandomIt> bigint(RandomIt begin, RandomIt end) {
+        digits.assign(begin, end);
     }
-  }
 
-  int size() const { return digits.size(); }
-
-  int &operator[](int i) { return digits[i]; }
-
-  int operator[](int i) const { return digits[i]; }
-
-  void trim() {
-    while (digits.back() == 0)
-      digits.pop_back();
-  }
-
-  bigint &operator*=(const bigint &rhs) {
-    vector<int> res(size() + rhs.size() + 1);
-    for (int i = 0; i < size(); i++) {
-      for (int j = 0; j < rhs.size(); j++) {
-        res[i + j] += digits[i] * rhs[j];
-      }
+    void set_value(ll value) {
+        digits.clear();
+        while (value) {
+            digits.push_back(value % 10);
+            value /= 10;
+        }
     }
-    for (int i = 0; i < res.size() - 1; i++) {
-      res[i + 1] += res[i] / 10;
-      res[i] %= 10;
-    }
-    digits = res;
-    trim();
-    return *this;
-  }
 
-  bigint &operator+=(const bigint &rhs) {
-    digits.resize(max(size(), rhs.size()) + 1);
-    for (int i = 0; i < rhs.size(); i++) {
-      digits[i] += rhs[i];
-      digits[i + 1] += digits[i] / 10;
-      digits[i] %= 10;
-    }
-    trim();
-    return *this;
-  }
+    int size() const { return digits.size(); }
 
-  friend bigint operator+(const bigint &lhs, const bigint &rhs) {
-    bigint res = lhs;
-    res.digits.resize(max(rhs.size(), lhs.size()) + 1);
-    for (int i = 0; i < (int)res.size() - 1; i++) {
-      res[i] += rhs[i];
-      res[i + 1] += res[i] / 10;
-      res[i] %= 10;
-    }
-    res.trim();
-    return res;
-  }
+    int &operator[](int i) { return digits[i]; }
 
-  friend bigint operator*(const bigint &lhs, const bigint &rhs) {
-    bigint res;
-    res.digits.resize(rhs.size() + lhs.size() + 1);
-    for (int i = 0; i < lhs.size(); i++) {
-      for (int j = 0; j < rhs.size(); j++) {
-        res[i + j] += lhs[i] * rhs[j];
-      }
-    }
-    for (int i = 0; i < res.size() - 1; i++) {
-      res[i + 1] += res[i] / 10;
-      res[i] %= 10;
-    }
-    res.trim();
-    return res;
-  }
+    int operator[](int i) const { return digits[i]; }
 
-  friend bool operator==(const bigint &lhs, const bigint &rhs) {
-    return lhs.digits == rhs.digits;
-  }
-
-  friend bool operator>(const bigint &lhs, const bigint &rhs) {
-    if (lhs.size() != rhs.size())
-      return lhs.size() > rhs.size();
-    for (int i = lhs.size() - 1; i >= 0; i--) {
-      if (lhs[i] > rhs[i])
-        return true;
+    void trim() {
+        while (digits.back() == 0)
+            digits.pop_back();
     }
-    return false;
-  }
 
-  friend bool operator>=(const bigint &lhs, const bigint &rhs) {
-    if (lhs.size() != rhs.size())
-      return lhs.size() > rhs.size();
-    for (int i = lhs.size() - 1; i >= 0; i--) {
-      if (lhs[i] > rhs[i])
-        return true;
-      if (lhs[i] < rhs[i])
+    bigint &operator*=(const bigint &rhs) {
+        vector<int> res(size() + rhs.size() + 1);
+        for (int i = 0; i < size(); i++) {
+            for (int j = 0; j < rhs.size(); j++) {
+                res[i + j] += digits[i] * rhs[j];
+            }
+        }
+        for (int i = 0; i < res.size() - 1; i++) {
+            res[i + 1] += res[i] / 10;
+            res[i] %= 10;
+        }
+        digits = res;
+        trim();
+        return *this;
+    }
+
+    bigint &operator+=(const bigint &rhs) {
+        digits.resize(max(size(), rhs.size()) + 1);
+        for (int i = 0; i < rhs.size(); i++) {
+            digits[i] += rhs[i];
+            digits[i + 1] += digits[i] / 10;
+            digits[i] %= 10;
+        }
+        trim();
+        return *this;
+    }
+
+    friend bigint operator+(const bigint &lhs, const bigint &rhs) {
+        bigint res = lhs;
+        res.digits.resize(max(rhs.size(), lhs.size()) + 1);
+        for (int i = 0; i < (int)res.size() - 1; i++) {
+            res[i] += rhs[i];
+            res[i + 1] += res[i] / 10;
+            res[i] %= 10;
+        }
+        res.trim();
+        return res;
+    }
+
+    friend bigint operator*(const bigint &lhs, const bigint &rhs) {
+        bigint res;
+        res.digits.resize(rhs.size() + lhs.size() + 1);
+        for (int i = 0; i < lhs.size(); i++) {
+            for (int j = 0; j < rhs.size(); j++) {
+                res[i + j] += lhs[i] * rhs[j];
+            }
+        }
+        for (int i = 0; i < res.size() - 1; i++) {
+            res[i + 1] += res[i] / 10;
+            res[i] %= 10;
+        }
+        res.trim();
+        return res;
+    }
+
+    friend bool operator==(const bigint &lhs, const bigint &rhs) {
+        return lhs.digits == rhs.digits;
+    }
+
+    friend bool operator>(const bigint &lhs, const bigint &rhs) {
+        if (lhs.size() != rhs.size())
+            return lhs.size() > rhs.size();
+        for (int i = lhs.size() - 1; i >= 0; i--) {
+            if (lhs[i] > rhs[i])
+                return true;
+        }
         return false;
     }
-    return true;
-  }
+
+    friend bool operator>=(const bigint &lhs, const bigint &rhs) {
+        if (lhs.size() != rhs.size())
+            return lhs.size() > rhs.size();
+        for (int i = lhs.size() - 1; i >= 0; i--) {
+            if (lhs[i] > rhs[i])
+                return true;
+            if (lhs[i] < rhs[i])
+                return false;
+        }
+        return true;
+    }
 };
 
 ostream &operator<<(ostream &os, const bigint &bi) {
-  for (int i = bi.size() - 1; i >= 0; i--)
-    os << bi[i];
-  return os;
+    for (int i = bi.size() - 1; i >= 0; i--)
+        os << bi[i];
+    return os;
 }
 endsnippet
 
 # source: https://codeforces.com/blog/entry/23365
 snippet code_modinv "modular inverse for coprimes not only prime mod" b
 ll mod_inv(ll a, ll b) {
-  return 1 < a ? b - mod_inv(b % a, a) * b / a : 1;
+    return 1 < a ? b - mod_inv(b % a, a) * b / a : 1;
 }
 endsnippet
 
 snippet code_trie "trie data structure" b
 constexpr int MAX_SIZE = 2;
 struct trie {
-  trie *child[MAX_SIZE];
-  bool is_leaf = false;
-  int count = 0;
-  char value;
+    trie *child[MAX_SIZE];
+    bool is_leaf = false;
+    int count = 0;
+    char value;
 
-  trie() {
-    for (int i = 0; i < MAX_SIZE; i++) {
-      child[i] = nullptr;
-    }
-  }
-
-  ~trie() {
-    for (int i = 0; i < MAX_SIZE; i++) {
-      if (child[i] == nullptr)
-        continue;
-      delete child[i];
-    }
-  }
-
-  trie *insert(const char *str) {
-    count++;
-    if (*str == '\0') {
-      is_leaf = true;
-      return this;
+    trie() {
+        for (int i = 0; i < MAX_SIZE; i++) {
+            child[i] = nullptr;
+        }
     }
 
-    int cur = *str - 'a';
-    if (child[cur] == nullptr) {
-      child[cur] = new trie();
-      child[cur]->value = *str;
+    ~trie() {
+        for (int i = 0; i < MAX_SIZE; i++) {
+            if (child[i] == nullptr)
+                continue;
+            delete child[i];
+        }
     }
-    return child[cur]->insert(str + 1);
-  }
+
+    trie *insert(const char *str) {
+        count++;
+        if (*str == '\0') {
+            is_leaf = true;
+            return this;
+        }
+
+        int cur = *str - 'a';
+        if (child[cur] == nullptr) {
+            child[cur] = new trie();
+            child[cur]->value = *str;
+        }
+        return child[cur]->insert(str + 1);
+    }
 };
 endsnippet
