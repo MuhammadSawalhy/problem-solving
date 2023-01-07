@@ -10,11 +10,12 @@ using ll = long long;
 #include "debug.hpp"
 #endif
 
-constexpr int mod = 998244353;
+constexpr int MOD = 998244353;// 998244353
 
-struct Z {
+template<int mod = MOD>
+struct mint {
 private:
-    // assume -P <= x < 2P
+    // assume -P <= x < 2P, (it's faster)
     int norm(int x) const {
         if (x < 0)
             x += mod;
@@ -25,66 +26,74 @@ private:
 
 public:
     int x;
-    Z(int x = 0) : x(norm(x)) {}
-    Z(ll x) : x(norm(x % mod)) {}
+    mint(int x = 0) : x(norm(x)) {}
+    mint(ll x) : x(norm(x % mod)) {}
     int val() const { return x; }
-    Z operator-() const { return Z(norm(mod - x)); }
-    Z inv() const {
+    mint operator-() const { return mint(norm(mod - x)); }
+    mint inv() const {
         assert(x != 0);
         return power(mod - 2);
     }
-    Z power(Z b) const {
-        Z res = 1;
-        Z a = x;
-        for (; b.x; a *= a, b.x >>= 1) {
-            if (b.x % 2)
-                res *= a;
+    mint power(ll b) const {
+        mint res = 1, a = x;
+        while (b) {
+            if (b & 1) res *= a;
+            a *= a;
+            b >>= 1;
         }
         return res;
     }
-    Z &operator*=(const Z &rhs) {
+    mint &operator*=(const mint &rhs) {
         x = (ll) x * rhs.x % mod;
         return *this;
     }
-    Z &operator+=(const Z &rhs) {
+    mint &operator+=(const mint &rhs) {
         x = norm(x + rhs.x);
         return *this;
     }
-    Z &operator-=(const Z &rhs) {
+    mint &operator-=(const mint &rhs) {
         x = norm(x - rhs.x);
         return *this;
     }
-    Z &operator/=(const Z &rhs) { return *this *= rhs.inv(); }
-    friend Z operator*(const Z &lhs, const Z &rhs) {
-        Z res = lhs;
+    mint &operator/=(const mint &rhs) { return *this *= rhs.inv(); }
+    friend mint operator*(const mint &lhs, const mint &rhs) {
+        mint res = lhs;
         res *= rhs;
         return res;
     }
-    friend Z operator+(const Z &lhs, const Z &rhs) {
-        Z res = lhs;
+    friend mint operator+(const mint &lhs, const mint &rhs) {
+        mint res = lhs;
         res += rhs;
         return res;
     }
-    friend Z operator-(const Z &lhs, const Z &rhs) {
-        Z res = lhs;
+    friend mint operator-(const mint &lhs, const mint &rhs) {
+        mint res = lhs;
         res -= rhs;
         return res;
     }
-    friend Z operator/(const Z &lhs, const Z &rhs) {
-        Z res = lhs;
+    friend mint operator/(const mint &lhs, const mint &rhs) {
+        mint res = lhs;
         res /= rhs;
         return res;
     }
-    friend std::istream &operator>>(std::istream &is, Z &a) {
+    friend std::istream &operator>>(std::istream &is, mint &a) {
         ll v;
         is >> v;
-        a = Z(v);
+        a = mint(v);
         return is;
     }
-    friend std::ostream &operator<<(std::ostream &os, const Z &a) {
+    friend std::ostream &operator<<(std::ostream &os, const mint &a) {
         return os << a.val();
     }
+    friend mint max(mint a, mint b) {
+        return a.x > b.x ? a : b;
+    }
+    friend mint min(mint a, mint b) {
+        return a.x < b.x ? a : b;
+    }
 };
+
+typedef mint<> Z;
 
 int main() {
     ios_base::sync_with_stdio(false);
@@ -93,46 +102,31 @@ int main() {
     int n;
     cin >> n;
 
-    bool ok = true;
     vector<vector<int>> cons(n + 1, vector<int>(n + 1));
     for (int i = 1; i <= n; i++) {
-        bool diff = false;
-        for (int j = i; j <= n; j++) {
-            cin >> cons[i][j];
-            if (cons[i][j] == 1 && diff)
-                ok = false;
-            diff |= cons[i][j] == 2;
-        }
-    }
-
-    if (!ok) {
-        cout << 0 << endl;
-        return 0;
-    }
-
-
-    Z dp[n + 1][n + 1][2];
-    dp[0][1][0] = (cons[1][1] != 2) * 2;
-    for (int i = 1; i <= n; i++) {
-        if (cons[i][i] == 2) {
-            dp[n][n][0] = 0;
-            dp[n][n][1] = 0;
-            break;
-        }
-        dp[i][i][0] = dp[i - 1][i][0];
-        dp[i][i][1] = dp[i - 1][i][1];
+        cin >> cons[i][i];
         for (int j = i + 1; j <= n; j++) {
-            if (cons[i][j] == 0 || cons[i][j] == 2) {
-                dp[i][j][1] = dp[i][j - 1][0] + dp[i][j - 1][1] * 2;
-                dp[i][j][0] = 0;
-            }
-            if (cons[i][j] == 0 || cons[i][j] == 1) {
-                dp[i][j][0] = dp[i][j - 1][0];
-            }
+            cin >> cons[i][j];
         }
     }
 
-    cout << max(dp[n][n][0].x, dp[n][n][1].x) << endl;
+    // the first constraint will result in some values
+    // the second constraint may lower the first containt results
+    //   - min of both results
+    //   - so on and so forth
+    // to calculate a contraint result:
+    //   1 1 1 1 ... 1 (x ones) -> 2
+    //   2 2 2 2 ... 2 (y twos) -> 0
+    //   1 ... 1 (x ones) 2 .... 2 (y twos) -> 2 ^ (y)
+    //
+    // -> 0 0 ... 0 (x zeros) 2 2 2 ... 2 (y twos) -> 2 ^ (y + x)
+    //    2 4 ... 2^x      2^(x+1)
+    //
+    // -> 0 0 0 1 0 ... 0 (x zeros) 2 2 2 ... 2 (y twos) -> 2 ^ (y + x + 1)
+    //    2 2 2 2 4     2^(x+1)   2^(x+2)
+
+
+
 
     return 0;
 }

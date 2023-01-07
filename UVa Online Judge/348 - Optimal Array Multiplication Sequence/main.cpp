@@ -1,22 +1,22 @@
 // Date: 03-10-22
 #include <bits/stdc++.h>
 using namespace std;
-#ifndef ONLINE_JUDGE
-#include "/home/ms/myp/problem-solving/debug.hpp"
-#else
 #define debug(...)
-#define debug_itr(...)
-#define debug_bits(...)
+#ifdef SAWALHY
+#include "debug.hpp"
 #endif
 
-map<pair<int, int>, pair<array<int, 3>, vector<string>>> memo;
+typedef pair<array<int, 3>, vector<string>> multiplication;
+
+map<pair<int, int>, multiplication> memo;
 vector<pair<int, int>> mats;
 
-pair<array<int, 3>, vector<string>> mincost(int i, int j) {
-  if (memo.find({i, j}) != memo.end())
+multiplication mincost(int i, int j) {
+  if (memo.count({i, j}))
     return memo[{i, j}];
 
   if (i + 1 == j) {
+    // one matrix only, no multiplication needed
     return memo[{i, j}] = {{mats[i].first, mats[i].second, 0}, {}};
   }
 
@@ -24,22 +24,20 @@ pair<array<int, 3>, vector<string>> mincost(int i, int j) {
   array<int, 2> size;
   vector<string> grouping;
 
+  // try all possible ways to multiplicate and recurse to do the sub multiplications
   for (int k = i + 1; k < j; k++) {
     auto left = mincost(i, k);
     auto right = mincost(k, j);
     assert(left.first[1] == right.first[0]);
     size = {left.first[0], right.first[1]}; // is the same for all cases
-    int newcost = right.first[2] + left.first[2] +
-                  left.first[0] * left.first[1] * right.first[1];
+    int extracost = left.first[0] * left.first[1] * right.first[1];
+    int newcost = right.first[2] + left.first[2] + extracost;
+
     if (newcost < cost) {
       cost = newcost;
       grouping = {to_string(i) + "-"};
-      for (auto g : left.second) {
-        grouping.push_back(g);
-      }
-      for (auto g : right.second) {
-        grouping.push_back(g);
-      }
+      for (auto g : left.second) grouping.push_back(g);
+      for (auto g : right.second) grouping.push_back(g);
       grouping.push_back(to_string(j - 1) + "+");
     }
   }
@@ -52,14 +50,22 @@ void solve(int n) {
   memo.clear();
   for (int i = 0; i < n; i++)
     cin >> mats[i].first >> mats[i].second;
+  // first: size and cost,  second: grouping
   auto ans = mincost(0, n);
   int j = 0;
+  debug(ans);
+  // i- means open parenthese before A[i]
+  // i+ means close parenthese after A[i]
+  // ans = {[1, 1, 105], [0-, 1-, 2+, 2+]}
+  // output ->          (A1 x (A2 x A3))
   for (int i = 0; i < n; i++) {
+    // print open parenthese before the current matrix (A[i])
     while (j < (int)ans.second.size() && ans.second[j] == to_string(i) + "-") {
       cout << "(";
       j++;
     }
     cout << "A" << i + 1;
+    // print close parenthese after the current matrix (A[i])
     while (j < (int)ans.second.size() && ans.second[j] == to_string(i) + "+") {
       cout << ")";
       j++;

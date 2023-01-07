@@ -1,0 +1,13 @@
+2
+4 4
+answer 1 4
+modification 1 2
+modification 2 3
+answer 2 2
+8 6
+modification 2 4
+modification 4 8
+modification 4 5
+answer 8 8
+modification 5 7
+answer 4 8

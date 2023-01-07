@@ -4,13 +4,22 @@
 
 using namespace std;
 
-int indent_level = 1;
+int indent_level = 0;
 string indent_str = "\t";
 
 void indent(ostream &os) {
     int i = indent_level;
     while (i--)
         os << indent_str;
+}
+
+template<typename _CharT, typename _Traits>
+inline basic_ostream<_CharT, _Traits>&
+ENDL(basic_ostream<_CharT, _Traits>& __os)
+{
+    flush(__os.put(__os.widen('\n')));
+    indent(__os);
+    return __os;
 }
 
 // to make it visible to other print
@@ -20,6 +29,8 @@ template<typename T>
 ostream &operator<<(ostream &os, const list<T> &x);
 template<typename T>
 ostream &operator<<(ostream &os, const valarray<T> &x);
+template<typename T>
+ostream &operator<<(ostream &os, const multiset<T> &x);
 template<typename T>
 ostream &operator<<(ostream &os, const vector<vector<T>> &x);
 template<typename T, typename V>
@@ -69,20 +80,23 @@ template<typename T>
 ostream &operator<<(ostream &os, const vector<vector<T>> &x) {
     os << '[';
     indent_level++;
-    for (const auto &i: x) {
-        os << endl;
-        indent(os);
-        os << i;
-        os << ",";
-    }
-    os << endl;
+    for (const auto &i: x)
+        os << ENDL << i << ",";
     indent_level--;
-    indent(os);
-    return os << ']';
+    return os << ENDL << "]";
 }
 
 template<typename T>
 ostream &operator<<(ostream &os, const set<T> &x) {
+    int f = 0;
+    os << '{';
+    for (const auto &i: x)
+        os << (f++ ? ", " : "") << i;
+    return os << '}';
+}
+
+template<typename T>
+ostream &operator<<(ostream &os, const multiset<T> &x) {
     int f = 0;
     os << '{';
     for (const auto &i: x)
@@ -103,11 +117,36 @@ ostream &operator<<(ostream &os, const valarray<T> &x) {
 }
 
 template<typename RandomIt>
-void debug_itr(RandomIt start, RandomIt end) {
-    cerr << '[';
-    for (RandomIt it = start; it != end; it++)
-        cerr << (it != start ? ", " : "") << *it;
-    cerr << ']' << endl;
+void debug_itr(RandomIt start, RandomIt end, int split = 0) {
+    if (split > 0) {
+        cerr << "[";
+        indent_level++;
+        cerr << ENDL;
+
+        int counter = 0;
+        while (start != end) {
+            if (counter == split) {
+                cerr << ENDL;
+                counter = 0;
+            }
+
+            cerr << *start;
+            start++;
+            if (start != end) {
+                cerr << ", ";
+            }
+            
+            counter++;
+        }
+        indent_level--;
+        cerr << ENDL;
+        cerr << "]" << ENDL;
+    } else {
+        cerr << '[';
+        for (RandomIt it = start; it != end; it++)
+            cerr << (it != start ? ", " : "") << *it;
+        cerr << ']' << ENDL;
+    }
 }
 
 template<typename T>
@@ -116,10 +155,10 @@ void debug_bits(T val, int splitby = 4, int numofbits = 16) {
     int start = numofbits - 1;
     for (int i = start; i >= 0; i--)
         cerr << ((start - i) % splitby == 0 && i != start ? " " : "") << bits[i];
-    cerr << endl;
+    cerr << ENDL;
 }
 
-void debug_all() { cerr << endl; }
+void debug_all() { cerr << ENDL; }
 template<typename T, typename... V>
 void debug_all(T t, V... v) {
     cerr << t;
@@ -128,4 +167,4 @@ void debug_all(T t, V... v) {
     debug_all(v...);
 }
 
-#define debug(x...) cerr << #x << " = ", debug_all(x)
+#define debug(x...) (#x[0] != '\0' && (cerr << #x << " = ")), debug_all(x)
