@@ -100,22 +100,23 @@ public:
 
 using Z = mint<>;
 
+const int N = 1e6;
+Z dp[2][N + 1];
+
 void solve() {
     int n; cin >> n;
-    vector<Z> dpone(n + 1), dp(n + 1);
-    Z s = 1;
-    dpone[0] = dp[0] = 1;
-    for (int i = 1; i <= n; i++)
-        dpone[i] = s, s += dpone[i];
-    s = 1;
-    for (int i = 1; i <= n; i++)
-        dp[i] = dpone[i] * dpone[i] + s + dp[i - 1] - dpone[i - 1] * dpone[i - 1], s += dp[i];
-    cout << dp[n] << endl;
+    cout << dp[0][n] + dp[1][n] << endl;
 }
 
 int32_t main() {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL), cout.tie(NULL);
+
+    dp[0][1] = dp[1][1] = 1;
+    for (int h = 2; h <= N; h++) {
+        dp[0][h] = 4 * dp[0][h - 1] + dp[1][h - 1];
+        dp[1][h] = dp[0][h - 1] + 2 * dp[1][h - 1];
+    }
 
     int t;
     cin >> t;

@@ -142,7 +142,10 @@ int32_t main() {
     for (j = 0; j < (int)s.size(); j++) {
         if (s[j] == ')') {
             m--;
-            if (m < 0)
+            if (m < 0) {
+                cout << 0 << endl;
+                return 0;
+            }
             if (x == -1)
                 x = j;
         } else {
@@ -150,16 +153,9 @@ int32_t main() {
         }
     }
 
-    if (j == 0 || j)
-
-    Z ans = 0;
-
-    for (int i = 0; i < n / 2; i++) {
-        int x = n / 2 - 2 + i;
-        Z a = choose(x, i), b = choose(x, i - 2);
-        ans += a - b;
-        debug(a - b);
-    }
+    n -= s.size();
+    debug(n, m + (n - m) / 2);
+    Z ans = choose(n, m + (n - m) / 2) - choose(n, m + (n - m) / 2 + 1);
 
     cout << ans << endl;
 

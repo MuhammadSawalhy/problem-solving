@@ -86,11 +86,12 @@ struct Z {
   }
 };
 
-int five_power(int n) {
+int fives(int n) {
   int r = 0;
-  while (n) {
-    n /= 5;
-    r += n;
+  int p = 5;
+  while (p <= n) {
+    r += n / p;
+    p *= 5;
   }
   return r;
 }
@@ -99,7 +100,9 @@ void solve() {
   int a, b;
   cin >> a >> b;
 
-  
+  Z ans = 0;
+
+  cout << ans << endl;
 }
 
 int main() {

@@ -1,50 +1,45 @@
-// Date: 27-10-2022
 #include <bits/stdc++.h>
 
 using namespace std;
 
-#define debug(...)
-#define ll long long
-#define all(v) v.begin(), v.end()
-#ifndef ONLINE_JUDGE
-#include "debug.hpp"
-#endif
-
 int main() {
-  ios_base::sync_with_stdio(false);
-  cin.tie(NULL), cout.tie(NULL);
+    int n;
+    cin >> n;
+    int a[n];
+    long long s[n];
+    for (int i = 0; i < n; i++) cin >> a[i], s[i] = (long long) a[i] + (i == 0 ? 0 : s[i - 1]);
 
-  int n;
-  cin >> n;
-  int a[n];
-  for (int i = 0; i < n; i++)
-    cin >> a[i];
+    map<long long, int> fr;
+    map<long long, int> rfr;
 
-  long long s[n + 1];
-  s[0] = 0;
-
-  for (int i = 1; i <= n; i++) {
-    s[i] += a[i - 1];
-  }
-
-  map<int, bool> vis;
-
-  vis[a[0]] = true;
-  for (int i = 1; i < n; i++) {
-    long long x = s[i];
-    long long y = s[n] - a[i];
-    if (x == y) {
-      cout << "YES" << endl;
-      return 0;
+    if (s[n - 1] & 1 || n == 1) {
+        cout << "NO" << endl;
+        return 0;
     }
-    if () {
-      cout << "YES" << endl;
-      return 0;
+
+    for (int i = 0; i < n; i++) {
+        rfr[a[i]]++;
     }
-    vis[a[i]] = true;
-  }
 
-  cout << "NO" << endl;
+    fr[0] = 1;
 
-  return 0;
+    for (int i = 0; i < n; i++) {
+        fr[a[i]]++;
+        rfr[a[i]]--;
+        if (s[i] >= s[n - 1] / 2) {
+            if (fr[s[i] - s[n - 1] / 2]) {
+                cout << "YES" << endl;
+                return 0;
+            }
+        } else {
+            if (rfr[s[n - 1] / 2 - s[i]]) {
+                cout << "YES" << endl;
+                return 0;
+            }
+        }
+    }
+
+    cout << "NO" << endl;
+
+    return 0;
 }

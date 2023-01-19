@@ -109,24 +109,8 @@ int main() {
             cin >> cons[i][j];
         }
     }
-
-    // the first constraint will result in some values
-    // the second constraint may lower the first containt results
-    //   - min of both results
-    //   - so on and so forth
-    // to calculate a contraint result:
-    //   1 1 1 1 ... 1 (x ones) -> 2
-    //   2 2 2 2 ... 2 (y twos) -> 0
-    //   1 ... 1 (x ones) 2 .... 2 (y twos) -> 2 ^ (y)
-    //
-    // -> 0 0 ... 0 (x zeros) 2 2 2 ... 2 (y twos) -> 2 ^ (y + x)
-    //    2 4 ... 2^x      2^(x+1)
-    //
-    // -> 0 0 0 1 0 ... 0 (x zeros) 2 2 2 ... 2 (y twos) -> 2 ^ (y + x + 1)
-    //    2 2 2 2 4     2^(x+1)   2^(x+2)
-
-
-
+    
+    
 
     return 0;
 }
