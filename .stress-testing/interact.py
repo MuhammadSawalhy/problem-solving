@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 # SOURCE: https://codeforces.com/blog/entry/99821
 
+import sys, time
 import argparse
+import random
 import subprocess as sp
 import threading
 from queue import Queue, Empty
-import sys
-import time
 
 
 def intercept(out, q):
@@ -16,8 +16,8 @@ def intercept(out, q):
 
 
 class ProcessThread:
-    def __init__(self, cmd):
-        self.p = sp.Popen(cmd, stdin=sp.PIPE, stdout=sp.PIPE, stderr=sp.PIPE,
+    def __init__(self, cmd, args = []):
+        self.p = sp.Popen([cmd, *args], stdin=sp.PIPE, stdout=sp.PIPE, stderr=sp.PIPE,
                           close_fds=("posix" in sys.builtin_module_names))
         self.q = dict()
         self.listen = dict()
@@ -102,9 +102,9 @@ class Echo:
         Echo.print_framed(text, "", " :interactor", "red")
 
 
-def interact(config):
+def interact(config, test_number = 0):
     solution = ProcessThread(config.solution)
-    interactor = ProcessThread(config.interactor)
+    interactor = ProcessThread(config.interactor, [str(test_number)])
 
     solution_running = True
     interactor_running = True
@@ -122,7 +122,8 @@ def interact(config):
         if interactor_running and interactor.poll() != None:
             if interactor.poll() != 0:
                 return False
-            print(f"Interactor process exited with error code {interactor.poll()}")
+            print(
+                f"Interactor process exited with error code {interactor.poll()}")
             interactor_running = False
 
         if not solution_running and not interactor_running:
@@ -167,16 +168,26 @@ if __name__ == "__main__":
                         help="Colored frames")
     parser.add_argument("--no-stderr", action="store_true",
                         help="Disable stderr printing")
-    parser.add_argument("-t", "--hang-timeout", type=float, default=1,
+    parser.add_argument("--hang-timeout", type=float, default=1,
                         help="The number of seconds to wait for the solution to exit after the interactor has finished")
     parser.add_argument("-m", "--many", action="store_true",
                         help="keep trying until we find any test case that fails the solution")
+    parser.add_argument("-t", "--test-case", type=int,
+                        help="a test case to feed to the interactor")
     args = parser.parse_args()
 
     Echo.colors_enabled = not args.no_color
-    if (args.many):
-        while interact(args):
-            pass
+
+    print(args)
+    if args.test_case != None:
+        interact(args, args.test_case)
+    elif args.many:
+        t = 0
+        while interact(args, t):
+            t += 1
+            print("---------------------------------------------")
+            print(f"==                  test {t}               ==")
+            print("---------------------------------------------")
     else:
-        interact(args)
+        interact(args, random.randint(0, 1000000))
 
