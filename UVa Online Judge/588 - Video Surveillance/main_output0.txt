@@ -1,0 +1,4 @@
+Floor #1
+Surveillance is possible.
+Floor #2
+Surveillance is impossible.
