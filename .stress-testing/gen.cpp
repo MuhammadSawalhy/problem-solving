@@ -12,17 +12,16 @@ string genstr(int len) {
 }
 
 int main(int argc, char *argv[]) {
-    srand(atoi(argv[1]));
+    if (argc > 1) srand(atoi(argv[1]));
+    else srand(time(NULL));
     int t = 1;
     cout << t << endl;
     while (t--) {
         int n;
         n = gen();
         cout << n << endl;
-
-        while (n--) {
+        while (n--)
             cout << gen() << " ";
-        }
         cout << endl;
     }
 
