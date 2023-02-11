@@ -57,6 +57,7 @@ class ProcessThread:
 
 
 class Echo:
+    enabled = True
     colors_enabled = True
     color_codes = {
         "Reset": 0,    "Bold": 1,    "Underline": 2,
@@ -67,14 +68,16 @@ class Echo:
 
     @staticmethod
     def colored(text, color):
-        if Echo.colors_enabled and color not in Echo.color_codes:
+        if not Echo.colors_enabled or color not in Echo.color_codes:
             return text
         return f"\033[{Echo.color_codes[color]}m{text}\033[0m"
 
     @staticmethod
     def print_framed(text, left_appendix="", right_appendix="", color="normal"):
+        if not Echo.enabled:
+            return
         left_padding = " " * 10
-        left_appendix = " " * (10 - len(left_appendix)) + left_appendix
+        left_appendix = " " * (10 - len(left_appendix) - 1) + left_appendix + " "
         color = color.capitalize()
         lines = text.strip().split('\n')
         width = max(map(len, lines)) + 2
@@ -84,6 +87,12 @@ class Echo:
                   line.ljust(width - 2, ' ') + Echo.colored(" |", color))
         print(Echo.colored(left_appendix + "+" + "-" *
               width + "+" + right_appendix, color))
+
+    @staticmethod
+    def print(*args, **kwargs):
+        if not Echo.enabled:
+            return
+        print(*args, **kwargs)
 
     @staticmethod
     def solution_out(text):
@@ -113,26 +122,6 @@ def interact(config, test_number = 0):
     HANG_TIMEOUT = config.hang_timeout
 
     while True:
-        if solution_running and solution.poll() != None:
-            if solution.poll() != 0:
-                return False
-            print(f"Solution process exited with error code {solution.poll()}")
-            solution_running = False
-
-        if interactor_running and interactor.poll() != None:
-            if interactor.poll() != 0:
-                return False
-            print(
-                f"Interactor process exited with error code {interactor.poll()}")
-            interactor_running = False
-
-        if not solution_running and not interactor_running:
-            return True
-
-        if hanging_start and time.time() - hanging_start >= HANG_TIMEOUT:
-            print(f"Solution process has been forced to shut down due to timeout")
-            return False
-
         soln_out = solution.get_out()
         inter_out = interactor.get_out()
         soln_err = solution.get_err()
@@ -153,8 +142,28 @@ def interact(config, test_number = 0):
             hanging_start = time.time()
 
         if inter_err is not None and not args.no_stderr:
-            Echo.interactor_err(inter_out)
+            Echo.interactor_err(inter_err)
             hanging_start = time.time()
+
+        if solution_running and solution.poll() != None:
+            Echo.print(f"Solution process exited with error code {solution.poll()}")
+            solution_running = False
+            if solution.poll() != 0:
+                return False
+
+        if interactor_running and interactor.poll() != None:
+            Echo.print(
+                f"Interactor process exited with error code {interactor.poll()}")
+            interactor_running = False
+            if interactor.poll() != 0:
+                return False
+
+        if not solution_running and not interactor_running:
+            return True
+
+        if hanging_start and time.time() - hanging_start >= HANG_TIMEOUT:
+            Echo.print(f"Solution process has been forced to shut down due to timeout")
+            return False
 
 
 if __name__ == "__main__":
@@ -174,20 +183,20 @@ if __name__ == "__main__":
                         help="keep trying until we find any test case that fails the solution")
     parser.add_argument("-t", "--test-case", type=int,
                         help="a test case to feed to the interactor")
+    parser.add_argument("--verbose", action="store_true",
+                        help="to get verbose interactions when doint many test cases, see --many option")
     args = parser.parse_args()
 
+    Echo.enabled = not args.many or args.verbose
     Echo.colors_enabled = not args.no_color
 
-    print(args)
     if args.test_case != None:
         interact(args, args.test_case)
     elif args.many:
         t = 0
         while interact(args, t):
             t += 1
-            print("---------------------------------------------")
-            print(f"==                  test {t}               ==")
-            print("---------------------------------------------")
+            print(f"(=---------- test {t} ----------=)")
     else:
         interact(args, random.randint(0, 1000000))
 
