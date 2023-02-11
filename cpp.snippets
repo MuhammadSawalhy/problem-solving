@@ -249,7 +249,7 @@ endsnippet
 
 snippet comp "competitive programming template" b
 // ﷽
-#include <bits/stdc++.h>
+#include <iostream>
 
 using namespace std;
 
@@ -277,7 +277,7 @@ endsnippet
 
 snippet compt "competitive programming template" b
 // ﷽
-#include <bits/stdc++.h>
+#include <iostream>
 
 using namespace std;
 
@@ -491,7 +491,7 @@ template <typename T> struct segtree {
     function<T(T, T)> operation;
 
     segtree(int n, T default_value, function<T(T, T)> operation) {
-        if (n & (n - 1) != 0)
+        if ((n & (n - 1)) != 0)
             n = 1 << (32 - __builtin_clz(n));
         this->n = n;
         this->operation = operation;
@@ -593,9 +593,7 @@ segtree<ll> ${0:sg}(n, LONG_LONG_MAX, [](ll l, ll r) { return min(l, r); });
 endsnippet
 
 snippet code_mint "modular arithmetics stolen from Jiangly" b
-constexpr int MOD = ${1:1000000007}; // 998244353
-
-template<int mod = MOD>
+template<int mod>
 struct mint {
 private:
     // assume -P <= x < 2P, (it's faster)
@@ -676,7 +674,8 @@ public:
     }
 };
 
-using Z = mint<>;
+constexpr int MOD = ${1:1000000007}; // 998244353
+using Z = mint<MOD>;
 endsnippet
 
 snippet code_comb "modular combinations" b
@@ -1098,13 +1097,12 @@ endsnippet
 
 snippet code_geo_circle3p "Description" b
 pair<complex<double>, double> circle3p(point a, point b, point c) {
-    complex<double> A = complex<double>(a.real(), a.imag());
-    complex<double> B = complex<double>(b.real(), b.imag());
-    complex<double> C = complex<double>(c.real(), c.imag());
-    complex<double> ABmid = complex<double>((A.real() + B.real()) / 2.0, (A.imag() + B.imag()) / 2.0);
-    complex<double> BCmid = complex<double>((C.real() + B.real()) / 2.0, (C.imag() + B.imag()) / 2.0);
-    complex<double> ABnorm = complex<double>((A - B).imag(), -(A - B).real());
-    complex<double> BCnorm = complex<double>((B - C).imag(), -(B - C).real());
+    complex<double> A = complex<double>(a.X, a.Y);
+    complex<double> B = complex<double>(b.X, b.Y);
+    complex<double> C = complex<double>(c.X, c.Y);
+    complex<double> ABmid = (A + B) / 2.0, BCmid = (B + C) / 2.0;
+    complex<double> ABnorm = complex<double>((A - B).Y, -(A - B).X);
+    complex<double> BCnorm = complex<double>((B - C).Y, -(B - C).X);
     complex<double> center;
     bool valid = intersection(ABmid, ABmid + ABnorm, BCmid, BCmid + BCnorm, center);
     assert(valid);

@@ -1,0 +1,19 @@
+6
+3 1
+abc
+abd
+3 0
+abc
+abd
+3 1
+xbb
+xcd
+4 1
+abcd
+axcb
+3 10
+abc
+abd
+10 3
+lkwhbahuqa
+qoiujoncjb

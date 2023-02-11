@@ -33,21 +33,21 @@ void solve() {
 
     debug_itr(&table[0][0], &table[0][0] + n * m, m);
 
-    for (int j = 0; j < m; j++) {
-        for (int k = j + 1; k < m; k++) {
-            for (int i = 0; i < n; i++) {
-                for (int i = 0; i < n; i++) {
-                    map<pair<int, int>, int> cols;
-                    if (table[i][j] == table[i][k]) {
-                        // mark this row and these two cols
-                        if (cols.count({j, k})) {
-                            cout << "NO" << endl;
-                            cout << cols[{i, j}] + 1<< " " << i + 1 << endl;
-                            cout << j + 1<< " " << k + 1 << endl;
-                            return;
-                        }
-                        cols[{j, k}] = i;
-                    }
+
+    for (int i = 0; i < m; i++) {
+        for (int j = i + 1; j < m; j++) {
+            // start work here
+            map<pair<string, string>, int> mp;
+            for (int k = 0; k < n; k++) {
+                debug(k, i, j);
+                if (!mp.count({ table[k][i], table[k][j] })) {
+                    mp[{ table[k][i], table[k][j] }] = k;
+                } else {
+                    int row = mp[{ table[k][i], table[k][j] }];
+                    cout << "NO" << endl;
+                    cout << row + 1 << " " << k + 1 << endl;
+                    cout << i + 1 << " " << j + 1 << endl;
+                    return;
                 }
             }
         }

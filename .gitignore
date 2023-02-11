@@ -10,4 +10,8 @@
 !*.txt
 !*.snippets
 !.gitignore
+build/
+.ccls-cache/
 cmake-build-debug/
+CMakeCache.txt
+CMakeFiles

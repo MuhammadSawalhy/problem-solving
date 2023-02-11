@@ -7,9 +7,9 @@ using namespace std;
 #define debug(...)
 #endif
 
-map<unsigned long long, unsigned long long>
-get_prime_factors(unsigned long long n) {
-  map<unsigned long long, unsigned long long> result;
+map<int, int>
+get_prime_factors(int n) {
+  map<int, int> result;
   int r = 0;
 
   while (n % 2 == 0) {
