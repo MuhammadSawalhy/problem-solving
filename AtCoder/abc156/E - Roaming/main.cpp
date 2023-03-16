@@ -1,5 +1,7 @@
 // ﷽
 #include <iostream>
+#include <assert.h>
+#include <vector>
 
 using namespace std;
 
@@ -129,12 +131,10 @@ int32_t main() {
     build_fact(n);
     Z ans = 0;
 
-    int y = k;
-    for (int k = y & 1; k <= min(y, n - 1); k++) {
-        // we can't have k zeros
-        int x = n - k; // non-zero
-        Z r = choose(n - x + x - 1, x - 1) * choose(n, k);
-        ans += r;
+    for (int z = 0; z <= min(k, n - 1); z++) {
+        // all possible cases when we have k zeros
+        int x = n - z; // non-zero
+        ans += choose(n - x + x - 1, x - 1) * choose(n, z);
     }
 
     cout << ans << endl;

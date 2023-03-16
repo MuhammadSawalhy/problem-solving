@@ -17,6 +17,7 @@ def intercept(out, q):
 
 class ProcessThread:
     def __init__(self, cmd, args = []):
+        self.cmd = cmd
         self.p = sp.Popen([cmd, *args], stdin=sp.PIPE, stdout=sp.PIPE, stderr=sp.PIPE,
                           close_fds=("posix" in sys.builtin_module_names))
         self.q = dict()
@@ -31,8 +32,15 @@ class ProcessThread:
     def feed_input(self, inp):
         if self.poll() is not None:
             return
-        self.p.stdin.write((inp + "\n").encode())
-        self.p.stdin.flush()
+        try:
+            self.p.stdin.write((inp + "\n").encode())
+            self.p.stdin.flush()
+        except IOError as e:
+            print(f"can't feed this string to the stdin of {self.cmd}:")
+            print(inp)
+            print()
+            print(e)
+            exit(1)
 
     def get_stream(self, stream):
         # if self.poll() is not None:

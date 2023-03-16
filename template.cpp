@@ -6,9 +6,9 @@ using namespace std;
 #ifdef SAWALHY
 #include "debug.hpp"
 #else
-#define debug(...)
-#define debug_itr(...)
-#define debug_bits(...)
+#define debug(...) 0
+#define debug_itr(...) 0
+#define debug_bits(...) 0
 #endif
 
 #define int long long
@@ -16,7 +16,7 @@ using namespace std;
 #define all(v) v.begin(), v.end()
 
 void solve() {
-    
+    cout << 1 << endl;
 }
 
 int32_t main() {

@@ -39,7 +39,7 @@ bool miller_rabin_ptest(unsigned ll n, int k = 3) {
     if (n == 2) return true;
 
     while (k--) {
-        unsigned ll a = 1LL * rand() * rand() * rand() % (n - 2) + 2;// [2 ... n-1]
+        unsigned ll a = 1LL * rand() * rand() % (n - 2) + 2;// [2 ... n-1]
         unsigned ll r = 1;
         for (unsigned ll p = n - 1; p; p >>= 1) {
             if (p & 1) r = r * a % n;
@@ -147,42 +147,6 @@ double dijkstra(int s, int e) {
 }
 endsnippet
 
-snippet code_union_find "union find data structure" b
-struct union_find {
-    vector<int> rank, parent;
-    int forests;
-
-    union_find(int n) {
-        forests = n;
-        rank = vector<int>(n);
-        parent = vector<int>(n);
-        for (int i = 0; i < n; i++)
-            parent[i] = i;
-    }
-
-    bool connected(int x, int y) { return find(x) == find(y); }
-
-    int find(int x) {
-        if (parent[x] == x)
-            return x;
-        return parent[x] = find(parent[x]);
-    }
-
-    bool uni(int x, int y) {
-        x = find(x), y = find(y);
-        if (x == y)
-            return false;
-        if (rank[y] > rank[x])
-            swap(x, y);
-        parent[y] = x;
-        if (rank[x] == rank[y])
-            rank[x]++;
-        forests--;
-        return true;
-    }
-};
-endsnippet
-
 snippet code_mst_kruskal "MST (minimum spanning tree), Kruskal's algorithm" b
 struct union_find {
     vector<int> rank, parent;
@@ -247,18 +211,18 @@ pair<double, vector<edge>> mst_kruskal(vector<edge> edges, int v) {
 }
 endsnippet
 
-snippet comp "competitive programming template" b
+snippet temp "competitive programming template" b
 // ﷽
-#include <iostream>
+#include <bits/stdc++.h>
 
 using namespace std;
 
 #ifdef SAWALHY
 #include "debug.hpp"
 #else
-#define debug(...)
-#define debug_itr(...)
-#define debug_bits(...)
+#define debug(...) 0
+#define debug_itr(...) 0
+#define debug_bits(...) 0
 #endif
 
 #define int long long
@@ -275,18 +239,107 @@ int32_t main() {
 }
 endsnippet
 
-snippet compt "competitive programming template" b
+snippet tempt "competitive programming template with multi-tests" b
 // ﷽
-#include <iostream>
+#include <bits/stdc++.h>
 
 using namespace std;
 
 #ifdef SAWALHY
 #include "debug.hpp"
 #else
-#define debug(...)
-#define debug_itr(...)
-#define debug_bits(...)
+#define debug(...) 0
+#define debug_itr(...) 0
+#define debug_bits(...) 0
+#endif
+
+#define int long long
+#define ll long long
+#define all(v) v.begin(), v.end()
+
+void solve() {
+    ${0}
+}
+
+int32_t main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL), cout.tie(NULL);
+
+    int t;
+    cin >> t;
+    while (t--)
+        solve();
+
+    return 0;
+}
+endsnippet
+
+snippet tempi "competitive programming template with explicit includes" b
+// ﷽
+#include <algorithm>
+#include <array>
+#include <assert.h>
+#include <chrono>
+#include <cmath>
+#include <iomanip>
+#include <iostream>
+#include <map>
+#include <queue>
+#include <random>
+#include <set>
+#include <string.h>
+#include <utility>
+#include <vector>
+
+using namespace std;
+
+#ifdef SAWALHY
+#include "debug.hpp"
+#else
+#define debug(...) 0
+#define debug_itr(...) 0
+#define debug_bits(...) 0
+#endif
+
+#define int long long
+#define ll long long
+#define all(v) v.begin(), v.end()
+
+int32_t main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL), cout.tie(NULL);
+
+    ${0}
+
+    return 0;
+}
+endsnippet
+
+snippet tempit "competitive programming template with includes and multi-tests" b
+// ﷽
+#include <algorithm>
+#include <array>
+#include <assert.h>
+#include <chrono>
+#include <cmath>
+#include <iomanip>
+#include <iostream>
+#include <map>
+#include <queue>
+#include <random>
+#include <set>
+#include <string.h>
+#include <utility>
+#include <vector>
+
+using namespace std;
+
+#ifdef SAWALHY
+#include "debug.hpp"
+#else
+#define debug(...) 0
+#define debug_itr(...) 0
+#define debug_bits(...) 0
 #endif
 
 #define int long long
@@ -395,12 +448,28 @@ endsnippet
 
 snippet code_segtree_simple "optimized segment tree with basic operations" b
 template<typename T>
+struct Node {
+    T value;
+
+    Node(T value = 0) : value(value) {}
+
+    void operator+=(const Node &other) {
+        value += other.value;
+    }
+
+    Node operator+(const Node &other) {
+        return value + other.value;
+    }
+};
+
+// source: https://codeforces.com/blog/entry/18051
+template<typename T>
 struct segtree {
     int n;
-    vector<T> tree;
+    vector<Node<T>> tree;
 
     segtree(int n) : n(n) {
-        tree.assign(n * 2, 0);
+        tree.resize(n * 2);
     }
 
     void build() {
@@ -419,12 +488,12 @@ struct segtree {
     }
 
     T query(int l, int r) {
-        T res = 0;
+        Node<T> res;
         for (l += n, r += n + 1; l < r; l >>= 1, r >>= 1) {
             if (l & 1) res += tree[l++];
             if (r & 1) res += tree[--r];
         }
-        return res;
+        return res.value;
     }
 };
 endsnippet
@@ -593,39 +662,45 @@ segtree<ll> ${0:sg}(n, LONG_LONG_MAX, [](ll l, ll r) { return min(l, r); });
 endsnippet
 
 snippet code_mint "modular arithmetics stolen from Jiangly" b
-template<int mod>
+template<typename T = void>
+struct OtherType {
+    typedef ll type;
+};
+
+template<>
+struct OtherType<ll> {
+    typedef __int128 type;
+};
+
+template<typename T, T mod, typename V = typename OtherType<T>::type>
 struct mint {
 private:
-    // assume -P <= x < 2P, (it's faster)
-    int norm(int x) const {
+    T norm(T x) const {
         if (x < 0)
-            x += mod;
+            x = x % mod + mod;
         if (x >= mod)
-            x -= mod;
+            x %= mod;
         return x;
     }
 
 public:
-    int x;
-    mint(int32_t x = 0) : x(norm(x)) {}
-    mint(ll x) : x(norm(x % mod)) {}
-    int val() const { return x; }
+    T x;
+	T val() const { return x; }
+    mint(T x = 0) : x(norm(x)) {}
     mint operator-() const { return mint(norm(mod - x)); }
     mint inv() const {
         assert(x != 0);
         return power(mod - 2);
     }
-    mint power(ll b) const {
+    mint power(T b) const {
         mint res = 1, a = x;
-        while (b) {
+        for (; b; b >>= 1, a *= a) {
             if (b & 1) res *= a;
-            a *= a;
-            b >>= 1;
         }
         return res;
     }
     mint &operator*=(const mint &rhs) {
-        x = (ll)x * rhs.x % mod;
+        x = (V) x * rhs.x % mod;
         return *this;
     }
     mint &operator+=(const mint &rhs) {
@@ -657,8 +732,11 @@ public:
         res /= rhs;
         return res;
     }
+    friend bool operator==(const mint &lhs, const mint &rhs) {
+        return lhs.x == rhs.x;
+    }
     friend std::istream &operator>>(std::istream &is, mint &a) {
-        ll v;
+        T v;
         is >> v;
         a = mint(v);
         return is;
@@ -674,8 +752,8 @@ public:
     }
 };
 
-constexpr int MOD = ${1:1000000007}; // 998244353
-using Z = mint<MOD>;
+constexpr int MOD = 1000000007;// 998244353
+using Z = mint<int32_t, MOD>;
 endsnippet
 
 snippet code_comb "modular combinations" b
@@ -699,11 +777,11 @@ Z choose(int n, int r) {
 endsnippet
 
 snippet code_dsu "disjoint set union" b
-struct union_find {
+struct dsu {
     vector<int> rank, parent;
     int forests;
 
-    union_find(int n) {
+    dsu(int n) {
         forests = n;
         rank = vector<int>(n);
         parent = vector<int>(n);
@@ -985,8 +1063,9 @@ public:
 };
 endsnippet
 
-# source: https://codeforces.com/blog/entry/23365
 snippet code_modinv "modular inverse for coprimes not only prime mod" b
+// source: https://codeforces.com/blog/entry/23365
+// a and b must be co-prime
 ll mod_inv(ll a, ll b) {
     return 1 < a ? b - mod_inv(b % a, a) * b / a : 1;
 }
@@ -1169,4 +1248,37 @@ vector<point> welzl(vector<point> &points, int i = 0, vector<point> cir = {}) {
     cir.push_back(points[i]);
     return welzl(points, i + 1, cir);
 }
+endsnippet
+
+snippet code_hash "string hashing implementation (polynomial hashing)" b
+class hashed_string {
+public:
+    // change M and B if you want
+    static const ll M = (1LL << 61) - 1;
+    static const ll B;
+
+private:
+    // pow[i] contains P^i % M
+    static vector<mint<ll, M>> pow;
+    // hash of the prefixes
+    vector<mint<ll, M>> p_hash;
+
+
+public:
+    hashed_string(const string &s) : p_hash(s.size() + 1) {
+        while (pow.size() < (int) s.size())
+            pow.push_back(pow.back() * B);
+        for (int i = 0; i < s.size(); i++)
+            p_hash[i + 1] = p_hash[i] * B + s[i];
+    }
+
+    auto get_hash(int start, int end) {
+        auto raw_val = p_hash[end + 1] - p_hash[start] * pow[end - start + 1];
+        return raw_val;
+    }
+};
+
+mt19937 rng((uint32_t) chrono::steady_clock::now().time_since_epoch().count());
+vector<mint<ll, hashed_string::M>> hashed_string::pow = {1};
+const ll hashed_string::B = uniform_int_distribution<ll>(0, M - 1)(rng);
 endsnippet
