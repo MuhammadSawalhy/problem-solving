@@ -1,0 +1,9 @@
+Case #1
+some beads may be lost
+
+Case #2
+2 1
+1 3
+3 4
+4 2
+2 2
