@@ -40,7 +40,7 @@ template <typename T> struct Node {
         pending_update = true;
     }
 
-    void relupdate(const T &val) {
+    void relupdate(ll val) {
         relative_update += val;
     }
 
@@ -62,7 +62,7 @@ template <typename T> struct Node {
             pending_update = false;
         }
 
-        value += count_children(node, sz) * relative_update;
+        value.first += relative_update;
         if (left < sz)
             tree[left].relative_update += relative_update;
         if (right < sz)
@@ -146,7 +146,7 @@ private:
     }
 
     void relative_update(int node, int node_low, int node_high,
-                     int query_low, int query_high, const T &val) {
+                     int query_low, int query_high, ll val) {
         tree[node].propagate(node, tree);
         if (query_high < node_low || node_high < query_low) return;
         if (query_low <= node_low && node_high <= query_high) {
@@ -174,24 +174,49 @@ private:
 void solve() {
     int n;
     cin >> n;
-    segtree<pair<ll, int>> sg(n + 1, {LONG_LONG_MAX, 0}, [](auto l, auto r) { return min(l, r); });
+    const ll inf = 1e18;
+    segtree<pair<ll, int>> sg(n + 1, {inf + inf, 0}, [](auto l, auto r) { return min(l, r); });
 
-    int a[n];
+    int a[n], order[n];
     for (int i = 0; i < n; i++)
         cin >> a[i];
 
-    ll s = 0, m = 0;
+    iota(order, order + n, 0);
+    stable_sort(order, order + n, [&](int l, int r) { return a[l] < a[r]; });
+
+    int ind[n];
     for (int i = 0; i < n; i++) {
-        s += a[i];
+        sg.update(i, {inf + a[order[i]], i});
+        ind[order[i]] = i;
+    }
+
+    ll s = 0, m = 0;
+
+    auto add = [&](int i) {
         m++;
+        s += a[i];
+        sg.relative_update(ind[i], ind[i], -inf);
+        sg.relative_update(ind[i], n, -1);
+    };
 
-        while (sg.query(0, n - 1).first) {
+    auto balance = [&]() {
+        for (pair<ll, int> p = sg.query(0, n); p.first < 0; p = sg.query(0, n)) {
+            // remove -> reverse add
+            int i = p.second;
             m--;
-
+            s -= a[order[i]];
+            sg.relative_update(i, i, inf);
+            sg.relative_update(i, n, 1);
         }
+    };
 
+    for (int i = 0; i < n; i++) {
+        add(i);
+        balance();
+        debug(i, m);
         cout << s - m * (m + 1) / 2 << ' ';
     }
+
     cout << '\n';
 }
 
