@@ -207,6 +207,10 @@ snippet temp "competitive programming template" b
 // ﷽
 #include <bits/stdc++.h>
 
+#pragma GCC optimize("O3")
+#pragma GCC optimize("unroll-loops")
+#pragma GCC target("avx,avx2,fma")
+
 using namespace std;
 
 #ifdef SAWALHY
@@ -234,6 +238,10 @@ endsnippet
 snippet tempt "competitive programming template with multi-tests" b
 // ﷽
 #include <bits/stdc++.h>
+
+#pragma GCC optimize("O3")
+#pragma GCC optimize("unroll-loops")
+#pragma GCC target("avx,avx2,fma")
 
 using namespace std;
 
@@ -284,6 +292,10 @@ snippet tempi "competitive programming template with explicit includes" b
 #include <vector>
 
 using namespace std;
+
+#pragma GCC optimize("O3")
+#pragma GCC optimize("unroll-loops")
+#pragma GCC target("avx,avx2,fma")
 
 #ifdef SAWALHY
 #include "debug.hpp"
@@ -509,7 +521,7 @@ template <typename T> struct Node {
         pending_update = true;
     }
 
-    void relupdate(const T &val) {
+    void relupdate(ll val) {
         relative_update += val;
     }
 
@@ -615,7 +627,7 @@ private:
     }
 
     void relative_update(int node, int node_low, int node_high,
-                     int query_low, int query_high, const T &val) {
+                     int query_low, int query_high, ll val) {
         tree[node].propagate(node, tree);
         if (query_high < node_low || node_high < query_low) return;
         if (query_low <= node_low && node_high <= query_high) {
