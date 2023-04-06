@@ -1,0 +1,7 @@
+abcdef 1
+5
+a b -10
+b c 5
+c d 5
+d e 5
+e f 5

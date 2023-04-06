@@ -145,11 +145,10 @@ int main() {
   cin >> n >> m >> k;
   matrix mat(n, vector<ll>(n));
 
-  for (int i = 0; i < m; i++) {
-    int a, b;
-    cin >> a >> b;
-    a--, b--;
-    mat[b][a] = 1; // b contributes to the next state of a
+  for (int i = 0, a, b; i < m; i++) {
+    cin >> a >> b, a--, b--;
+    // a contributes to the next state of b
+    mat[b][a] = 1;
   }
 
   matrix_expo paths(mat);

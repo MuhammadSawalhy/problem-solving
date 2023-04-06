@@ -10,6 +10,7 @@
 !*.txt
 !*.snippets
 !.gitignore
+!.clang-format
 build/
 .ccls-cache/
 cmake-build-debug/

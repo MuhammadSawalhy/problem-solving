@@ -135,7 +135,7 @@ template <typename T> ostream &operator<<(ostream &os, const queue<T> &x) {
     v.push_back(copy.front()), copy.pop();
   bool gd = general_debugging;
   general_debugging = true;
-  debug_itr(v);
+  debug_one(v);
   general_debugging = gd;
   return os;
 }
@@ -146,10 +146,7 @@ ostream &operator<<(ostream &os, const priority_queue<T> &x) {
   vector<T> v;
   while (copy.size())
     v.push_back(copy.top()), copy.pop();
-  bool gd = general_debugging;
-  general_debugging = true;
-  debug_itr(v);
-  general_debugging = gd;
+  debug_one(v);
   return os;
 }
 #endif

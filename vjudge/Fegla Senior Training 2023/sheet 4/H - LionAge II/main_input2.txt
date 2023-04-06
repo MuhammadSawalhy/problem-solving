@@ -1,0 +1,8 @@
+abcdfe 1
+5
+a b -10
+b c -10
+c d -10
+d f -10
+f e -10
+f g 10
