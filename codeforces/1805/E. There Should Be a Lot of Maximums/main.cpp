@@ -35,28 +35,38 @@ void dfs(int node, int p) {
     last[node] = euler.size() - 1;
 }
 
-template<typename T>
-struct Node {
+template<typename T = long long>
+struct Sum {
     T value;
+    Sum(T value = 0) : value(value) {}
+    Sum &operator+=(const Sum &other) { return value += other.value, *this; }
+    Sum operator+(const Sum &other) const { return value + other.value; }
+};
 
-    Node(T value = 0) : value(value) {}
+template<typename T = long long>
+struct Max {
+    T value;
+    Max(T value = numeric_limits<T>::min() / 2) : value(value) {}
+    Max &operator+=(const Max &other) { return value = max(value, other.value), *this; }
+    Max operator+(const Max &other) const { return Max(max(value, other.value)); }
+};
 
-    void operator+=(const Node &other) {
-        value = max(value, other.value);
-    }
-
-    Node operator+(const Node &other) {
-        return max(value, other.value);
-    }
+template<typename T = long long>
+struct Min {
+    T value;
+    Min(T value = numeric_limits<T>::max() / 2) : value(value) {}
+    Min &operator+=(const Min &other) { return value = min(value, other.value), *this; }
+    Min operator+(const Min &other) const { return Min(min(value, other.value)); }
 };
 
 // source: https://codeforces.com/blog/entry/18051
 template<typename T>
-struct segtree {
+struct Segtree {
     int n;
-    vector<Node<T>> tree;
+    vector<T> tree;
 
-    segtree(int n) : n(n) {
+    Segtree() = default;
+    Segtree(int n) : n(n) {
         tree.resize(n * 2);
     }
 
@@ -75,8 +85,8 @@ struct segtree {
             tree[i >> 1] = tree[i] + tree[i ^ 1];
     }
 
-    T query(int l, int r) {
-        Node<T> res;
+    auto query(int l, int r) {
+        T res;
         for (l += n, r += n + 1; l < r; l >>= 1, r >>= 1) {
             if (l & 1) res += tree[l++];
             if (r & 1) res += tree[--r];
@@ -101,10 +111,10 @@ struct MO {
     vector<int> arr;
     vector<Query> queries;
     vector<int> fr = vector<int>(N);
-    segtree<int> sg = segtree<int>(0);
+    Segtree<Max<ll>> sg;
 
     MO(vector<int> &arr, vector<Query> &queries) : arr(arr), queries(queries) {
-        sg = segtree<int>(arr.size() + 1);
+        sg = Segtree<Max<ll>>(arr.size() + 1);
     }
 
     int l = 0, r = -1;

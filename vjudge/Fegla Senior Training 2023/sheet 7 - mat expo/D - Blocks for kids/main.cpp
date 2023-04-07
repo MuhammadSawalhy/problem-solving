@@ -120,18 +120,18 @@ struct matrix {
 
 int dp[1001], cnt[1001];
 
-matrix<> mat = vector<vector<int>> {
-    {0, 1, 0, 0},
-    {2, 2, 0, 0},
-    {0, 0, 0, 1},
-    {2, 2, 2, 2},
+matrix<> mat = vector<vector<int>>{
+        {0, 1, 0, 0},
+        {2, 2, 0, 0},
+        {0, 0, 0, 1},
+        {2, 2, 2, 2},
 };
 
-matrix<> ini = vector<vector<int>> {
-    {1},
-    {2},
-    {1},
-    {4},
+matrix<> ini = vector<vector<int>>{
+        {1},
+        {2},
+        {1},
+        {4},
 };
 
 int solve(int n) {

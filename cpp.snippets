@@ -359,16 +359,24 @@ snippet code_geo "computational geometry stuff for competitive prgramming" b
 namespace Geometry
 {
 
-using T = long long;
-const T EPS = 0;
+using T = double;
+const T EPS = 1e-4;
 const double PI = acos(-1.0);
 
 template<typename T, typename V>
 int cmp(T a, V b) { return (a -= b) < -EPS ? -1 : (a > EPS ? 1 : 0); }
 template<typename T, typename V>
-bool eq(T a, V b) { return cmp(a, b) == 0; }
+bool iseq(T a, V b) { return cmp(a, b) == 0; }
 template<typename T>
-bool eq0(T a) { return cmp(a, 0) == 0; }
+bool iseq0(T a) { return cmp(a, 0) == 0; }
+template<typename T, typename V>
+bool islte(T a, V b) { return cmp(a, b) != 1; }
+template<typename T, typename V>
+bool isgte(T a, V b) { return cmp(a, b) != -1; }
+template<typename T, typename V>
+bool islt(T a, V b) { return cmp(a, b) == -1; }
+template<typename T, typename V>
+bool isgt(T a, V b) { return cmp(a, b) == 1; }
 template<typename T>
 int sign(T val) { return cmp(val, 0); }
 
@@ -401,6 +409,7 @@ typedef struct Point {
     bool operator!=(const Point &p) const { return !(*this == p); }
     bool operator<(const Point &p) const { return x < p.x || (x == p.x && y < p.y); }
     friend ostream &operator<<(ostream &os, const Point &p) { return os << '(' << p.x << ',' << p.y << ')'; }
+    friend istream &operator>>(istream &is, Point &p) { return is >> p.x >> p.y; }
 } pt;
 
 int ccw(const pt &a, pt b, pt c) {
@@ -417,20 +426,20 @@ struct Segment {
     pt a, b;
     Segment() {}
     Segment(pt a, pt b) : a(a), b(b) {}
+    friend istream &operator>>(istream &is, Segment &s) { return is >> s.a >> s.b; }
+    friend ostream &operator<<(ostream &os, const Segment &s) {
+        return os << "{" << s.a << ", " << s.b << "}";
+    }
 };
 
 struct Line {
     pt a, b;
     Line() {}
     Line(pt a, pt b) : a(a), b(b) {}
-};
-
-
-struct Circle {
-    pt p;
-    T r;
-    Circle() = default;
-    Circle(Point p, T r) : p(p), r(r) {}
+    friend istream &operator>>(istream &is, Line &l) { return is >> l.a >> l.b; }
+    friend ostream &operator<<(ostream &os, const Line &l) {
+        return os << "l{" << l.a << ", " << l.b << "}";
+    }
 };
 
 struct Polygon {
@@ -439,14 +448,14 @@ struct Polygon {
     Polygon() = default;
     Polygon(vector<pt> &vert) : vert(vert) { n = vert.size(); }
 
-    T area2x() {
+    T area2() {
         T a = 0;
         for (int i = 2; i < n; i++)
             a += vert[0].cross(vert[i], vert[i - 1]);
         return abs(a);
     }
 
-    long double area() { return area2x() / 2.0; };
+    long double area() { return area2() / 2.0; };
 };
 
 bool parallel(const Line &a, const Line &b) { return (a.b - a.a).cross(b.b - b.a) == 0; }
@@ -465,8 +474,7 @@ pt intersection(pt a, pt b, pt c, pt d) {
     // you should check for intersection before calling this
     assert(fabs(d1) > EPS);
     long double t1 = d2 / d1;
-    pt inter = a + (b - a) * t1;
-    return inter;
+    return a + (b - a) * t1;
 }
 
 bool intersection(const Line &l, const Line &m, pt &inter) {
@@ -487,27 +495,72 @@ bool intersection(const Segment &s, const Line &l, pt &inter) {
     return true;
 }
 
-bool point_in_triangle(pt a, pt b, pt c, pt point) {
+struct Circle {
+    pt c;
+    T r;
+
+    Circle() = default;
+    Circle(pt c, T r) : c(c), r(r) {}
+    Circle(const vector<pt> &p) {
+        if (p.size() == 1) c = p[0], r = 0;
+        else if (p.size() == 2) {
+            c = (p[0] + p[1]) / 2;
+            r = (p[0] - c).len();
+        } else {
+            assert(p.size() == 3);
+            *this = Circle(p[0], p[1], p[2]);
+        }
+    }
+
+    Circle(pt a, pt b, pt c) {
+        // NOTE: use T as long double
+        // if we have a cord in a circle,
+        // the perpendicular from the center will pass from the center
+        // so we simply solve for the interection of two lines
+        auto ABmid = (a + b) / 2.0, BCmid = (b + c) / 2.0;
+        auto ABnorm = pt((a - b).y, -(a - b).x);
+        auto BCnorm = pt((b - c).y, -(b - c).x);
+        bool valid = intersection(
+                Line(ABmid, ABmid + ABnorm),
+                Line(BCmid, BCmid + BCnorm), this->c);
+        assert(valid); // unless at least two points are identical
+        r = (a - this->c).len();
+    }
+
+    friend bool intersect(const pt &p, const Circle &c) { return islte((p - c.c).norm(), c.r * c.r); }
+    friend ostream &operator<<(ostream &os, const Circle &c) {
+        return os << "c{" << c.c << ", " << c.r << "}";
+    }
+};
+
+int point_in_triangle(pt a, pt b, pt c, pt point) {
     // point is on an edge or all are either 1 or -1
     int x = ccw(a, b, point), y = ccw(b, c, point), z = ccw(c, a, point);
-    return x * y * z == 0 || (sign(x) == sign(y) && sign(y) == sign(z));
+    if (sign(x) == sign(y) && sign(y) == sign(z)) return 1;
+    if (x * y * z == 0) return 0;
+    return -1;
 }
 
-pair<pt, double> circle3p(pt a, pt b, pt c) {
-    // NOTE: use T as long double
-    // if we have a cord in a circle,
-    // the perpendicular from the center will pass from the center
-    // so we simply solve for the interection of two lines
-    auto ABmid = (a + b) / 2.0, BCmid = (a + c) / 2.0;
-    auto ABnorm = pt((a - b).y, -(a - b).x);
-    auto BCnorm = pt((b - c).y, -(b - c).x);
-    pt center;
-    bool valid = intersection(
-            Line(ABmid, ABmid + ABnorm),
-            Line(BCmid, BCmid + BCnorm), center);
-    assert(valid); // unless two points are identical
-    double r = (a - center).len();
-    return {center, r};
+int point_in_circle(pt p, const vector<pt> &cir) {
+    if (cir.size() == 0) return -1;
+    auto c = Circle(cir);
+    if (iseq((p - c.c).norm(), c.r * c.r)) return 0;
+    if (intersect(p, c)) return 1;
+    return -1;
+}
+
+int point_in_polygon(pt p, vector<pt> &polygon) {
+    polygon.push_back(polygon[0]);
+    int wn = 0, n = polygon.size();
+    for (int i = 1; i < n; i++) {
+        if (ccw(polygon[i], polygon[i - 1], p) == 0) return polygon.pop_back(), 0;
+        if ((p.y < polygon[i].y) != (p.y < polygon[i - 1].y)) {
+            wn += polygon[i].y > polygon[i - 1].y && ccw(p, polygon[i - 1], polygon[i]) == 1;
+            wn -= polygon[i].y < polygon[i - 1].y && ccw(p, polygon[i], polygon[i - 1]) == 1;
+        }
+    }
+    polygon.pop_back();
+    return wn == 0 ? -1 : 1;
 }
 
 vector<pt> &sort_clock(vector<pt> &points, bool cw = false) {
@@ -595,7 +648,7 @@ struct PointInConvex {
         points.push_back(points.front());
         vector<pt> nodup; // no duplications
         for (int i = 0, sz = 0; i < (int) points.size(); i++) {
-            while (sz >= 2 && eq0(points[i].cross(nodup[sz - 1], nodup[sz - 2])))
+            while (sz >= 2 && iseq0(points[i].cross(nodup[sz - 1], nodup[sz - 2])))
                 nodup.pop_back(), sz--;
             nodup.push_back(points[i]), sz++;
         }
@@ -625,10 +678,27 @@ struct PointInConvex {
                 r = mid;
         }
 
-        bool ok = point_in_triangle(seq[l], seq[l + 1], pt(0, 0), point);
-        if (!ok) return -1;
+        int ok = point_in_triangle(seq[l], seq[l + 1], pt(0, 0), point);
+        if (ok == -1) return -1;
         if (intersect(point, Segment(seq[l], seq[l + 1]))) return 0;
         return 1;
+    }
+};
+
+struct Welzl {
+    vector<pt> points;
+    Welzl(vector<pt> &_points) : points(_points) {
+        shuffle(all(points), default_random_engine(time(NULL)));
+    }
+
+    Circle get_circle() { return Circle(go()); }
+    vector<pt> go(int i = 0, vector<pt> cir = {}) {
+        if (cir.size() == 3 || i == (int) points.size()) return cir;
+        auto new_cir = go(i + 1, cir);
+        if (point_in_circle(points[i], new_cir) != -1)
+            return new_cir;
+        cir.push_back(points[i]);
+        return go(i + 1, cir);
     }
 };
 
@@ -645,79 +715,39 @@ template<typename T>
 using ordered_set = tree<T, null_type, std::less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 endsnippet
 
-snippet code_geo_intersecttion "intersection point between two segements" b
-bool intersection(point a, point b, point c, point d, point &inter) {
-    double d1 = cp(a - b, d - c), d2 = cp(a - c, d - c), d3 = cp(a - b, a - c);
-    if (fabs(d1) < EPS) return false;
-    double t1 = d2 / d1, t2 = d3 / d1;
-    inter = a + (b - a) * t1;
-    if (t1 < -EPS || t2 < -EPS || t2 > 1 + EPS || t1 > 1 + EPS)
-        return false;
-    return true;
-}
-endsnippet
-
-snippet code_geo_intersects "whether the two segments intersects or not" b
-bool between(point a, point b, point c) {
-    auto d = dp(a - c, b - c);
-    return cmp(d * d, norm(a - c) * norm(b - c)) == 0 && d <= EPS;
-}
-
-bool intersects(point a, point b, point c, point d) {
-    double d1 = cp(a - b, d - c), d2 = cp(a - c, d - c), d3 = cp(a - b, a - c);
-    if (fabs(d1) < EPS)
-        return between(a, b, c) || between(a, b, d) || between(c, d, a) || between(c, d, b);  // Parllel || identical
-    double t1 = d2 / d1, t2 = d3 / d1;
-    if (t1 < -EPS || t2 < -EPS || t2 > 1 + EPS || t1 > 1 + EPS)
-        return false;
-    return true;
-}
-endsnippet
-
-snippet code_geo_ccw "is counter close wise (CCW), given three points" b
-// Where is P2 relative to segment p0-p1?
-// ccw = +1 => angle > 0 or collinear after p1
-// cw = -1 => angle < 0 or collinear after p0
-// Undefined = 0 => Collinar in range [a, b]. Be careful here
-int ccw(point a, point b, point c) {
-    point v1(b - a), v2(c - a);
-    double t = cp(v1, v2);
-
-    if (t > +EPS)
-        return +1;
-    if (t < -EPS)
-        return -1;
-    if (v1.X * v2.X < -EPS || v1.Y * v2.Y < -EPS)
-        return -1;
-    if (norm(v1) < norm(v2) - EPS)
-        return +1;
-    return 0;
-}
-endsnippet
-
 snippet code_segtree_simple "optimized segment tree with basic operations" b
-template<typename T>
-struct Node {
+template<typename T = long long>
+struct Sum {
     T value;
+    Sum(T value = 0) : value(value) {}
+    Sum &operator+=(const Sum &other) { return value += other.value, *this; }
+    Sum operator+(const Sum &other) const { return value + other.value; }
+};
 
-    Node(T value = 0) : value(value) {}
+template<typename T = long long>
+struct Max {
+    T value;
+    Max(T value = numeric_limits<T>::min() / 2) : value(value) {}
+    Max &operator+=(const Max &other) { return value = max(value, other.value), *this; }
+    Max operator+(const Max &other) const { return Max(max(value, other.value)); }
+};
 
-    Node &operator+=(const Node &other) {
-        value += other.value;
-    }
-
-    Node operator+(const Node &other) const {
-        return value + other.value;
-    }
+template<typename T = long long>
+struct Min {
+    T value;
+    Min(T value = numeric_limits<T>::max() / 2) : value(value) {}
+    Min &operator+=(const Min &other) { return value = min(value, other.value), *this; }
+    Min operator+(const Min &other) const { return Min(min(value, other.value)); }
 };
 
 // source: https://codeforces.com/blog/entry/18051
 template<typename T>
-struct segtree {
+struct Segtree {
     int n;
-    vector<Node<T>> tree;
+    vector<T> tree;
 
-    segtree(int n) : n(n) {
+    Segtree() = default;
+    Segtree(int n) : n(n) {
         tree.resize(n * 2);
     }
 
@@ -736,8 +766,8 @@ struct segtree {
             tree[i >> 1] = tree[i] + tree[i ^ 1];
     }
 
-    T query(int l, int r) {
-        Node<T> res;
+    auto query(int l, int r) {
+        T res;
         for (l += n, r += n + 1; l < r; l >>= 1, r >>= 1) {
             if (l & 1) res += tree[l++];
             if (r & 1) res += tree[--r];
@@ -1344,147 +1374,6 @@ struct trie {
         return child[cur]->insert(str + 1);
     }
 };
-endsnippet
-
-snippet code_geo_convexhull "graham scan to get convex hull" b
-vector<point> convexhull(vector<point> points, bool collinear = true) {
-    int n = points.size();
-    vector<point> hull;
-
-    // choose the pivot
-    for (int i = 1; i < n; i++) {
-        auto &l = points[0], &r = points[i];
-        int cy = cmp(l.Y, r.Y), cx = cmp(l.X, r.X);
-        if (cy == 0 ? cx == 1 : cy == 1) swap(l, r);
-    }
-
-    // CW sorting with points[0] as pivot
-    sort(points.begin() + 1, points.end(),
-         [&](auto l, auto r) {
-             int c = cp(l - points[0], r - points[0]);
-             int cy = cmp(l.Y, r.Y), cx = cmp(l.X, r.X);
-             if (eq0(c)) return cy == 0 ? cx == -1 : cy == -1;
-             return c < -EPS;
-         });
-
-    for (int i = 0, sz = 0; i < n; i++) {
-        if (collinear)
-            while (sz > 1 && cp(points[i] - hull[sz - 1], hull[sz - 2] - hull[sz - 1]) > EPS)
-                hull.pop_back(), sz--;
-        else
-            while (sz > 1 && cp(points[i] - hull[sz - 1], hull[sz - 2] - hull[sz - 1]) >= -EPS)
-                hull.pop_back(), sz--;
-        hull.push_back(points[i]), sz++;
-    }
-
-    if (collinear)
-        // for the last points that are collinear hull[0], hull[sz - 1]
-        for (int i = 0, sz = hull.size(); i < n; i++) {
-            if (same_vec(points[i], hull[0]) || same_vec(points[i], hull[sz - 1]))
-                continue;
-            if (eq0(cp(points[i] - hull[0], points[i] - hull[sz - 1])))
-                hull.push_back(points[i]);
-        }
-
-    return hull;
-}
-endsnippet
-
-snippet code_geo_point_in_polygon "whether the point is in the polygon or not" b
-bool between(point a, point b, point c) {
-    auto d = dp(a - c, b - c);
-    return cmp(d * d, norm(a - c) * norm(b - c)) == 0 && d <= EPS;
-}
-
-int point_in_polygon(point p,vector<point> &polygon) {
-    polygon.push_back(polygon[0]);
-    int wn = 0, n = polygon.size();
-    for (int i = 1; i < n; i++) {
-        if (between(polygon[i], polygon[i - 1], p)) return polygon.pop_back(), 0;
-        if ((p.Y < polygon[i].Y) != (p.Y < polygon[i - 1].Y)) {
-            wn += polygon[i].Y > polygon[i - 1].Y && cp(polygon[i - 1] - p, polygon[i] - p) > EPS;
-            wn -= polygon[i].Y < polygon[i - 1].Y && cp(polygon[i] - p, polygon[i - 1] - p) > EPS;
-        }
-    }
-    polygon.pop_back();
-    return wn == 0 ? -1 : 1;
-}
-endsnippet
-
-snippet code_geo_circle3p "Description" b
-pair<complex<double>, double> circle3p(point a, point b, point c) {
-    complex<double> A = complex<double>(a.X, a.Y);
-    complex<double> B = complex<double>(b.X, b.Y);
-    complex<double> C = complex<double>(c.X, c.Y);
-    complex<double> ABmid = (A + B) / 2.0, BCmid = (B + C) / 2.0;
-    complex<double> ABnorm = complex<double>((A - B).Y, -(A - B).X);
-    complex<double> BCnorm = complex<double>((B - C).Y, -(B - C).X);
-    complex<double> center;
-    bool valid = intersection(ABmid, ABmid + ABnorm, BCmid, BCmid + BCnorm, center);
-    assert(valid);
-    double r = length(A - center);
-    return {center, r};
-}
-endsnippet
-
-snippet code_geo_welzl "Description" b
-bool intersection(complex<double> a, complex<double> b, complex<double> c, complex<double> d, complex<double> &inter) {
-    double d1 = cp(a - b, d - c), d2 = cp(a - c, d - c), d3 = cp(a - b, a - c);
-    if (fabs(d1) < EPS) return false;
-    double t1 = d2 / d1, t2 = d3 / d1;
-    inter = a + (b - a) * t1;
-    return true;
-}
-
-pair<complex<double>, double> circle3p(point a, point b, point c) {
-    complex<double> A = complex<double>(a.X, a.Y);
-    complex<double> B = complex<double>(b.X, b.Y);
-    complex<double> C = complex<double>(c.X, c.Y);
-    complex<double> ABmid = (A + B) / 2.0, BCmid = (B + C) / 2.0;
-    complex<double> ABnorm = complex<double>((A - B).Y, -(A - B).X);
-    complex<double> BCnorm = complex<double>((B - C).Y, -(B - C).X);
-    complex<double> center;
-    bool valid = intersection(ABmid, ABmid + ABnorm, BCmid, BCmid + BCnorm, center);
-    assert(valid);
-    double r = length(A - center);
-    return {center, r};
-}
-
-pair<complex<double>, double> get_circle(vector<point> cir) {
-    double r;
-    complex<double> c;
-
-    if (cir.size() == 1) {
-        c = complex<double>(cir[0].X, cir[0].Y);
-        r = 0;
-    }
-    if (cir.size() == 2) {
-        c = complex<double>(cir[0].X + cir[1].X, cir[0].Y + cir[1].Y);
-        c.real(c.X / 2), c.imag(c.Y / 2);
-        r = length(cir[0] - cir[1]) / 2;
-    } else {
-        assert(cir.size() == 3);
-        return circle3p(cir[0], cir[1], cir[2]);
-    }
-
-    return {c, r};
-}
-
-bool inside_circle(point p, vector<point> cir) {
-    if (cir.size() == 0) return false;
-    if (cir.size() == 1) return same_vec(p, cir[0]);
-    auto [c, r] = get_circle(cir);
-    return cmp(length(complex<double>(p.X, p.Y) - c), r) != 1;// lte (<=)
-}
-
-vector<point> welzl(vector<point> &points, int i = 0, vector<point> cir = {}) {
-    if (cir.size() == 3 || i == points.size()) return cir;
-    auto new_cir = welzl(points, i + 1, cir);
-    if (inside_circle(points[i], new_cir))
-        return new_cir;
-    cir.push_back(points[i]);
-    return welzl(points, i + 1, cir);
-}
 endsnippet
 
 snippet code_hash "string hashing implementation (polynomial hashing)" b
