@@ -160,13 +160,12 @@ public:
     }
 };
 
-constexpr int MOD = 1000000007;// 998244353
+constexpr int MOD = 1000000007; // 998244353
 using Z = mint<int32_t, MOD>;
 
 constexpr int N = 5005;
 int n, k;
 
-Z dp[N][N];
 int c[N], fr[N][N];
 segtree<int> sg(N);
 
@@ -186,13 +185,32 @@ int solve_max(int sz) {
 }
 
 Z count(int sz) {
-    for (int i = 0; i <= n; i++)
-        for (int j = 0; j <= n; j++)
-            dp[i][j].x = -1;
+    vector<vector<Z>> dp(n + 1, vector<Z>(n + 1));
+    vector<Z> allsum(n + 1);
+    for (int i = 0; i <= n; i++) dp[i][0] = 1;
+    allsum[0] = 1;
 
-    
+    for (int i = 1; i <= n; i++) {
+        vector<Z> cur(n + 1);
 
-    return 0;
+        for (int j = 1; j <= n; j++) {
+            if ((j - 1) % k == 0) {
+                cur[j] += allsum[j - 1];
+            } else {
+                cur[j] += dp[c[i]][j - 1];
+            }
+        }
+
+        for (int j = 1; j <= n; j++) {
+            allsum[j] += cur[j];
+        }
+
+        for (int j = 0; j <= n; j++) {
+            dp[c[i]][j] += cur[j];
+        }
+    }
+
+    return allsum[sz];
 }
 
 void solve() {
@@ -211,25 +229,7 @@ void solve() {
             fr[i][j] += fr[i][j - 1];
 
     int mx = solve_max(k);
-
-    if (mx == 0) {
-        cout << "1\n";
-        return;
-    }
-
-    vector<int> withmx{k};
-
-    for (int i = k + k; i <= mx; i += k) {
-        if (solve_max(i) == mx) withmx.push_back(i);
-    }
-
-    debug(mx);
-
-    Z ans = 0;
-    for (auto sz : withmx)
-        ans += count(sz);
-
-    cout << ans << '\n';
+    cout << count(mx) << '\n';
 }
 
 int32_t main() {
