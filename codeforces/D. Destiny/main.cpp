@@ -1,37 +1,41 @@
 // ﷽
 #include <bits/stdc++.h>
+#include <climits>
+#include <random>
 
 using namespace std;
 
 #ifdef SAWALHY
 #include "debug.hpp"
 #else
-#define debug(...) 0
-#define debug_itr(...) 0
+#define debug(...)      0
+#define debug_itr(...)  0
 #define debug_bits(...) 0
 #endif
 
-#define int long long
-#define ll long long
+#define ll     long long
 #define all(v) v.begin(), v.end()
 
+mt19937 rng = mt19937(random_device()());
+
+void seed(int s) { rng = mt19937(s); }
+
+int rand_int(int x, int y) {
+    return uniform_int_distribution<int>(x, y)(rng);
+}
+
 struct Query {
-    int l, r;
-    int k;
-    bool operator<(const Query &q) {
-        return r < q.r;
-    }
+    int l, r, k, i;
 };
 
 struct MO {
-    vector<int> arr;
+    vector<int32_t> arr;
     vector<Query> queries;
 
-    MO(vector<int> &arr, vector<Query> &queries) : arr(arr), queries(queries) {}
-
     int l = 0, r = -1;
-    map<int, int> fr;
-    set<pair<int, int>> s;
+    vector<int32_t> fr;
+
+    MO(vector<int32_t> arr, vector<Query> queries) : arr(arr), queries(queries), fr(arr.size() + 1) {}
 
     void set_range(Query &q) {
         // [l, r] inclusive
@@ -42,49 +46,44 @@ struct MO {
     }
 
     void add(int x) {
-        if (s.count({x, fr[x]})) {
-            s.erase({x, fr[x]});
-        }
         fr[x]++;
-        s.insert({x, fr[x]});
     }
 
     void remove(int x) {
-        s.erase({x, fr[x]});
         fr[x]--;
-        s.insert({x, fr[x]});
     }
 
-    int getans(Query q) {
-        auto [r, l, k] = q;
-        auto it = s.lower_bound({(r - l + 1 + k) / k, 0});
+    int getans(Query &q) {
+        int ans = 1e9;
+        int iter = 100;
+        int target = (q.r - q.l + 1 + q.k) / q.k;
 
-        if (it == s.end())
-            return -1;
+        while (iter--) {
+            int i = rand_int(q.l, q.r);
+            if (fr[arr[i]] >= target) {
+                ans = min(ans, arr[i]);
+            }
+        }
 
-        return it->second;
+        return ans == 1e9 ? -1 : ans;
     }
 
     vector<int> ans() {
         int q = queries.size();
+        int SQ = sqrtl(arr.size()) + 1;
         vector<int> ans(q);
-        vector<int> order(q);
-        iota(all(order), 0);
-        sort(all(order), [&](auto l, auto r) { return queries[l] < queries[r]; });
 
-        int SQ = sqrtl(q);
-        vector<vector<int>> buckets(q);
-
-        for (auto i: order) {
-            buckets[queries[i].l / SQ].push_back(i);
-        }
+        sort(all(queries), [&](Query l, Query r) {
+            if (l.l / SQ == r.l / SQ) {
+                return l.l / SQ % 2 == 1 ? l.r > r.r : l.r < r.r;
+            } else {
+                return l.l < r.l;
+            }
+        });
 
         for (int i = 0; i < q; i++) {
-            // we have sorted bucket i according to end edge
-            for (auto j: buckets[i]) {
-                set_range(queries[j]);
-                ans[j] = getans(queries[j]);
-            }
+            set_range(queries[i]);
+            ans[queries[i].i] = getans(queries[i]);
         }
 
         return ans;
@@ -98,13 +97,19 @@ int32_t main() {
 
     int n, q;
 
-    cin >> n;
-    vector<int> arr(n);
+    cin >> n >> q;
+    vector<int32_t> arr(n);
     vector<Query> qu;
     for (auto &i: arr) cin >> i;
+
     for (int i = 0, l, r, k; i < q; i++) {
         cin >> l >> r >> k, l--, r--;
-        qu.emplace_back(l, r, k);
+        Query query;
+        query.l = l;
+        query.r = r;
+        query.k = k;
+        query.i = i;
+        qu.push_back(query);
     }
 
     auto ans = MO(arr, qu).ans();

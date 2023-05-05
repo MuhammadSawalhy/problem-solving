@@ -1,18 +1,20 @@
-// Date: 11-12-2022
+// ﷽
 #include <bits/stdc++.h>
 
 using namespace std;
 
-#define debug(...)
-#define ll long long
-#define all(v) v.begin(), v.end()
 #ifdef SAWALHY
 #include "debug.hpp"
+#else
+#define debug(...)      0
+#define debug_itr(...)  0
+#define debug_bits(...) 0
 #endif
 
-void solve() {
-    
-}
+#define ll     long long
+#define all(v) v.begin(), v.end()
+
+void solve() {}
 
 int main() {
     ios_base::sync_with_stdio(false);

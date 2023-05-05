@@ -1,45 +1,79 @@
-// Date: 25-11-2022
+// ﷽
 #include <bits/stdc++.h>
 
 using namespace std;
 
-#define debug(...)
-#define ll long long
-#define all(v) v.begin(), v.end()
 #ifdef SAWALHY
 #include "debug.hpp"
+#else
+#define debug(...)      0
+#define debug_itr(...)  0
+#define debug_bits(...) 0
 #endif
 
-int main() {
-  ios_base::sync_with_stdio(false);
-  cin.tie(NULL), cout.tie(NULL);
+#define int    long long
+#define ll     long long
+#define all(v) v.begin(), v.end()
 
-  int n;
-  cin >> n;
-  int a[n];
-  for (int i = 0; i < n; i++)
-    cin >> a[i];
+const int N = 81;
+map<vector<bool>, int> dp[N * (N - 1) / 2];
+int n;
 
-  int dp[n + 1][n + 1][n + 1];
-  int dddp[n + 1][n + 1];
-  memset(dp, 0, sizeof dp);
-  memset(dddp, 0, sizeof dddp);
+int solve(vector<bool> state, int steps) {
+    if (dp[steps].count(state)) return dp[steps][state];
 
-  for (int i = 1; i <= n; i++) {
-    for (int ones = 1; ones <= i; ones++) {
-      int zeros = (i - ones);
-      for (int shift = 0; shift <= zeros; shift++) {
-        int more = (zeros - shift) * shift;
-        dp[i][ones][shift] = max(dp[i][ones][shift], dddp[i - shift - 1][ones - 1] + more);
-        dddp[i][ones] = max(dddp[i][ones], dp[i][ones][shift]);
-      }
+    int res = 0;
+
+    if (steps == 0) {
+        int x = 0, y = 0;
+        for (int i = 0; i < n; i++) {
+            if (state[i]) {
+                y += x;
+                x = 0;
+            } else {
+                x++;
+                res += y;
+            }
+        }
+    } else {
+        vector<bool> newstate = state;
+        for (int i = 0; i < n; i++) {
+            if (i - 1 >= 0 && state[i] ^ state[i - 1]) {
+                newstate[i] = newstate[i] ^ 1;
+                newstate[i - 1] = newstate[i - 1] ^ 1;
+                res = max(res, solve(newstate, steps - 1));
+                newstate[i] = newstate[i] ^ 1;
+                newstate[i - 1] = newstate[i - 1] ^ 1;
+            }
+            if (i + 1 < n && state[i] ^ state[i + 1]) {
+                newstate[i] = newstate[i] ^ 1;
+                newstate[i + 1] = newstate[i + 1] ^ 1;
+                res = max(res, solve(newstate, steps - 1));
+                newstate[i] = newstate[i] ^ 1;
+                newstate[i + 1] = newstate[i + 1] ^ 1;
+            }
+        }
     }
-  }
 
-  int ones = 0;
-  for (int i = 0; i < n; i++)
-    ones += a[i];
-  cout << dddp[n][ones] << endl;
+    return dp[steps][state] = res;
+}
 
-  return 0;
+int32_t main() {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL), cout.tie(NULL);
+
+    cin >> n;
+    vector<bool> a(n);
+    for (int i = 0, x; i < n; i++)
+        cin >> x, a[i] = x;
+
+
+    int ans[n * (n - 1) / 2 + 1];
+    for (int i = 0; i <= n * (n - 1) / 2; i++) {
+        ans[i] = solve(a, i);
+        if (i > 0) ans[i] = max(ans[i], ans[i - 1]);
+        cout << ans[i] << " ";
+    }
+
+    return 0;
 }

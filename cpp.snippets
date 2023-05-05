@@ -140,48 +140,15 @@ long long dijkstra(int s, int e, vector<vector<pair<int, int>>> &adj) {
 endsnippet
 
 snippet code_mst_kruskal "MST (minimum spanning tree), Kruskal's algorithm" b
-struct union_find {
-    vector<int> rank, parent;
-    int forests;
-
-    union_find(int n) {
-        forests = n;
-        rank = vector<int>(n);
-        parent = vector<int>(n);
-        for (int i = 0; i < n; i++)
-            parent[i] = i;
-    }
-
-    bool connected(int x, int y) { return find(x) == find(y); }
-
-    int find(int x) {
-        if (parent[x] == x)
-            return x;
-        return parent[x] = find(parent[x]);
-    }
-
-    bool uni(int x, int y) {
-        x = find(x), y = find(y);
-        if (x == y)
-            return false;
-        if (rank[y] > rank[x])
-            swap(x, y);
-        parent[y] = x;
-        if (rank[x] == rank[y])
-            rank[x]++;
-        return true;
-    }
-};
-
 struct edge {
     int from, to;
-    double w;
-    edge(int from, int to, double weight) : from(from), to(to), w(weight) {}
-    bool operator<(edge &e) { return w < e.w; }
+    long long weight;
+    edge(int from, int to, long long weight) : from(from), to(to), weight(weight) {}
+    bool operator<(edge &e) { return weight < e.weight; }
 };
 
-pair<double, vector<edge>> mst_kruskal(vector<edge> edges, int v) {
-    union_find uf(v + 1);
+pair<long long, vector<edge>> mst_kruskal(vector<edge> &edges, int n) {
+    union_find uf(n + 1);
     double cost = 0;
     vector<edge> mst_edges;
 
@@ -196,14 +163,15 @@ pair<double, vector<edge>> mst_kruskal(vector<edge> edges, int v) {
         }
     };
 
-    if (mst_edges.size() != v - 1)
-        return {INFINITY, {}};
+    if (mst_edges.size() != n - 1)
+        return {1e18, {}};
 
     return {cost, mst_edges};
 }
 endsnippet
 
 snippet temp "competitive programming template" b
+// ﷽
 // ﷽
 #include <bits/stdc++.h>
 
@@ -212,13 +180,13 @@ using namespace std;
 #ifdef SAWALHY
 #include "debug.hpp"
 #else
-#define debug(...) 0
-#define debug_itr(...) 0
+#define debug(...)      0
+#define debug_itr(...)  0
 #define debug_bits(...) 0
 #endif
 
-#define int long long
-#define ll long long
+#define ll     long long
+#define int    long long
 #define all(v) v.begin(), v.end()
 
 int32_t main() {
@@ -240,102 +208,13 @@ using namespace std;
 #ifdef SAWALHY
 #include "debug.hpp"
 #else
-#define debug(...) 0
-#define debug_itr(...) 0
+#define debug(...)      0
+#define debug_itr(...)  0
 #define debug_bits(...) 0
 #endif
 
-#define int long long
-#define ll long long
-#define all(v) v.begin(), v.end()
-
-void solve() {
-    ${0}
-}
-
-int32_t main() {
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL), cout.tie(NULL);
-
-    int t;
-    cin >> t;
-    while (t--)
-        solve();
-
-    return 0;
-}
-endsnippet
-
-snippet tempi "competitive programming template with explicit includes" b
-// ﷽
-#include <algorithm>
-#include <array>
-#include <assert.h>
-#include <chrono>
-#include <cmath>
-#include <iomanip>
-#include <iostream>
-#include <map>
-#include <queue>
-#include <random>
-#include <set>
-#include <string.h>
-#include <utility>
-#include <vector>
-
-using namespace std;
-
-#ifdef SAWALHY
-#include "debug.hpp"
-#else
-#define debug(...) 0
-#define debug_itr(...) 0
-#define debug_bits(...) 0
-#endif
-
-#define int long long
-#define ll long long
-#define all(v) v.begin(), v.end()
-
-int32_t main() {
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL), cout.tie(NULL);
-
-    ${0}
-
-    return 0;
-}
-endsnippet
-
-snippet tempit "competitive programming template with includes and multi-tests" b
-// ﷽
-#include <algorithm>
-#include <array>
-#include <assert.h>
-#include <chrono>
-#include <cmath>
-#include <iomanip>
-#include <iostream>
-#include <map>
-#include <queue>
-#include <random>
-#include <set>
-#include <string.h>
-#include <utility>
-#include <vector>
-
-using namespace std;
-
-#ifdef SAWALHY
-#include "debug.hpp"
-#else
-#define debug(...) 0
-#define debug_itr(...) 0
-#define debug_bits(...) 0
-#endif
-
-#define int long long
-#define ll long long
+#define ll     long long
+#define int    long long
 #define all(v) v.begin(), v.end()
 
 void solve() {
@@ -359,8 +238,8 @@ snippet code_geo "computational geometry stuff for competitive prgramming" b
 namespace Geometry
 {
 
-using T = double;
-const T EPS = 1e-4;
+using T = long long;
+const T EPS = 0;
 const double PI = acos(-1.0);
 
 template<typename T, typename V>
@@ -397,7 +276,11 @@ typedef struct Point {
     T norm() const { return dot(*this); }
 
     long double len() const { return sqrtl(dot(*this)); }
-    long double ang() const { return atan2l(x, y); }
+    long double ang(bool pos = true) const {
+        auto a = atan2l(y, x);
+        if (pos && a < 0) a += PI * 2;
+        return a;
+    }
 
     Point rotate(const Point &p, long double a) { return (*this - p).rotate(a) + p; }
     Point rotate(long double angle) {
@@ -422,77 +305,93 @@ int ccw(const pt &a, pt b, pt c) {
     return 0;                                     // "ON_SEGMENT"
 }
 
+pt slope(pt a, pt b, bool change_direction = true) {
+    assert(is_integral_v<T>);
+    long long dx = a.x - b.x;
+    long long dy = a.y - b.y;
+    if (dx == 0 && dy == 0) return pt(0, 0);
+    long long g = gcd(abs(dy), abs(dy));
+    dx /= g, dy /= g;
+    if (change_direction) {
+        if (dx < 0) dy *= -1, dx *= -1;
+        if (dx == 0) dy = abs(dy);
+    }
+    return pt(dx, dy);
+}
+
 struct Segment {
     pt a, b;
     Segment() {}
     Segment(pt a, pt b) : a(a), b(b) {}
+    bool operator==(const Segment &s) const { return a == s.a ? b == s.b : a == s.b && b == s.a; };
     friend istream &operator>>(istream &is, Segment &s) { return is >> s.a >> s.b; }
     friend ostream &operator<<(ostream &os, const Segment &s) {
         return os << "{" << s.a << ", " << s.b << "}";
     }
 };
 
-struct Line {
-    pt a, b;
+struct Line : public Segment {
     Line() {}
-    Line(pt a, pt b) : a(a), b(b) {}
-    friend istream &operator>>(istream &is, Line &l) { return is >> l.a >> l.b; }
-    friend ostream &operator<<(ostream &os, const Line &l) {
-        return os << "l{" << l.a << ", " << l.b << "}";
-    }
+    Line(pt a, pt b) : Segment(a, b) {}
+    bool operator==(const Line &l) const { return iseq0((a - b).cross(l.a - l.b)); };
+};
+
+struct Ray : public Segment {
+    Ray() {}
+    Ray(pt a, pt b) : Segment(a, b) {}
+    bool operator==(const Ray &r) const { return a == r.a && slope(a, b, false) == slope(r.a, r.b, false); };
 };
 
 struct Polygon {
     int n;
     vector<pt> vert;
     Polygon() = default;
-    Polygon(vector<pt> &vert) : vert(vert) { n = vert.size(); }
+    Polygon(int n) : n(n) { vert.resize(n); }
+    Polygon(vector<pt> &vert) : vert(vert), n(vert.size()) {}
 
-    T area2() {
+    T area2() const {
         T a = 0;
         for (int i = 2; i < n; i++)
             a += vert[0].cross(vert[i], vert[i - 1]);
         return abs(a);
     }
 
-    long double area() { return area2() / 2.0; };
+    long double area() const { return area2() / 2.0; };
 };
 
 bool parallel(const Line &a, const Line &b) { return (a.b - a.a).cross(b.b - b.a) == 0; }
 bool orthogonal(const Line &a, const Line &b) { return (a.a - a.b).dot(b.a - b.b) == 0; }
+
 bool intersect(const Line &l, const Line &m) { return !parallel(l, m); }
 bool intersect(const pt &p, const Segment &s) { return ccw(s.a, s.b, p) == 0; }
 bool intersect(const pt &p, const Line &l) { return abs(ccw(l.a, l.b, p)) != 1; }
-bool intersect(const Segment &s, const Line &l) { return l.a.cross(l.b, s.a) * l.a.cross(l.b, s.b) <= 0; }
+bool intersect(const Segment &s, const Line &l) { return ccw(l.a, l.b, s.a) * ccw(l.a, l.b, s.b) != 1; }
 bool intersect(const Segment &s, const Segment &t) { return ccw(s.a, s.b, t.a) * ccw(s.a, s.b, t.b) <= 0 && ccw(t.a, t.b, s.a) * ccw(t.a, t.b, s.b) <= 0; }
 
-pt intersection(pt a, pt b, pt c, pt d) {
-    // NOTE: use T as long double
-    // check Dr. Mostafa Saad's Videos
+bool intersect(const Segment &s, const Ray &r) {
+    auto d1 = (s.a - s.b).cross(r.b - r.a),
+         d2 = (s.a - r.a).cross(r.b - r.a),
+         d3 = (s.a - s.b).cross(s.a - r.a);
+    if (abs(d1) <= EPS)
+        return r.a.cross(r.b, s.a) == 0 &&
+               (r.a.dot(r.b, s.a) >= 0 || r.a.dot(r.b, s.b) >= 0); // NOT BACK
+    return sign(d1) * sign(d2) >= 0 && sign(d1) * sign(d3) >= 0 && abs(d2) <= abs(d1);
+}
+
+bool intersection(pt a, pt b, pt c, pt d, pt &inter) {
+    assert(is_floating_point_v<T>);
     long double d1 = (a - b).cross(d - c);
     long double d2 = (a - c).cross(d - c);
-    // you should check for intersection before calling this
-    assert(fabs(d1) > EPS);
+    if (fabs(d1) <= EPS) return false;
     long double t1 = d2 / d1;
-    return a + (b - a) * t1;
+    inter = a + (b - a) * t1;
+    return true;
 }
 
-bool intersection(const Line &l, const Line &m, pt &inter) {
+template<typename T, typename V>
+bool intersection(const T &l, const V &m, pt &inter) {
     if (!intersect(l, m)) return false;
-    inter = intersection(l.a, l.b, m.a, m.b);
-    return true;
-}
-
-bool intersection(const Segment &l, const Segment &m, pt &inter) {
-    if (!intersect(l, m)) return false;
-    inter = intersection(l.a, l.b, m.a, m.b);
-    return true;
-}
-
-bool intersection(const Segment &s, const Line &l, pt &inter) {
-    if (!intersect(s, l)) return false;
-    inter = intersection(l.a, l.b, s.a, s.b);
-    return true;
+    return intersection(l.a, l.b, m.a, m.b, inter);
 }
 
 struct Circle {
@@ -513,7 +412,6 @@ struct Circle {
     }
 
     Circle(pt a, pt b, pt c) {
-        // NOTE: use T as long double
         // if we have a cord in a circle,
         // the perpendicular from the center will pass from the center
         // so we simply solve for the interection of two lines
@@ -541,7 +439,7 @@ int point_in_triangle(pt a, pt b, pt c, pt point) {
     return -1;
 }
 
-int point_in_circle(pt p, const vector<pt> &cir) {
+int point_in_circle(const pt &p, const vector<pt> &cir) {
     if (cir.size() == 0) return -1;
     auto c = Circle(cir);
     if (iseq((p - c.c).norm(), c.r * c.r)) return 0;
@@ -549,18 +447,35 @@ int point_in_circle(pt p, const vector<pt> &cir) {
     return -1;
 }
 
-int point_in_polygon(pt p, vector<pt> &polygon) {
-    polygon.push_back(polygon[0]);
+int point_in_polygon(const pt &p, const vector<pt> &polygon) {
     int wn = 0, n = polygon.size();
-    for (int i = 1; i < n; i++) {
-        if (ccw(polygon[i], polygon[i - 1], p) == 0) return polygon.pop_back(), 0;
-        if ((p.y < polygon[i].y) != (p.y < polygon[i - 1].y)) {
-            wn += polygon[i].y > polygon[i - 1].y && ccw(p, polygon[i - 1], polygon[i]) == 1;
-            wn -= polygon[i].y < polygon[i - 1].y && ccw(p, polygon[i], polygon[i - 1]) == 1;
+    for (int i = 0, j = 1; i < n; i++, j++, j %= n) {
+        if (ccw(polygon[j], polygon[i], p) == 0) return 0;
+        if ((p.y < polygon[j].y) != (p.y < polygon[i].y)) {
+            wn += polygon[j].y > polygon[i].y && ccw(p, polygon[i], polygon[j]) == 1;
+            wn -= polygon[j].y < polygon[i].y && ccw(p, polygon[j], polygon[i]) == 1;
         }
     }
-    polygon.pop_back();
     return wn == 0 ? -1 : 1;
+}
+
+int ray_and_polygon(const Ray &r, const Polygon &polygon) {
+    // NOTE: Should be a good ray (a != b),
+    // and non-degenerate polygon with no duplicated points
+    int n = polygon.n, ans = -1;
+    for (int i = 0, j = 1, k = 2; i < n; i++, j++, k++, j %= n, k %= n) {
+        if (!intersect(Segment(polygon.vert[i], polygon.vert[j]), r)) continue;
+        auto x = r.a.cross(r.b, polygon.vert[i]);
+        auto y = r.a.cross(r.b, polygon.vert[j]);
+        auto z = r.a.cross(r.b, polygon.vert[k]);
+        if (x == 0) ans = 0; // Maybe tangent
+        else if (y == 0) {
+            // (the ray splits an internal angle)
+            // Entering from a vertex
+            if (sign(x) * sign(z) == -1) return 1;
+        } else return 1; // Entering from an edge
+    }
+    return ans;
 }
 
 vector<pt> &sort_clock(vector<pt> &points, bool cw = false) {
@@ -933,17 +848,15 @@ template<typename T, T mod, typename V = typename OtherType<T>::type>
 struct mint {
 private:
     T norm(T x) const {
-        if (x < 0)
-            x = x % mod + mod;
-        if (x >= mod)
-            x %= mod;
+        if (x < 0) x += mod;
+        if (x >= mod) x -= mod;
         return x;
     }
 
 public:
     T x;
-	T val() const { return x; }
-    mint(T x = 0) : x(norm(x)) {}
+    T val() const { return x; }
+    mint(V x = 0) : x(norm(x % mod)) {}
     mint operator-() const { return mint(norm(mod - x)); }
     mint inv() const {
         assert(x != 0);
@@ -994,9 +907,7 @@ public:
     }
     friend std::istream &operator>>(std::istream &is, mint &a) {
         T v;
-        is >> v;
-        a = mint(v);
-        return is;
+        return is >> v, a = mint(v), is;
     }
     friend std::ostream &operator<<(std::ostream &os, const mint &a) {
         return os << a.val();
@@ -1009,11 +920,12 @@ public:
     }
 };
 
-constexpr int MOD = 1000000007;// 998244353
+// constexpr int MOD = 998244353;
+constexpr int MOD = 1000000007;
 using Z = mint<int32_t, MOD>;
 endsnippet
 
-snippet code_comb "modular combinations" b
+snippet code_ncr "modular combinations" b
 vector<Z> fact = {1};
 vector<Z> fact_inv = {1};
 
@@ -1026,7 +938,7 @@ void build_fact(int n = 1e6) {
         fact_inv[j] = fact_inv[j + 1] * (j + 1);
 }
 
-Z choose(int n, int r) {
+Z ncr(int n, int r) {
     if (r > n || r < 0) return 0;
     if ((int) fact.size() < n + 1) build_fact(n);
     return fact[n] * fact_inv[r] * fact_inv[n - r];
@@ -1034,36 +946,30 @@ Z choose(int n, int r) {
 endsnippet
 
 snippet code_dsu "disjoint set union" b
-struct dsu {
-    vector<int> rank, parent;
+struct DSU {
+    vector<int> size, parent;
     int forests;
 
-    dsu(int n) {
+    DSU(int n) {
         forests = n;
-        rank = vector<int>(n);
-        parent = vector<int>(n);
-        for (int i = 0; i < n; i++)
-            parent[i] = i;
+        size.assign(n, 1);
+        parent.resize(n);
+        iota(all(parent), 0);
     }
 
     bool connected(int x, int y) { return find(x) == find(y); }
 
     int find(int x) {
-        if (parent[x] == x)
-            return x;
+        if (parent[x] == x) return x;
         return parent[x] = find(parent[x]);
     }
 
     bool uni(int x, int y) {
         x = find(x), y = find(y);
-        if (x == y)
-            return false;
-        if (rank[y] > rank[x])
-            swap(x, y);
+        if (x == y) return false;
         forests--;
         parent[y] = x;
-        if (rank[x] == rank[y])
-            rank[x]++;
+        size[x] += size[y];
         return true;
     }
 };
@@ -1578,4 +1484,107 @@ struct MO {
         return ans;
     }
 };
+endsnippet
+
+snippet code_scc "Torjan's algorithm" b
+struct SCC {
+    int N, ID = 0, COMP = 0;
+    vector<vector<int>> adj;
+    vector<int> id, comp, st;
+
+    SCC(int N) : N(N) {
+        adj.resize(N), id.resize(N), comp = vector<int>(N, -1);
+    }
+
+    void add_edge(int u, int v) { adj[u].push_back(v); }
+
+    int dfs(int i) {
+        int low = id[i] = ++ID;
+        st.push_back(i);
+        for (int j: adj[i])
+            if (comp[j] == -1)
+                // id[j] != 0 -> in stack, don't dfs
+                low = min(low, id[j] ?: dfs(j));
+        if (low == id[i]) {
+            COMP++;
+            for (int j = -1; j != i;)
+                comp[j = st.back()] = COMP, st.pop_back();
+        }
+        return low;
+    }
+
+    void gen() {
+        for (int i = 0; i < N; i++)
+            if (!id[i]) dfs(i);
+    }
+};
+endsnippet
+
+snippet code_kmp "KMP string algorithm" b
+vector<int> KMP(const string &a, const string &b) {
+    // search for b in a
+    vector<int> ans;
+    int n = a.length(), m = b.length();
+    int b_table[n];
+    b_table[0] = 0;
+
+    for (int i = 1, k = 0; i < m; i++) {
+        while (k > 0 && b[k] != b[i])
+            k = b_table[k - 1];
+        k += b[i] == b[k];
+        b_table[i] = k;
+    }
+
+    for (int i = 0, k = 0; i < n; i++) {
+        while (k > 0 && b[k] != a[i])
+            k = b_table[k - 1];
+        k += b[k] == a[i];
+        if (k == m) {
+            k = b_table[k - 1];
+            ans.push_back(i - m + 1);
+        }
+    }
+
+    return ans;
+}
+endsnippet
+
+snippet code_gen_tree "random tree generator for stress testing" b
+vector<int> gen_tree_parents(int n, int root) {
+    // in a tree, each node other than the root
+    // has exactly one parent
+    assert(1 <= root && root <= n);
+    vector<int> parents(n + 1, -1);
+    vector<int> order(n + 1);
+    if (n == 1) return parents;
+    iota(all(order), 0);
+    shuffle(order.begin() + 1, order.end(),
+            default_random_engine(rand()));
+    swap(order[1], *find(all(order), root));
+    for (int i = 2; i <= n; i++)
+        parents[order[i]] = order[gen(1, i - 1)];
+    return parents;
+}
+
+vector<pair<int, int>> gen_tree(int n, int root = -1) {
+    if (root == -1) root = gen(1, n);
+    auto parents = gen_tree_parents(n, root);
+    vector<pair<int, int>> edges;
+    for (int i = 1; i <= n; i++) {
+        if (i == root) continue;
+        edges.emplace_back(i, parents[i]);
+    }
+    assert(edges.size() == n - 1);
+    return edges;
+}
+endsnippet
+
+snippet code_rand "random utils" b
+mt19937 rng = mt19937(random_device()());
+
+void seed(int s) { rng = mt19937(s); }
+
+int rand_int(int x, int y) {
+    return uniform_int_distribution<int>(x, y)(rng);
+}
 endsnippet

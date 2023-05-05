@@ -30,12 +30,12 @@ int32_t main() {
         while (i + z[i] < n && s[i + z[i]] == s[z[i]]) z[i]++;
         if (i + z[i] > r) r = i + z[i], l = i;
     }
-    
+
     int ans[n], c = 0;
-    debug_itr(z, n);
+    debug_itr(z, n + 1);
 
     z[n] = 0;
-    for (int i = 0; i <= n; i++) {
+    for (int i = 1; i <= n; i++) {
         if (z[i] + i == n) ans[c++] = i;
     }
 

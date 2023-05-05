@@ -1,39 +1,36 @@
 // ﷽
 #include <bits/stdc++.h>
-
 using namespace std;
 
 #ifdef SAWALHY
 #include "debug.hpp"
 #else
-#define debug(...) 0
-#define debug_itr(...) 0
+#define debug(...)      0
+#define debug_itr(...)  0
 #define debug_bits(...) 0
 #endif
 
-#define ll long long
+#define ll     long long
 #define all(v) v.begin(), v.end()
 
-int gen(int a = 1, int b = 10) { return a + rand() % (b - a + 1); }
+mt19937 rng = mt19937(random_device()());
 
-string genstr(int len) {
-    string s;
-    for (int i = 0; i < len; i++) 
-        s += 'a' + gen(0, 25);
-    return s;
+void seed(int s) { rng = mt19937(s); }
+
+int rand_int(int x, int y) {
+    return uniform_int_distribution<int>(x, y)(rng);
 }
 
 int main(int argc, char *argv[]) {
-    if (argc > 1) srand(atoi(argv[1]));
-    else srand(time(NULL));
+    if (argc > 1) seed(atoi(argv[1]));
+
     int t = 1;
     cout << t << endl;
     while (t--) {
-        int n;
-        n = gen();
+        int n = rand_int(1, 10);
         cout << n << endl;
         while (n--)
-            cout << gen() << " ";
+            cout << rand_int(1, 10) << ' ';
         cout << endl;
     }
 

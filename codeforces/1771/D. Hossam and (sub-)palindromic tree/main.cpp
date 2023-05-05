@@ -4,11 +4,14 @@
 using namespace std;
 
 #define debug(...)
-#define ll long long
+#define ll     long long
 #define all(v) v.begin(), v.end()
 #ifdef SAWALHY
 #include "debug.hpp"
 #endif
+
+const int N = 2e3 + 1;
+pair<int, int> info[N][N];
 
 void solve() {
     int n;
@@ -23,23 +26,50 @@ void solve() {
         adj[v].push_back(u);
     }
 
-    int ans = 1;
-    int dp[n][n][26];
-    memset(dp, -1, sizeof dp);
+    vector<vector<pair<int, int>>> with_len(n);
+    int dp[n][n];
+    memset(dp, 0, sizeof dp);
 
-    function<int(int, int, int, int)> dfs = [&](int root, int parent, int node, int mx) -> int {
-        char r = letter[root], n = letter[node];
-        if (r == n) mx += 2;
-        
+    function<void(int, int, int, int, int)> process = [&](int v, int u, int gate, int prev, int len) {
+        info[v][u] = {gate, prev};
+        with_len[len].push_back({v, u});
+        for (auto j: adj[u]) {
+            if (j == prev) continue;
+            process(v, j, gate, u, len + 1);
+        }
     };
 
+    int ans = 1;
+
+    // clac dp for len = 0 and 1
     for (int i = 0; i < n; i++) {
-        for (auto child : adj[i]) {
-            dfs(i, i, child, 1);
+        dp[i][i] = 1;
+        for (auto j: adj[i]) {
+            dp[i][j] = 1 + (letter[i] == letter[j]);
+            ans = max(ans, dp[i][j]);
+            for (auto k: adj[j]) {
+                if (k == i) continue;
+                process(i, k, j, j, 2);
+            }
         }
     }
 
-    cout << ans << endl;
+    for (int len = 2; len < n; len++) {
+        debug(len, with_len[len]);
+        for (auto [v, u]: with_len[len]) {
+            auto [a, b] = info[v][u];
+            debug(v, a, b, u);
+            dp[v][u] = max(dp[v][u], dp[a][u]);
+            dp[v][u] = max(dp[v][u], dp[v][b]);
+            if (letter[v] == letter[u]) {
+                dp[v][u] = max(dp[v][u], dp[a][b] + 2);
+            }
+            ans = max(ans, dp[v][u]);
+            debug(dp[v][u]);
+        }
+    }
+
+    cout << ans << '\n';
 }
 
 int main() {
