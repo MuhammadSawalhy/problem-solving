@@ -11,8 +11,8 @@ using namespace std;
 #define debug_bits(...)
 #endif
 
-#define int long long
-#define ll long long
+#define int    long long
+#define ll     long long
 #define all(v) v.begin(), v.end()
 
 void solve() {
@@ -22,29 +22,79 @@ void solve() {
     for (int i = 0; i < n; i++) cin >> a[i];
 
     int good = 0;
-    vector<int> extra(n);
-
+    vector<int> prev(n + 1);
     vector<bool> vis(n);
+    vector<bool> onmain(n);
     vector<bool> isgood(n);
 
     function<bool(int)> dfs = [&](int i) -> bool {
         if (i >= n || i < 0) return true;
-        if (a[i] == 0) return false;
-        if (vis[i]) {
-            return isgood[i];
-        }
+        if (vis[i]) return isgood[i];
         vis[i] = true;
         bool ok = dfs(i + a[i]);
         isgood[i] = ok;
-        extra[i] = good;
         good += ok;
         return ok;
     };
 
-    int ans = (n + 1) * n;
-    for (int i = 0; i < n; i++) {
+    function<void(int)> dfs2 = [&](int i) {
+        if (i >= n || i < 0) return;
+        if (onmain[i]) return;
+        onmain[i] = true;
+        dfs2(i + a[i]);
+    };
+
+    dfs2(0);
+
+    for (int i = 0; i < n; i++)
         dfs(i);
-        ans += extra[i];
+
+    vector<int> indeg(n + 1);
+    vector<int> next(n + 1, -1);
+
+    for (int i = 0; i < n; i++) {
+        if (i + a[i] < 0 || i + a[i] >= n) {
+            indeg[n]++;
+            next[i] = n;
+        } else {
+            indeg[i + a[i]]++;
+            next[i] = i + a[i];
+        }
+    }
+
+    queue<int> qu;
+    for (int i = 0; i < n; i++) {
+        if (indeg[i] == 0)
+            qu.push(i);
+    }
+
+    while (qu.size()) {
+        int i = qu.front();
+        qu.pop();
+        if (next[i] != -1) {
+            indeg[next[i]]--;
+            if (indeg[next[i]] == 0)
+                qu.push(next[i]);
+            prev[next[i]] += prev[i] + 1;
+        }
+    }
+
+    debug(prev);
+
+    int ans = n * (2 * n + 1);
+    for (int i = 0; i < n; i++) {
+        if (onmain[i]) {
+            if (isgood[0]) {
+                ans -= (n - good) + prev[i] + 1;
+            } else {
+                ans -= (n - good);
+            }
+        } else {
+            if (isgood[0]) {
+            } else {
+                ans -= 2 * n + 1;
+            }
+        }
     }
 
     cout << ans << endl;
