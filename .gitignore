@@ -11,6 +11,8 @@
 !*.snippets
 !.gitignore
 !.clang-format
+!Makefile
+.idea/
 build/
 .ccls-cache/
 cmake-build-debug/
