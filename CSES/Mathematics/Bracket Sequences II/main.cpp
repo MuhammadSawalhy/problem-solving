@@ -9,8 +9,8 @@
 #define debug_bits(...)
 #endif
 
-#define int long long
-#define ll long long
+#define int    long long
+#define ll     long long
 #define all(v) v.begin(), v.end()
 
 using namespace std;
@@ -49,7 +49,7 @@ public:
         return res;
     }
     mint &operator*=(const mint &rhs) {
-        x = (ll)x * rhs.x % mod;
+        x = (ll) x * rhs.x % mod;
         return *this;
     }
     mint &operator+=(const mint &rhs) {
@@ -121,7 +121,7 @@ Z choose(int n, int r) {
 int32_t main() {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL), cout.tie(NULL);
-    
+
     int n;
     cin >> n;
 
@@ -133,29 +133,27 @@ int32_t main() {
         return 0;
     }
 
-    if (n == 2) {
-        cout << 1 << endl;
-        return 0;
-    }
-
-    int j, x = -1, m = 0;
-    for (j = 0; j < (int)s.size(); j++) {
+    int m = 0;
+    for (int j = 0; j < (int) s.size(); j++) {
         if (s[j] == ')') {
-            m--;
-            if (m < 0) {
+            if (--m < 0) {
                 cout << 0 << endl;
                 return 0;
             }
-            if (x == -1)
-                x = j;
         } else {
             m++;
         }
     }
 
     n -= s.size();
-    debug(n, m + (n - m) / 2);
-    Z ans = choose(n, m + (n - m) / 2) - choose(n, m + (n - m) / 2 + 1);
+    int x = (n + m) / 2;
+    int y = (n - m) / 2;
+    // Watch this: https://youtu.be/kaInaIUABzY
+    Z ans = choose(x + y, x) - choose(x + y, y - 1);
+    Z ans2 = choose(x + y, y) - choose(x + y, x + 1);
+    Z ans3 = choose(x + y, y) * (x - y + 1) / (x + 1);
+    assert(ans.x == ans2.x);
+    assert(ans.x == ans3.x);
 
     cout << ans << endl;
 
