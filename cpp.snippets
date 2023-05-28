@@ -14,8 +14,12 @@ int main(int argc, char *argv[]) {
 endsnippet
 
 snippet arr "Description" b
-int ${1:n}; cin >> ${1}; ll ${2:a}[${1}];
-for (int i = 0; i < ${1}; i++) cin >> ${2}[i];
+int ${1:n};
+cin >> ${1};
+vector<int> ${2:a}(${1});
+for (int i = 0; i < ${1}; i++) {
+	cin >> ${2}[i];
+}
 endsnippet
 
 snippet code_is_prime "brute force primality test" b
@@ -171,7 +175,6 @@ pair<long long, vector<edge>> mst_kruskal(vector<edge> &edges, int n) {
 endsnippet
 
 snippet temp "competitive programming template" b
-// ﷽
 // ﷽
 #include <bits/stdc++.h>
 
@@ -551,27 +554,13 @@ struct PointInConvex {
     PointInConvex(vector<pt> polygon) { prepare_convex_ccw(polygon); }
 
     void prepare_convex_ccw(vector<pt> &points) {
+		// NOTE: the polygon should be strictly convex
         n = points.size();
         int pos = 0; // most left-bottom point
-        for (int i = 1; i < n; i++) {
+        for (int i = 1; i < n; i++)
             if (points[i] < points[pos])
                 pos = i;
-        }
         rotate(points.begin(), points.begin() + pos, points.end());
-
-        // no duplication
-        points.push_back(points.front());
-        vector<pt> nodup; // no duplications
-        for (int i = 0, sz = 0; i < (int) points.size(); i++) {
-            while (sz >= 2 && iseq0(points[i].cross(nodup[sz - 1], nodup[sz - 2])))
-                nodup.pop_back(), sz--;
-            nodup.push_back(points[i]), sz++;
-        }
-
-        nodup.pop_back();
-        points = nodup;
-        n = points.size();
-        assert(n >= 1);
 
         seq.resize(n);
         for (int i = 0; i < n; i++)
@@ -1085,26 +1074,6 @@ void build_pascal(int d) {
             newrow[i] = lastrow[i] + lastrow[i - 1];
         pascal.push_back(newrow);
     }
-}
-endsnippet
-
-snippet code_choose "choose elements from  a vector (combinations)" b
-template <class T>
-void choose(int cnt, vector<T> &v, vector<vector<T>> &res, int i = 0,
-                        vector<T> choosen = vector<T>()) {
-
-    if (cnt == 0) {
-        res.push_back(choosen);
-        return;
-    }
-
-    if (i >= (int)v.size())
-        return;
-
-    choosen.push_back(v[i]);
-    choose(cnt - 1, v, res, i + 1, choosen);
-    choosen.pop_back();
-    choose(cnt, v, res, i + 1, choosen);
 }
 endsnippet
 
