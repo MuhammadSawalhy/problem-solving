@@ -15,30 +15,16 @@ using namespace std;
 #define ll long long
 #define all(v) v.begin(), v.end()
 
-int gen(int a = 1, int b = 10) { return a + rand() % (b - a + 1); }
+mt19937 rng = mt19937(random_device()());
 
-int countbits(int n) {
-    return __builtin_popcount(n);
+void seed(int s) { rng = mt19937(s); }
+
+int rand_int(int x, int y) {
+    return uniform_int_distribution<int>(x, y)(rng);
 }
 
 void interact() {
-    int n = gen(), initial = n;
-    cout << countbits(n) << endl;
-
-    int x, cnt = 0;
-    char t;
-    while (true) {
-        assert(++cnt <= 30);
-        cin >> t >> x;
-        if (t == '!') {
-            assert(x == initial);
-            return;
-        } else {
-            n -= x;
-            assert(n >= 0);
-            cout << countbits(n) << endl;
-        }
-    }
+    // cout to the solution and cin from it, interact and enjoy
 }
 
 int32_t main(int32_t argc, char *argv[]) {
