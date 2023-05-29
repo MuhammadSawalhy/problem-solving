@@ -15,14 +15,14 @@ using namespace std;
 #define int    long long
 #define all(v) v.begin(), v.end()
 
-const int N = 1e5 + 1;
+const int mod = 1e9 + 7;
 
 int32_t main() {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL), cout.tie(NULL);
 
-    int n, m, k;
-    cin >> n >> m >> k;
+    int n, m;
+    cin >> n >> m;
 
     vector<pair<int, int>> adj[n];
     for (int i = 0, a, b, c; i < m; i++) {
@@ -31,7 +31,7 @@ int32_t main() {
     }
 
     priority_queue<pair<int, int>> pq;
-    vector<int> values[n];
+    vector<int> price(n), cnt(n), cntmin(n), cntmax(n);
     pq.push({0, 0});
 
     while (pq.size()) {
@@ -39,17 +39,10 @@ int32_t main() {
         pq.pop();
         d *= -1;
 
-        if (values[i].size() == 10) continue;
-        values[i].push_back(d);
-
         for (auto [j, c]: adj[i]) {
             pq.push({-(d + c), j});
         }
     }
-
-    for (int i = 0; i < k; i++)
-        cout << values[n - 1][i] << ' ';
-    cout << endl;
 
     return 0;
 }

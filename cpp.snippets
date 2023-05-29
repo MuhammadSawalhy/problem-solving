@@ -1557,3 +1557,52 @@ int rand_int(int x, int y) {
     return uniform_int_distribution<int>(x, y)(rng);
 }
 endsnippet
+
+snippet code_lca "least common ancestor using binary lifting" b
+struct LCA {
+    int n, LOG;
+    vector<int> depth;
+    vector<vector<int>> parent, adj;
+
+    LCA() : n(0), LOG(-1e9) {}
+
+    LCA(const vector<vector<int>> &adj, int root = 0) : adj(adj), n(adj.size()), LOG(log2(n) + 1) {
+        depth.resize(n);
+        parent = vector<vector<int>>(n, vector<int>(LOG, root));
+        preprocess(root);
+    }
+
+    void dfs(int u, int p) {
+        for (auto v: adj[u]) {
+            if (v == p) continue;
+            parent[v][0] = u;
+            depth[v] = depth[u] + 1;
+            dfs(v, u);
+        }
+    }
+
+    void preprocess(int root) {
+        dfs(root, root);
+        for (int k = 1; k < LOG; k++)
+            for (int u = 0; u < n; u++)
+                parent[u][k] = parent[parent[u][k - 1]][k - 1];
+    }
+
+    int query(int u, int v) {
+        if (depth[u] < depth[v]) swap(u, v);
+        for (int k = LOG - 1; k >= 0; k--) {
+            if (depth[parent[u][k]] >= depth[v]) {
+                u = parent[u][k];
+            }
+        }
+        if (u == v) return u;
+        for (int k = LOG - 1; k >= 0; k--) {
+            if (parent[u][k] != parent[v][k]) {
+                u = parent[u][k];
+                v = parent[v][k];
+            }
+        }
+        return parent[u][0];
+    }
+};
+endsnippet
