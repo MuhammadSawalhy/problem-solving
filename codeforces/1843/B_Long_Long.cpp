@@ -16,7 +16,28 @@ using namespace std;
 #define all(v) v.begin(), v.end()
 
 void solve() {
-    cout << 1 << endl;
+    
+    int n; cin >> n;
+    int a[n];
+
+    for (int i = 0; i < n; i++)
+    cin >> a[i];
+
+    bool state = 1;
+    int ops = 0;
+    int sum = 0;
+    for (int i = 0; i < n; i++) {
+      sum += abs(a[i]);
+
+      if (a[i] < 0 && state == 1) {
+        ops++;
+      }
+
+      if (a[i] < 0) state = 0;
+      else if (a[i] > 0) state = 1;
+    }
+
+    cout << sum << ' ' << ops << endl;
 }
 
 int32_t main() {

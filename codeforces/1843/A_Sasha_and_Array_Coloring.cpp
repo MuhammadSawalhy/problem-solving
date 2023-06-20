@@ -16,7 +16,19 @@ using namespace std;
 #define all(v) v.begin(), v.end()
 
 void solve() {
-    cout << 1 << endl;
+    
+    int n; cin >> n;
+    int a[n];
+
+    for (int i = 0; i < n; i++)
+    cin >> a[i];
+    sort(a, a+ n );
+
+    ll cost = 0;
+    for (int i  = 0, j = n - 1; i < j; i ++ , j--) 
+      cost += a[j] - a[i];
+
+    cout << cost << '\n';
 }
 
 int32_t main() {

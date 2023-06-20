@@ -16,7 +16,14 @@ using namespace std;
 #define all(v) v.begin(), v.end()
 
 void solve() {
-    cout << 1 << endl;
+    ll n;
+    cin >> n;
+    ll sum = 0;
+    while (n) {
+        sum += n;
+        n /= 2;
+    }
+    cout << sum << '\n';
 }
 
 int32_t main() {
