@@ -32,24 +32,20 @@ int32_t main() {
     s -= ymin;
     e -= ymin;
 
-    int dp[2][ymax + 1];
+    int dp[w + 1][ymax + 1];
     memset(dp, 0, sizeof dp);
-
-    int DP = 0;
-    dp[DP][s] = 1;
+    dp[0][s] = 1;
 
     for (int i = 1; i <= w; i++) {
-        DP ^= 1;
-        for (int y = 0; y <= ymax; y++) dp[DP][y] = 0;
         for (int y = 0; y <= ymax; y++) {
             if (y - 1 >= 0)
-                dp[DP][y] = (dp[DP][y] + dp[DP ^ 1][y - 1]) % MOD;
+                dp[i][y] = (dp[i][y] + dp[i - 1][y - 1]) % MOD;
+                dp[i][y] = (dp[i][y] + dp[i - 1][y + 1]) % MOD;
             if (y + 1 <= ymax)
-                dp[DP][y] = (dp[DP][y] + dp[DP ^ 1][y + 1]) % MOD;
         }
     }
 
-    cout << dp[DP][e] << endl;
+    cout << dp[w][e] << endl;
 
     return 0;
 }

@@ -3,8 +3,8 @@ BasedOnStyle: LLVM
 AccessModifierOffset: -4
 AlignAfterOpenBracket: Align
 AlignConsecutiveAssignments: None
-AlignConsecutiveMacros:
-  Enabled: true
+# AlignConsecutiveMacros:
+#   Enabled: true
 # OperandAlignmentStyle: OAS_AlignAfterOperator
 AlignOperands: Align
 AllowAllArgumentsOnNextLine: false
