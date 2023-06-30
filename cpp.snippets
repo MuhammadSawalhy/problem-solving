@@ -811,17 +811,17 @@ private:
 endsnippet
 
 snippet code_mint "modular arithmetics stolen from Jiangly" b
-template<typename T = void>
-struct OtherType {
+template<typename T = void> // default
+struct BiggerType {
     typedef ll type;
 };
 
-template<>
-struct OtherType<ll> {
+template<> // for long long
+struct BiggerType<ll> {
     typedef __int128 type;
 };
 
-template<typename T, T mod, typename V = typename OtherType<T>::type>
+template<typename T, T mod, typename V = typename BiggerType<T>::type>
 struct mint {
 private:
     T norm(T x) const {
@@ -832,8 +832,8 @@ private:
 
 public:
     T x;
-    T val() const { return x; }
-    mint(V x = 0) : x(norm(x % mod)) {}
+    mint(T x = 0) : x(norm(x)) {}
+    mint(V x) : x(norm(x % mod)) {}
     mint operator-() const { return mint(norm(mod - x)); }
     mint inv() const {
         assert(x != 0);
@@ -887,7 +887,7 @@ public:
         return is >> v, a = mint(v), is;
     }
     friend std::ostream &operator<<(std::ostream &os, const mint &a) {
-        return os << a.val();
+        return os << a.x;
     }
     friend mint max(mint a, mint b) {
         return a.x > b.x ? a : b;
