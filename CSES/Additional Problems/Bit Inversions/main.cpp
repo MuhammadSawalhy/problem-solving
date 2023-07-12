@@ -1,16 +1,19 @@
 // ﷽
 #include <bits/stdc++.h>
 
-#define debug(...)
+using namespace std;
+
 #ifdef SAWALHY
 #include "debug.hpp"
+#else
+#define debug(...) 0
+#define debug_itr(...) 0
+#define debug_bits(...) 0
 #endif
 
-#define int long long
 #define ll long long
+#define int long long
 #define all(v) v.begin(), v.end()
-
-using namespace std;
 
 // relative updates have to be linear
 struct CustomRelativeUpdate {
@@ -28,22 +31,35 @@ struct CustomRelativeUpdate {
 
 template<typename RelativeUpdate = CustomRelativeUpdate>
 struct CustomValue {
-    long long sum = 0, mn = -1e18, mx = 1e18, cnt = 1;
+    ll prefix[2] = {};
+    ll suffix[2] = {};
+    ll substr[2] = {};
+    int cnt = 1;
 
     CustomValue() = default;
-    CustomValue(ll value) { sum = mn = mx = value; }
 
     inline CustomValue &operator+=(const RelativeUpdate &rel) {
-        sum += cnt * rel.value, mn += rel.value, mx += rel.value;
         return *this;
     }
 
     inline CustomValue operator+(const CustomValue &other) const {
         CustomValue ans;
-        ans.sum = sum + other.sum;
-        ans.mn = min(mn, other.mn);
-        ans.mx = max(mx, other.mx);
+
+        ans.prefix[0] = prefix[0] == cnt ? prefix[0] + other.prefix[0] : prefix[0];
+        ans.prefix[1] = prefix[1] == cnt ? prefix[1] + other.prefix[1] : prefix[1];
+
+        ans.suffix[0] = other.suffix[0] == cnt ? other.suffix[0] + suffix[0] : other.suffix[0];
+        ans.suffix[1] = other.suffix[1] == cnt ? other.suffix[1] + suffix[1] : other.suffix[1];
+
+        ans.substr[0] = max({substr[0], other.substr[0], suffix[0] + other.prefix[0]});
+        ans.substr[1] = max({substr[1], other.substr[1], suffix[1] + other.prefix[1]});
         ans.cnt = cnt + other.cnt;
+
+        if (ans.prefix[0]) assert(!ans.prefix[1]);
+        if (ans.prefix[1]) assert(!ans.prefix[0]);
+        if (ans.suffix[0]) assert(!ans.suffix[1]);
+        if (ans.suffix[1]) assert(!ans.suffix[0]);
+
         return ans;
     }
 };
@@ -175,33 +191,38 @@ using RelativeUpdate = CustomRelativeUpdate;
 using Value = CustomValue<RelativeUpdate>;
 using SegTREE = Segtree<Value, RelativeUpdate>;
 
+Value create_value(char c) {
+    Value val;
+    int v = c - '0';
+    val.prefix[v] = 1;
+    val.suffix[v] = 1;
+    val.substr[v] = 1;
+    return val;
+}
+
 int32_t main() {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL), cout.tie(NULL);
 
-    int n, q, t, a, b;
-    cin >> n >> q;
-    SegTREE sg(n);
+    string s;
+    cin >> s;
 
-    for (int i = 0; i < n; i++) {
-        cin >> a;
-        sg.update(i, Value(a));
+    SegTREE sg(s.length());
+
+    for (int i = 0; i < s.length(); i++) {
+        sg.update(i, create_value(s[i]));
+        debug(i);
     }
 
-    string s;
-    cin.ignore();
+    int q;
+    cin >> q;
     while (q--) {
-        getline(cin, s);
-        istringstream is(s);
-        is >> t;
-        if (t == 1) {
-            is >> a >> b >> t;
-            a--, b--;
-            sg.relative_update(a, b, RelativeUpdate(t));
-        } else {
-            is >> a, a--;
-            cout << sg.query(a).sum << endl;
-        }
+        int i;
+        cin >> i, i--;
+        s[i] = s[i] == '0' ? '1' : '0';
+        sg.update(i, create_value(s[i]));
+        auto ans = sg.query(0, s.length() - 1);
+        cout << max(ans.substr[0], ans.substr[1]) << ' ';
     }
 
     return 0;
