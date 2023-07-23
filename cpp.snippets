@@ -1485,11 +1485,15 @@ struct SCC {
     vector<vector<int>> adj;
     vector<int> id, comp, st;
 
-    SCC(int N) : N(N) {
-        adj.resize(N), id.resize(N), comp = vector<int>(N, -1);
+    SCC(const vector<vector<int>> &adj) : adj(adj), N(adj.size()) {
+        id.resize(N), comp = vector<int>(N, -1);
+        go();
     }
 
-    void add_edge(int u, int v) { adj[u].push_back(v); }
+    void go() {
+        for (int i = 0; i < N; i++)
+            if (!id[i]) dfs(i);
+    }
 
     int dfs(int i) {
         int low = id[i] = ++ID;
@@ -1504,11 +1508,6 @@ struct SCC {
                 comp[j = st.back()] = COMP, st.pop_back();
         }
         return low;
-    }
-
-    void gen() {
-        for (int i = 0; i < N; i++)
-            if (!id[i]) dfs(i);
     }
 };
 endsnippet
