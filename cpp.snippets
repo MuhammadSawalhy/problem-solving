@@ -144,17 +144,17 @@ long long dijkstra(int s, int e, vector<vector<pair<int, int>>> &adj) {
 endsnippet
 
 snippet code_mst_kruskal "MST (minimum spanning tree), Kruskal's algorithm" b
-struct edge {
+struct Edge {
     int from, to;
     long long weight;
-    edge(int from, int to, long long weight) : from(from), to(to), weight(weight) {}
-    bool operator<(edge &e) { return weight < e.weight; }
+    Edge(int from, int to, long long weight) : from(from), to(to), weight(weight) {}
+    bool operator<(Edge &e) { return weight < e.weight; }
 };
 
-pair<long long, vector<edge>> mst_kruskal(vector<edge> &edges, int n) {
-    union_find uf(n + 1);
+pair<long long, vector<Edge>> mst_kruskal(vector<Edge> &edges, int n) {
+    DSU uf(n + 1);
     double cost = 0;
-    vector<edge> mst_edges;
+    vector<Edge> mst_edges;
 
     sort(edges.rbegin(), edges.rend());
 
@@ -162,7 +162,7 @@ pair<long long, vector<edge>> mst_kruskal(vector<edge> &edges, int n) {
         auto &e = edges.back();
         edges.pop_back();
         if (uf.uni(e.from, e.to)) {
-            cost += e.w;
+            cost += e.weight;
             mst_edges.push_back(e);
         }
     };
@@ -1292,7 +1292,7 @@ class DirectedEulerian {
 public:
     int n, m;
     vector<vector<pair<int, Edge>>> adj;
-    DirectedEulerian(int n, int m, vector<vector<pair<int, Edge>>> adj) : adj(adj), n(n), m(m) {}
+    DirectedEulerian(int n, int m, const vector<vector<pair<int, Edge>>> &adj) : adj(adj), n(n), m(m) {}
 
     vector<Edge> path(bool circuit = false) {
         vector<Edge> path;
@@ -1354,8 +1354,8 @@ template<typename Edge>
 class UndirectedEulerian {
 public:
     int n, m;
-    vector<vector<pair<int, Edge>>> adj;
-    UndirectedEulerian(int n, int m, vector<vector<pair<int, Edge>>> adj) : adj(adj), n(n), m(m) {}
+    vector<vector<pair<int, Edge>>> adj; // NOTE: dont't add a self-edge twice
+    UndirectedEulerian(int n, int m, const vector<vector<pair<int, Edge>>> &adj) : adj(adj), n(n), m(m) {}
 
     vector<Edge> path(bool circuit = false) {
         vector<Edge> path;
