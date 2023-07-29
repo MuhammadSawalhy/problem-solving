@@ -698,7 +698,7 @@ struct CustomRelativeUpdate {
 
 template<typename RelativeUpdate = CustomRelativeUpdate>
 struct CustomValue {
-    long long sum = 0, mn = -1e18, mx = 1e18, cnt = 1;
+    long long sum = 0, mn = 1e18, mx = -1e18, cnt = 1;
 
     CustomValue() = default;
     CustomValue(ll value) { sum = mn = mx = value; }
