@@ -1,6 +1,6 @@
 // ﷽
-// $(URL)
-// $(JUDGE) -> $(CONTEST) -> $(PROBLEM)
+// https://cses.fi/problemset/task/1694
+// CSES -> CSES Problem Set -> Download Speed
 
 #include <bits/stdc++.h>
 using namespace std;
@@ -17,18 +17,16 @@ using namespace std;
 #define ll long long
 #define all(v) v.begin(), v.end()
 
-void solve() {
-    cout << 1 << endl;
-}
+void solve() { cout << 1 << endl; }
 
 int32_t main() {
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL), cout.tie(NULL);
+  ios_base::sync_with_stdio(false);
+  cin.tie(NULL), cout.tie(NULL);
 
-    int t;
-    cin >> t;
-    while (t--)
-        solve();
+  int t;
+  cin >> t;
+  while (t--)
+    solve();
 
-    return 0;
+  return 0;
 }
