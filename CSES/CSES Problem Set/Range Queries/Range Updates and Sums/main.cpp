@@ -48,6 +48,13 @@ struct CustomValue {
     CustomValue() = default;
     CustomValue(ll value) { sum = mn = mx = value; }
 
+    inline void operator+=(const Update &up) {
+        if (up.state == Update::relative)
+            sum += up.value * cnt, mn += up.value, mx += up.value;
+        else
+            sum = up.value * cnt, mn = up.value, mx = up.value;
+    }
+
     inline CustomValue operator+(const CustomValue &other) const {
         CustomValue ans;
         ans.sum = sum + other.sum;
@@ -62,7 +69,6 @@ template<typename Value, typename Update>
 struct Node {
     Update up;
     Value value;
-
     int l = -1, r = -1; // [l, r]
 
     Node() = default;
@@ -73,13 +79,7 @@ struct Node {
     }
 
     void apply_update() {
-        if (up.state == Update::relative) {
-            value.sum += up.value * (r - l + 1);
-            value.mn += up.value, value.mx += up.value;
-        } else {
-            value.sum = up.value * (r - l + 1);
-            value.mn = up.value, value.mx = up.value;
-        }
+        this->value += up;
         up.state = Update::idle;
     }
 };

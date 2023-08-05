@@ -697,7 +697,7 @@ snippet code_segtree
         long long value = 0;
 
         CustomUpdate() = default;
-        CustomUpdate(long long value, State s = forced) : value(value), state(s){};
+        CustomUpdate(long long value, State state = forced) : value(value), state(state){};
 
         inline CustomUpdate &operator+=(const CustomUpdate &other) {
             if (state == idle || other.state == forced) {
@@ -718,6 +718,13 @@ snippet code_segtree
         CustomValue() = default;
         CustomValue(ll value) { sum = mn = mx = value; }
 
+        inline void operator+=(const Update &up) {
+            if (up.state == Update::relative)
+                sum += up.value * cnt, mn += up.value, mx += up.value;
+            else
+                sum = up.value * cnt, mn = up.value, mx = up.value;
+        }
+
         inline CustomValue operator+(const CustomValue &other) const {
             CustomValue ans;
             ans.sum = sum + other.sum;
@@ -732,7 +739,6 @@ snippet code_segtree
     struct Node {
         Update up;
         Value value;
-
         int l = -1, r = -1; // [l, r]
 
         Node() = default;
@@ -743,13 +749,7 @@ snippet code_segtree
         }
 
         void apply_update() {
-            if (up.state == Update::relative) {
-                value.sum += up.value * (r - l + 1);
-                value.mn += up.value, value.mx += up.value;
-            } else {
-                value.sum = up.value * (r - l + 1);
-                value.mn = up.value, value.mx = up.value;
-            }
+            this->value += up;
             up.state = Update::idle;
         }
     };
