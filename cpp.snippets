@@ -688,31 +688,35 @@ snippet code_segtree_simple
 # segment tree data structure
 snippet code_segtree
     // relative updates have to be linear
-    struct CustomRelativeUpdate {
-        static const long long initial = 0;
-        long long value = initial;
+    struct CustomUpdate {
+        enum State { idle,
+                     relative,
+                     forced };
 
-        CustomRelativeUpdate() = default;
-        CustomRelativeUpdate(long long value) : value(value){};
+        State state = idle;
+        long long value = 0;
 
-        inline CustomRelativeUpdate &operator+=(const CustomRelativeUpdate &other) {
-            value = value + other.value;
+        CustomUpdate() = default;
+        CustomUpdate(long long value, State s = forced) : value(value), state(s){};
+
+        inline CustomUpdate &operator+=(const CustomUpdate &other) {
+            if (state == idle || other.state == forced) {
+                value = other.value;
+                state = other.state;
+            } else {
+                assert(other.state == relative);
+                value += other.value;
+            }
             return *this;
         }
     };
 
-    template<typename RelativeUpdate = CustomRelativeUpdate>
+    template<typename Update = CustomUpdate>
     struct CustomValue {
         long long sum = 0, mn = 1e18, mx = -1e18, cnt = 1;
 
         CustomValue() = default;
         CustomValue(ll value) { sum = mn = mx = value; }
-
-        // Node is responsible for applying the relative update
-        inline CustomValue &operator+=(const RelativeUpdate &rel) {
-            sum += cnt * rel.value, mn += rel.value, mx += rel.value;
-            return *this;
-        }
 
         inline CustomValue operator+(const CustomValue &other) const {
             CustomValue ans;
@@ -724,55 +728,51 @@ snippet code_segtree
         }
     };
 
-    template<typename Value, typename RelativeUpdate>
+    template<typename Value, typename Update>
     struct Node {
-        Value value; // shouldn't be edited directly, only in pull function
-        RelativeUpdate rel;
+        Update up;
+        Value value;
 
         int l = -1, r = -1; // [l, r]
-        bool pending_update = false;
-        bool pending_relative_update = false;
 
         Node() = default;
         Node(int l, int r, const Value &value) : l(l), r(r) { update(value); };
 
-        void update(const Value &value) {
-            this->value = value;
-            this->rel = RelativeUpdate(); // reset
-            pending_update = true;
-            pending_relative_update = false;
+        void update(const Update &up) {
+            this->up += up; // accumulate updates
         }
 
-        void relative_update(const RelativeUpdate rel) {
-            // we need this to be pushed later to the children
-            this->rel += rel;
-            pending_relative_update = true;
-        }
-
-        void apply_relupdate() {
-            value += rel;
+        void apply_update() {
+            if (up.state == Update::relative) {
+                value.sum += up.value * (r - l + 1);
+                value.mn += up.value, value.mx += up.value;
+            } else {
+                value.sum = up.value * (r - l + 1);
+                value.mn = up.value, value.mx = up.value;
+            }
+            up.state = Update::idle;
         }
     };
 
-    template<typename Value, typename RelativeUpdate>
+    template<typename Value, typename Update>
     struct Segtree {
         int n;
-        vector<Node<Value, RelativeUpdate>> tree;
+        vector<Node<Value, Update>> tree;
 
         Segtree(int n) {
             if ((n & (n - 1)) != 0)
                 n = 1 << (32 - __builtin_clz(n));
             this->n = n;
-            tree.assign(n << 1, Node<Value, RelativeUpdate>());
+            tree.assign(n << 1, Node<Value, Update>());
             for (int i = n; i < n << 1; i++)
                 tree[i].l = tree[i].r = i - n;
             for (int i = n - 1; i > 0; i--)
                 tree[i].l = tree[i << 1].l, tree[i].r = tree[i << 1 | 1].r;
         }
 
-        Segtree(const vector<Value> &values) : Segtree(values.size()) {
+        Segtree(const vector<Update> &values) : Segtree(values.size()) {
             for (int i = 0; i < (int) values.size(); i++)
-                tree[i + n].update(values[i]);
+                tree[i + n].update(values[i]), push(i + n);
             build();
         }
 
@@ -781,20 +781,9 @@ snippet code_segtree
         }
 
         inline Value query(int i) { return query(1, i, i); }
-
         inline Value query(int i, int j) { return query(1, i, j); }
-
-        inline void update(int i, const Value &val) { update(1, i, i, val); }
-
-        inline void update(int i, int j, const Value &val) { update(1, i, j, val); }
-
-        inline void relative_update(int i, const RelativeUpdate &val) {
-            relative_update(1, i, i, val);
-        }
-
-        inline void relative_update(int i, int j, const RelativeUpdate &val) {
-            relative_update(1, i, j, val);
-        }
+        inline void update(int i, const Update &val) { update(1, i, i, val); }
+        inline void update(int i, int j, const Update &val) { update(1, i, j, val); }
 
     private:
         void pull(int i) {
@@ -803,19 +792,10 @@ snippet code_segtree
 
         void push(int i) {
             int left = i << 1, right = i << 1 | 1;
-
-            if (tree[i].pending_update) {
-                if (i < n) tree[left].update(tree[i].value);
-                if (i < n) tree[right].update(tree[i].value);
-                tree[i].pending_update = false;
-            }
-
-            if (tree[i].pending_relative_update) {
-                if (i < n) tree[left].relative_update(tree[i].rel);
-                if (i < n) tree[right].relative_update(tree[i].rel);
-                tree[i].apply_relupdate();
-                tree[i].rel = RelativeUpdate(); // reset
-                tree[i].pending_relative_update = false;
+            if (tree[i].up.state != Update::idle) {
+                if (i < n) tree[left].update(tree[i].up);
+                if (i < n) tree[right].update(tree[i].up);
+                tree[i].apply_update();
             }
         }
 
@@ -826,35 +806,23 @@ snippet code_segtree
             return query(i << 1, l, r) + query(i << 1 | 1, l, r);
         }
 
-        void update(int i, int l, int r, const Value &val) {
+        void update(int i, int l, int r, const Update &val) {
             push(i);
             if (tree[i].r < l || r < tree[i].l) return;
             if (l <= tree[i].l && tree[i].r <= r) {
                 tree[i].update(val);
+                push(i); // to apply the update
                 return;
             }
             update(i << 1, l, r, val);
             update(i << 1 | 1, l, r, val);
             pull(i);
         }
-
-        void relative_update(int i, int l, int r, const RelativeUpdate &val) {
-            push(i);
-            if (tree[i].r < l || r < tree[i].l) return;
-            if (l <= tree[i].l && tree[i].r <= r) {
-                tree[i].relative_update(val);
-                push(i); // to apply the rel update and update ancestors
-                return;
-            }
-            relative_update(i << 1, l, r, val);
-            relative_update(i << 1 | 1, l, r, val);
-            pull(i);
-        }
     };
 
-    using RelativeUpdate = CustomRelativeUpdate;
-    using Value = CustomValue<RelativeUpdate>;
-    using SegTREE = Segtree<Value, RelativeUpdate>;
+    using Update = CustomUpdate;
+    using Value = CustomValue<Update>;
+    using SegTREE = Segtree<Value, Update>;
 
 
 
