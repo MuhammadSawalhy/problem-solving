@@ -1,5 +1,3 @@
-*.out
-*.toc
-*.log
-*.aux
+!*.tex
+!*.pdf
 cod/

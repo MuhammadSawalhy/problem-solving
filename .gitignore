@@ -8,7 +8,6 @@
 !*.py
 !*.java
 !*.txt
-!*.tex
 !*.snippets
 !.gitignore
 !.clang-format

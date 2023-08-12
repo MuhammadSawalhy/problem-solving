@@ -1,9 +1,9 @@
 .PHONY: build
 build: snippets.tex
-	if which xelatex.exe > /dev/null; then \
-		xelatex.exe snippets.tex; \
+	if which pdflatex.exe > /dev/null; then \
+		pdflatex.exe snippets.tex -interaction=nonstopmode; \
 	else \
-		xelatex snippets.tex; \
+		pdflatex snippets.tex -interaction=nonstopmode; \
 	fi
 
 .PHONY: extract
