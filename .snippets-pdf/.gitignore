@@ -1,0 +1,5 @@
+*.out
+*.toc
+*.log
+*.aux
+cod/

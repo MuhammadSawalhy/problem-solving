@@ -8,10 +8,12 @@
 !*.py
 !*.java
 !*.txt
+!*.tex
 !*.snippets
 !.gitignore
 !.clang-format
 !Makefile
+!.snippets-pdf/
 .idea/
 build/
 .ccls-cache/

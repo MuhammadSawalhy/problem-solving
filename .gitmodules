@@ -1,0 +1,3 @@
+[submodule ".snippets-pdf"]
+	path = .snippets-pdf
+	url = https://github.com/AbdeltwabMF/reference-materials.git
