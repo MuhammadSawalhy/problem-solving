@@ -30,7 +30,7 @@ class ProcessThread:
             self.listen[name].start()
 
     def feed_input(self, inp):
-        if self.poll() is not None:
+        if self.poll() is not None or not self.p.stdin:
             return
         try:
             self.p.stdin.write((inp + "\n").encode())

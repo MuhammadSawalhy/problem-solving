@@ -240,8 +240,8 @@ snippet code_geo
     namespace Geometry
     {
 
-    using T = long long;
-    const T EPS = 0;
+    using T = long double;
+    const T EPS = 1e-8;
     const double PI = acos(-1.0);
 
     template<typename T, typename V>
@@ -260,6 +260,10 @@ snippet code_geo
     bool isgt(T a, V b) { return cmp(a, b) == 1; }
     template<typename T>
     int sign(T val) { return cmp(val, 0); }
+
+    enum PointState { OUT,
+                      IN,
+                      ON };
 
     typedef struct Point {
         T x, y;
@@ -302,9 +306,13 @@ snippet code_geo
         b = b - a, c = c - a;
         if (sign(b.cross(c)) == +1) return +1;        // "COUNTER_CLOCKWISE"
         if (sign(b.cross(c)) == -1) return -1;        // "CLOCKWISE"
-        if (sign(b.dot(c)) == -1) return +2;          // "ONLINE_BACK"
-        if (cmp(b.norm(), c.norm()) == -1) return -2; // "ONLINE_FRONT"
+        if (sign(b.dot(c)) == -1) return +2;          // "ON_RAY_b_a)"
+        if (cmp(b.norm(), c.norm()) == -1) return -2; // "ON_RAY_a_b"
         return 0;                                     // "ON_SEGMENT"
+    }
+
+    bool colinear(const pt &a, const pt &b, const pt &c) {
+        return abs(ccw(a, b, c)) != 1;
     }
 
     pt slope(pt a, pt b, bool change_direction = true) {
@@ -346,28 +354,62 @@ snippet code_geo
 
     struct Polygon {
         int n;
-        vector<pt> vert;
+        vector<pt> verts;
         Polygon() = default;
-        Polygon(int n) : n(n) { vert.resize(n); }
-        Polygon(vector<pt> &vert) : vert(vert), n(vert.size()) {}
+        Polygon(int n) : n(n) { verts.resize(n); }
+        Polygon(vector<pt> &vert) : verts(vert), n(vert.size()) {}
 
         T area2() const {
             T a = 0;
             for (int i = 2; i < n; i++)
-                a += vert[0].cross(vert[i], vert[i - 1]);
+                a += verts[0].cross(verts[i], verts[i - 1]);
             return abs(a);
         }
 
         long double area() const { return area2() / 2.0; };
+
+        void no_collinear() {
+            vector<pt> v;
+            for (int i = 0; i <= n; i++) {
+                while (v.size() > 1 && colinear(v.back(), v.end()[-2], verts[i % n]))
+                    v.pop_back();
+                v.push_back(verts[i % n]);
+            }
+            v.pop_back();
+            n = v.size();
+            verts = v;
+            assert(n > 2);
+        }
+
+        void ensure_ccw() {
+            start_bottom_left();
+            if (ccw(verts[0], verts[1], verts.back()) == -1)
+                reverse(verts.begin() + 1, verts.end());
+        }
+
+        void start_bottom_left() {
+            int pos = 0; // most left-bottom point
+            for (int i = 1; i < n; i++)
+                if (verts[i] < verts[pos])
+                    pos = i;
+            rotate(verts.begin(), verts.begin() + pos, verts.end());
+        }
     };
 
     bool parallel(const Line &a, const Line &b) { return (a.b - a.a).cross(b.b - b.a) == 0; }
     bool orthogonal(const Line &a, const Line &b) { return (a.a - a.b).dot(b.a - b.b) == 0; }
 
     bool intersect(const Line &l, const Line &m) { return !parallel(l, m); }
+
     bool intersect(const pt &p, const Segment &s) { return ccw(s.a, s.b, p) == 0; }
+    bool intersect(const Segment &s, const pt &p) { return intersect(p, s); }
+
     bool intersect(const pt &p, const Line &l) { return abs(ccw(l.a, l.b, p)) != 1; }
+    bool intersect(const Line &l, const pt &p) { return intersect(p, l); }
+
     bool intersect(const Segment &s, const Line &l) { return ccw(l.a, l.b, s.a) * ccw(l.a, l.b, s.b) != 1; }
+    bool intersect(const Line &l, const Segment &s) { return intersect(s, l); }
+
     bool intersect(const Segment &s, const Segment &t) { return ccw(s.a, s.b, t.a) * ccw(s.a, s.b, t.b) <= 0 && ccw(t.a, t.b, s.a) * ccw(t.a, t.b, s.b) <= 0; }
 
     bool intersect(const Segment &s, const Ray &r) {
@@ -379,6 +421,8 @@ snippet code_geo
                    (r.a.dot(r.b, s.a) >= 0 || r.a.dot(r.b, s.b) >= 0); // NOT BACK
         return sign(d1) * sign(d2) >= 0 && sign(d1) * sign(d3) >= 0 && abs(d2) <= abs(d1);
     }
+
+    bool intersect(const Ray &r, const Segment &s) { return intersect(s, r); }
 
     bool intersection(pt a, pt b, pt c, pt d, pt &inter) {
         assert(is_floating_point_v<T>);
@@ -395,6 +439,51 @@ snippet code_geo
         if (!intersect(l, m)) return false;
         return intersection(l.a, l.b, m.a, m.b, inter);
     }
+
+    // - NOTE: The polygon shouldn't have collinear points.
+    // - NOTE: First vertex should be the bottom-left, points in ccw order.
+    vector<pt> intersection(const Polygon &poly, const Line &line) {
+        int n = poly.n;
+        vector<pt> inter;
+        const vector<pt> &verts = poly.verts;
+
+        pt x;
+        for (int i = 1; i <= n; i++) {
+            int I = i % n, J = i - 1, K = (i - 2 + n) % n;
+            if (intersection(line, Segment(verts[I], verts[J]), x)) {
+                if (x == verts[I]) continue;
+                if (x != verts[J]) {
+                    inter.push_back(x);
+                    continue;
+                }
+                int dir1 = ccw(line.a, line.b, verts[I]);
+                int dir2 = ccw(line.a, line.b, verts[K]);
+                if (dir1 * dir2 == -1)
+                    // entering or leaving from a vertex
+                    inter.push_back(verts[J]);
+            } else if (abs(ccw(line.a, line.b, verts[J])) != 1) {
+                // side (I, J) is on the line
+                bool isWideAngleI = islt(ccw(verts[I], verts[((I + 1) % n)], verts[J]), 0);
+                bool isWideAngleJ = islt(ccw(verts[J], verts[I], verts[K]), 0);
+                if (isWideAngleI) inter.push_back(verts[I]);
+                if (isWideAngleJ) inter.push_back(verts[J]);
+                inter.push_back(verts[I]);
+                inter.push_back(verts[J]);
+            }
+        }
+
+        debug(inter);
+
+        // sort in one direction, as if you travel on the line
+        // in this direction and see the points one by one
+        // NOTE: points may NOT be eaxctly on the line due to precesion errors
+        sort(all(inter), [&](pt l, pt r) {
+            return sign((line.b - line.a).dot(r - l)) == 1;
+        });
+
+        assert(inter.size() % 2 == 0);
+        return inter;
+    };
 
     struct Circle {
         pt c;
@@ -427,55 +516,54 @@ snippet code_geo
             r = (a - this->c).len();
         }
 
-        friend bool intersect(const pt &p, const Circle &c) { return islte((p - c.c).norm(), c.r * c.r); }
         friend ostream &operator<<(ostream &os, const Circle &c) {
             return os << "c{" << c.c << ", " << c.r << "}";
         }
     };
 
-    int point_in_triangle(pt a, pt b, pt c, pt point) {
-        // point is on an edge or all are either 1 or -1
+    PointState point_in_triangle(pt a, pt b, pt c, pt point) {
         int x = ccw(a, b, point), y = ccw(b, c, point), z = ccw(c, a, point);
-        if (sign(x) == sign(y) && sign(y) == sign(z)) return 1;
-        if (x * y * z == 0) return 0;
-        return -1;
+        if (sign(x) == sign(y) && sign(y) == sign(z)) return IN;
+        if (x * y * z == 0) return ON;
+        return OUT;
     }
 
-    int point_in_circle(const pt &p, const vector<pt> &cir) {
-        if (cir.size() == 0) return -1;
+    PointState point_in_circle(const pt &p, const vector<pt> &cir) {
+        if (cir.size() == 0) return OUT;
         auto c = Circle(cir);
-        if (iseq((p - c.c).norm(), c.r * c.r)) return 0;
-        if (intersect(p, c)) return 1;
-        return -1;
+        if (iseq((p - c.c).norm(), c.r * c.r)) return ON;
+        if (islt((p - c.c).norm(), c.r * c.r)) return IN;
+        return OUT;
     }
 
-    int point_in_polygon(const pt &p, const vector<pt> &polygon) {
+    PointState point_in_polygon(const pt &p, const vector<pt> &polygon) {
         int wn = 0, n = polygon.size();
         for (int i = 0, j = 1; i < n; i++, j++, j %= n) {
-            if (ccw(polygon[j], polygon[i], p) == 0) return 0;
+            if (ccw(polygon[j], polygon[i], p) == 0) return ON;
             if ((p.y < polygon[j].y) != (p.y < polygon[i].y)) {
                 wn += polygon[j].y > polygon[i].y && ccw(p, polygon[i], polygon[j]) == 1;
                 wn -= polygon[j].y < polygon[i].y && ccw(p, polygon[j], polygon[i]) == 1;
             }
         }
-        return wn == 0 ? -1 : 1;
+        return wn == 0 ? OUT : IN;
     }
 
-    int ray_and_polygon(const Ray &r, const Polygon &polygon) {
+    PointState ray_and_polygon(const Ray &r, const Polygon &polygon) {
         // NOTE: Should be a good ray (a != b),
         // and non-degenerate polygon with no duplicated points
-        int n = polygon.n, ans = -1;
+        int n = polygon.n;
+        PointState ans = OUT;
         for (int i = 0, j = 1, k = 2; i < n; i++, j++, k++, j %= n, k %= n) {
-            if (!intersect(Segment(polygon.vert[i], polygon.vert[j]), r)) continue;
-            auto x = r.a.cross(r.b, polygon.vert[i]);
-            auto y = r.a.cross(r.b, polygon.vert[j]);
-            auto z = r.a.cross(r.b, polygon.vert[k]);
-            if (x == 0) ans = 0; // Maybe tangent
+            if (!intersect(Segment(polygon.verts[i], polygon.verts[j]), r)) continue;
+            auto x = r.a.cross(r.b, polygon.verts[i]);
+            auto y = r.a.cross(r.b, polygon.verts[j]);
+            auto z = r.a.cross(r.b, polygon.verts[k]);
+            if (x == 0) ans = ON; // Maybe tangent
             else if (y == 0) {
                 // (the ray splits an internal angle)
                 // Entering from a vertex
-                if (sign(x) * sign(z) == -1) return 1;
-            } else return 1; // Entering from an edge
+                if (sign(x) * sign(z) == -1) return IN;
+            } else return IN; // Entering from an edge
         }
         return ans;
     }
@@ -503,6 +591,7 @@ snippet code_geo
         return points;
     }
 
+    // sort a convex polygon cw or ccw with the bottom-right as the pivot
     vector<pt> &sort_convex(vector<pt> &points, bool cw = false) {
         int n = points.size();
 
@@ -553,7 +642,7 @@ snippet code_geo
         PointInConvex(vector<pt> polygon) { prepare_convex_ccw(polygon); }
 
         void prepare_convex_ccw(vector<pt> &points) {
-                    // NOTE: the polygon should be strictly convex
+            // NOTE: the polygon should be strictly convex
             n = points.size();
             int pos = 0; // most left-bottom point
             for (int i = 1; i < n; i++)
@@ -598,7 +687,7 @@ snippet code_geo
         vector<pt> go(int i = 0, vector<pt> cir = {}) {
             if (cir.size() == 3 || i == (int) points.size()) return cir;
             auto new_cir = go(i + 1, cir);
-            if (point_in_circle(points[i], new_cir) != -1)
+            if (point_in_circle(points[i], new_cir) != OUT)
                 return new_cir;
             cir.push_back(points[i]);
             return go(i + 1, cir);
@@ -738,7 +827,7 @@ snippet code_segtree
             other.sum += value.sum * (cnt - 1);
         }
 
-        Update get(Node &node) const { return *this; }
+        Update get(const Node &node) const { return *this; }
     };
 
     struct Node {
@@ -793,9 +882,9 @@ snippet code_segtree
         }
 
         void push(int i) {
-            int l = i << 1, r = i << 1 | 1;
             if (tree[i].up.state != Update::idle) {
                 if (i < n) {
+                    int l = i << 1, r = i << 1 | 1;
                     tree[l].update(tree[i].up.get(tree[l]));
                     tree[r].update(tree[i].up.get(tree[r]));
                 }
