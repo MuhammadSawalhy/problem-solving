@@ -2,7 +2,6 @@
 snippet temp
     // ﷽
     #include <bits/stdc++.h>
-
     using namespace std;
 
     #ifdef SAWALHY
@@ -13,9 +12,12 @@ snippet temp
     #define debug_bits(...) 0
     #endif
 
-    #define ll     long long
-    #define int    long long
+    #define ll long long
+    #define int long long
     #define all(v) v.begin(), v.end()
+    #define rall(v) v.rbegin(), v.rend()
+    #define minit(v, x) v = min(v, x)
+    #define maxit(v, x) v = max(v, x)
 
     int32_t main() {
         ios_base::sync_with_stdio(false);
@@ -32,7 +34,6 @@ snippet temp
 snippet tempt
     // ﷽
     #include <bits/stdc++.h>
-
     using namespace std;
 
     #ifdef SAWALHY
@@ -43,9 +44,12 @@ snippet tempt
     #define debug_bits(...) 0
     #endif
 
-    #define ll     long long
-    #define int    long long
+    #define ll long long
+    #define int long long
     #define all(v) v.begin(), v.end()
+    #define rall(v) v.rbegin(), v.rend()
+    #define minit(v, x) v = min(v, x)
+    #define maxit(v, x) v = max(v, x)
 
     void solve() {
         ${0}
@@ -67,13 +71,12 @@ snippet tempt
 
 # Read an array of length n from the stdin
 snippet arr
-    int ${1:n};
-    cin >> ${1};
-    vector<int> ${2:a}(${1});
-    for (int i = 0; i < ${1}; i++) {
-            cin >> ${2}[i];
+    int n;
+    cin >> n;
+    vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        cin >> a[i];
     }
-
 
 
 # Brute force primality test

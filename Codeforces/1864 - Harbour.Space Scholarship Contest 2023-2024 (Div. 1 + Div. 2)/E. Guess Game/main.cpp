@@ -126,85 +126,29 @@ void solve() {
     cin >> n;
     vector<int> a(n);
     map<int, int> fr;
-    map<int, int> p2;
-    map<int, int> msb;
-
-    map<int, int> dp[32];
 
     for (int i = 0; i < n; i++) {
         cin >> a[i];
         fr[a[i]]++;
-        int m = find_msb(a[i]);
-        msb[m]++;
-
-        if (m != -1 && a[i] == 1 << m) {
-            p2[a[i]]++;
-        }
-
-        for (int j = 0; j < 32; j++) {
-            dp[j][a[i] >> j]++;
-        }
     }
-
-    debug(a);
 
     Z ans = 0;
 
-    ans += fr[0] * (n);             // one turn for (0, x>=0)
-    ans += fr[0] * (n - fr[0]) * 2; // one turn for (x>0, 0)
-
-    debug("zeros", ans);
-
-    // num with itself
     for (auto [x, f]: fr) {
-        debug(x, f);
-        if (x == 0) continue;
-        ans += (f * f) * (count_ones(x) + 1);
+        ans += Z(f) * f * (__popcount(x) + 1);
     }
 
-    debug("same", ans);
-
-    // with the same msb
-    for (int i = 0; i < n; i++) {
-        if (a[i] == 0) continue;
-
-        for (int j = 0; j < 32; j++) {
-            if (a[i] >> j & 1) continue;
-            // 10110?
-            // 10111?
-            //     ^
-            int d = dp[j][(a[i] >> (j + 1)) << 1 | 1];
-            int cnt = count_ones(a[i] >> (j + 1));
-            if (cnt == 0) continue;
-            ans += cnt * 2 * d;
-            ans += (cnt * 2 + 1) * d;
+    debug(a);
+    for (int i = 30; i >= 0; i--) {
+        map<int, int> fr;
+        for (int j = 0; j < n; j++) {
+            int f = fr[a[j] >> i ^ 1];
+            ans += Z(f) * (2 * __popcount(a[j] >> (i + 1)) + 3);
+            fr[a[j] >> i]++;
         }
-
-        for (int j = 1; j < 32; j++) {
-            if (a[i] >> j & 1 ^ 1) continue;
-            if (a[i] >> (j - 1) & 1) continue;
-            // 10110?
-            // 10110?
-            //    ^
-            int d = dp[j][a[i] >> j] - fr[a[i]];
-            assert(d >= 0);
-            int cnt = count_ones(a[i] >> (j + 1));
-            if (cnt == 0) continue;
-            ans += (cnt * 2 + 1) * d;
-            // ans += (cnt * 2 + 1) * d; // the other one will count itself
-        }
+        debug(i, ans);
     }
 
-
-    debug("same msb", ans);
-
-    // with diff msb
-    for (int i = 0, j = 0; i < 32; i++) {
-        ans += msb[i] * j * 3;
-        j += msb[i];
-    }
-
-    debug("diff msb", ans);
     cout << ans / (n * n) << endl;
 }
 

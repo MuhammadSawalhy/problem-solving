@@ -1,6 +1,6 @@
 // ﷽
-// $(URL)
-// $(JUDGE) -> $(CONTEST) -> $(PROBLEM)
+// https://codeforces.com/contest/1867/problem/D
+// Codeforces -> Codeforces Round 897 (Div. 2) -> D. Cyclic Operations
 
 #include <bits/stdc++.h>
 using namespace std;
@@ -8,20 +8,24 @@ using namespace std;
 #ifdef SAWALHY
 #include "debug.hpp"
 #else
-#define debug(...)      0
-#define debug_itr(...)  0
+#define debug(...) 0
+#define debug_itr(...) 0
 #define debug_bits(...) 0
 #endif
 
-#define ll long long
 #define int long long
+#define ll long long
 #define all(v) v.begin(), v.end()
-#define rall(v) v.rbegin(), v.rend()
-#define minit(v, x) v = min(v, x)
-#define maxit(v, x) v = max(v, x)
 
 void solve() {
-    return;
+    int n, k;
+    cin >> n;
+    vector<int> b(n);
+    for (int i = 0; i < n; i++) {
+            cin >> b[i];
+    }
+
+
 }
 
 int32_t main() {
