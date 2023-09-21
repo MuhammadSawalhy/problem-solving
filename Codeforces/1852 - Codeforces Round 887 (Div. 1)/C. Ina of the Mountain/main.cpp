@@ -18,7 +18,29 @@ using namespace std;
 #define all(v) v.begin(), v.end()
 
 void solve() {
-    cout << 1 << endl;
+    int n, k;
+    cin >> n >> k;
+    priority_queue<int, vector<int>, greater<int>> pq;
+    int ans = 0;
+
+    int cur = 0, x, y, prev = 0;
+    for (int i = 0; i < n; i++) {
+        cin >> x, x %= k, y = x;
+        x -= prev;
+        if (x == 0) continue;
+        if (x > 0) x -= k;
+        cur += x;
+        pq.push(x + k);
+        if (cur < 0) {
+            debug(i);
+            cur += k;
+            ans += pq.top();
+            pq.pop();
+        }
+        prev = y;
+    }
+
+    cout << ans << '\n';
 }
 
 int32_t main() {
