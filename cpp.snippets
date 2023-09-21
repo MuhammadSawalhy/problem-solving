@@ -760,11 +760,6 @@ snippet code_segtree_simple
                 tree[i >> 1] = tree[i] + tree[i ^ 1];
         }
 
-        void relative_update(int i, T val) {
-            for (tree[i += n] += val; i > 1; i >>= 1)
-                tree[i >> 1] = tree[i] + tree[i ^ 1];
-        }
-
         auto query(int l, int r) {
             T res;
             for (l += n, r += n + 1; l < r; l >>= 1, r >>= 1) {
@@ -916,6 +911,84 @@ snippet code_segtree
         }
     };
 
+
+# Persistent segtree
+snippet code_persistent_sgtree
+    const int MIN = -(1 << 30), MAX = (1 << 30) - 1;
+    const int DEFAULT = 0;
+
+    struct Node {
+        long long value = DEFAULT;
+        Node *l = nullptr, *r = nullptr;
+        Node() = default;
+        Node(Node *l, Node *r) : l(l), r(r) {
+            if (l) value += l->value;
+            if (r) value += r->value;
+        }
+    };
+
+    struct PersistentSegtree {
+        Node *root = nullptr;
+
+        Node *update(int x, long long value) {
+            return root = update(x, value, root, MIN, MAX);
+        }
+
+        long long query(int L, int R) {
+            return query(L, R, root, MIN, MAX);
+        }
+
+    private:
+        Node *update(int x, long long value, Node *node, int l, int r) {
+            if (l == r) {
+                assert(l == x);
+                Node *ret = new Node();
+                ret->value = value;
+                return ret;
+            }
+
+            int mid = l + (r - l) / 2;
+            Node *left = node ? node->l : nullptr;
+            Node *right = node ? node->r : nullptr;
+            if (x <= mid) return new Node(update(x, value, left, l, mid), right);
+            else return new Node(left, update(x, value, right, mid + 1, r));
+        }
+
+        long long query(int L, int R, Node *node, int l, int r) {
+            if (!node || L > r || R < l) return DEFAULT;
+            if (L <= l && r <= R) return node->value;
+            int mid = l + (r - l) / 2;
+            return query(L, R, node->l, l, mid) + query(L, R, node->r, mid + 1, r);
+        }
+    };
+
+# n-d binary indexed tree
+snippet code_bit
+    template<class T, int... Ns>
+    struct BIT {
+        T val = 0;
+        void update(T v) { val += v; }
+        T query() { return val; }
+    };
+
+    template<class T, int N, int... Ns>
+    struct BIT<T, N, Ns...> {
+        BIT<T, Ns...> bit[N + 1];
+        template<typename... Args>
+        void update(int pos, Args... args) {
+            for (pos++; pos <= N; pos += (pos & -pos)) bit[pos].update(args...);
+        }
+        template<typename... Args>
+        T sum(int r, Args... args) {
+            T res = 0;
+            for (r++; r; r -= (r & -r)) res += bit[r].query(args...);
+            return res;
+        }
+        template<typename... Args>
+        T query(int l, int r, Args... args) {
+            return sum(r, args...) - sum(l - 1, args...);
+        }
+    }; // BIT<int,10,10> gives a 2D BIT
 
 
 # modular arithmetics stolen from Jiangly
