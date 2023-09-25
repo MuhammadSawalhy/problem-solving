@@ -13,6 +13,10 @@ def debug(msg: str):
     print(f"=====> {msg}")
 
 
+def debug_err(msg: str):
+    print(f"ERROR => {msg}")
+
+
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -64,10 +68,10 @@ def try_to_extract_7z() -> bool:
     files = get_7z_file(downloads_dir)
     debug("Trying to extract 7z file")
     if len(files) == 0:
-        print("Error: no input file or 7z archive found")
+        debug_err("no input file or 7z archive found")
         return False
     elif len(files) > 1:
-        print("Error: more than one input.zip file in the downloads directory")
+        debug_err("more than one input.zip file in the downloads directory")
         return False
     print(f"Extracting {os.path.basename(files[0])}, continue? [y]/n: ", end="")
     ans = input().lower()
@@ -77,7 +81,7 @@ def try_to_extract_7z() -> bool:
         # os.remove(files[0])
         return True
     else:
-        debug("Error: extraction failed")
+        debug_err("extraction failed")
         return False
 
 
@@ -91,10 +95,10 @@ def run(get_input):
                 if not try_to_extract_7z():
                     sys.exit(1)
             else:
-                print("Error: no validation input file")
+                debug_err("no validation input file")
                 sys.exit(1)
         elif len(files) > 1:
-            print("Error: more than one input file")
+            debug_err("more than one input file")
             sys.exit(1)
         else:
             # move input file to the current_dir
@@ -103,7 +107,7 @@ def run(get_input):
 
         files = get_input(current_dir)
     elif len(files) > 1:
-        print("Error: more than one input file")
+        debug_err("more than one input file")
         sys.exit(1)
 
     assert len(files) == 1
@@ -114,6 +118,9 @@ def run(get_input):
 
 
 def main():
+    if not os.path.exists(args.executable):
+        debug_err(f"{args.executable} does not exist")
+        sys.exit(1)
     if args.validation:
         run(get_validation_input)
     if args.main:
