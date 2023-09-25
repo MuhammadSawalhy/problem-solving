@@ -9,14 +9,6 @@ current_dir = os.getcwd()
 downloads_dir = "/mnt/c/Users/ms205/Downloads"
 
 
-def debug(msg: str):
-    print(f"=====> {msg}")
-
-
-def debug_err(msg: str):
-    print(f"ERROR => {msg}")
-
-
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -26,12 +18,25 @@ def parse_args():
         "-v", "--validation", action="store_true", help="Run validation", default=True
     )
     parser.add_argument("-m", "--main", action="store_true", help="Run main")
+    parser.add_argument(
+        "-q", "--quiet", action="store_true", help="Quiet mode", default=False
+    )
     args = parser.parse_args()
 
     return args
 
 
 args = parse_args()
+
+
+def debug(msg: str):
+    if args.quiet:
+        return
+    print(f"=====> {msg}")
+
+
+def debug_err(msg: str):
+    print(f"ERROR => {msg}")
 
 
 def get_validation_input(dir: str) -> list[str]:
@@ -78,9 +83,11 @@ def try_to_extract_7z() -> bool:
     if ans not in ["y", "yes", ""]:
         return False
     if extract_7z(files[0], current_dir) == 0:
-        # os.remove(files[0])
+        os.remove(files[0])
         return True
     else:
+        for f in get_main_input(current_dir):
+            os.remove(f)
         debug_err("extraction failed")
         return False
 
@@ -121,10 +128,10 @@ def main():
     if not os.path.exists(args.executable):
         debug_err(f"{args.executable} does not exist")
         sys.exit(1)
-    if args.validation:
-        run(get_validation_input)
     if args.main:
         run(get_main_input)
+    elif args.validation:
+        run(get_validation_input)
 
 
 if __name__ == "__main__":
