@@ -1,6 +1,5 @@
 // ﷽
 // $(URL)
-// $(JUDGE) -> $(CONTEST) -> $(PROBLEM)
 
 #include <bits/stdc++.h>
 using namespace std;
@@ -8,8 +7,8 @@ using namespace std;
 #ifdef SAWALHY
 #include "debug.hpp"
 #else
-#define debug(...)      0
-#define debug_itr(...)  0
+#define debug(...) 0
+#define debug_itr(...) 0
 #define debug_bits(...) 0
 #endif
 

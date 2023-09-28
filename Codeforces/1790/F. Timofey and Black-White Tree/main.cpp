@@ -11,57 +11,79 @@ using namespace std;
 #define debug_bits(...)
 #endif
 
-#define int long long
 #define ll long long
 #define all(v) v.begin(), v.end()
 
-int ans = 1e9;
+char in[1 << 24];
+struct scanner {
+    char const *o;
+    scanner() : o(in) { load(); }
+    void load() { in[fread(in, 1, sizeof(in) - 4, stdin)] = 0; }
+    unsigned readInt() {
+        unsigned u = 0;
+        while (*o && *o <= 32)
+            ++o;
+        while (*o >= '0' && *o <= '9')
+            u = u * 10 + (*o++ - '0');
+        return u;
+    }
+} sc;
 
-void dfs(int i, int p, int c, vector<int> adj[], int dist[]) {
-    if (dist[i] < c) return;
-    dist[i] = c;
+constexpr int N = 2e5 + 5;
+int ans = 1e9;
+int dist[N];
+vector<int> adj[N];
+
+void dfs(int i, int p) {
     for (auto j: adj[i]) {
         if (j == p) continue;
-        dfs(j, i, c + 1, adj, dist);
+        if (dist[i] + 1 < dist[j]) {
+            dist[j] = dist[i] + 1;
+            if (dist[j] < ans)
+                dfs(j, i);
+        } else {
+            ans = min(ans, dist[i] + dist[j] + 1);
+        }
     }
 }
 
+void set_black(int i) {
+    ans = min(ans, dist[i]);
+    dist[i] = 0;
+    dfs(i, -1);
+}
+
 void solve() {
-    int n, c;
-    cin >> n >> c, c--;
+    ans = 1e9;
+    int n = sc.readInt(), c = sc.readInt() - 1;
     int sq[n - 1];
-    vector<int> adj[n];
-    int dist[n];
-    memset(dist, 0x3f, sizeof dist);
+
+    for (int i = 0; i < n; i++) adj[i].clear(), dist[i] = 1e9;
     for (int i = 0; i < n - 1; i++) {
-        cin >> sq[i], sq[i]--;
+        sq[i] = sc.readInt() - 1;
     }
 
     for (int i = 0, u, v; i < n - 1; i++) {
-        cin >> u >> v, u--, v--;
+        u = sc.readInt() - 1, v = sc.readInt() - 1;
         adj[u].push_back(v);
         adj[v].push_back(u);
     }
 
-    dfs(c, c, 0, adj, dist);
-    debug_itr(dist, n);
+    set_black(c);
 
-    ans = 1e9;
     for (int i = 0; i < n - 1; i++) {
-        ans = min(ans, dist[sq[i]]);
-        cout << ans << " ";
-        dfs(sq[i], sq[i], 0, adj, dist);
+        set_black(sq[i]);
+        printf("%d ", ans);
     }
+    puts("");
 
-    cout << endl;
 }
 
 int32_t main() {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL), cout.tie(NULL);
 
-    int t;
-    cin >> t;
+    int t = sc.readInt();
     while (t--)
         solve();
 

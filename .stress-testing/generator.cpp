@@ -10,11 +10,9 @@ int main(int argc, char **argv) {
 
     println(n, q);
 
-    while (n--)
-        cout << rnd.next(1, 100) << ' ';
-    cout << endl;
+    for (int i = 0; i < n; i++)
+        cout << rnd.next(1, 100) << " \n"[i == n - 1];
 
-    while (q--)
-        cout << rnd.next(1, 100) << ' ';
-    cout << endl;
+    for (int i = 0; i < q; i++)
+        cout << rnd.next(1, 100) << " \n"[i == q - 1];
 }

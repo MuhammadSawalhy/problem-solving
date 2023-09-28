@@ -1,6 +1,6 @@
 // بسم الله الرحمن الرحيم
-// https://www.facebook.com/codingcompetitions/hacker-cup/2023/practice-round/problems/A2?source=codeforces
-// Meta Coding Competitions -> Meta Hacker Cup 2023 Practice Round -> A2: Cheeseburger Corollary 2
+// https://codeforces.com/contest/1878/problem/A
+// Codeforces -> Codeforces Round 900 (Div. 3) -> A. How Much Does Daytona Cost?
 
 #include <bits/stdc++.h>
 using namespace std;
@@ -21,14 +21,14 @@ using namespace std;
 #define maxit(v, x) v = max(v, x)
 
 void solve() {
-    int a, b, c;
-    cin >> a >> b >> c;
-    int ans = 0;
-    maxit(ans, (c - a) / b * 2 + (c >= a));
-    maxit(ans, (c - a - a) / b * 2 + (c >= a + a) * 2);
-    maxit(ans, c / b * 2 - 1);
-    maxit(ans, c / a);
-    cout << ans << endl;
+    int n, k;
+    cin >> n >> k;
+    vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        cin >> a[i];
+    }
+
+    cout << (find(all(a), k) != a.end() ? "YES\n" : "NO\n");
 }
 
 int32_t main() {
@@ -37,8 +37,8 @@ int32_t main() {
 
     int t;
     cin >> t;
-    for (int i = 1; i <= t; i++)
-        cout << "Case #" << i << ": ", solve();
+    while (t--)
+        solve();
 
     return 0;
 }
