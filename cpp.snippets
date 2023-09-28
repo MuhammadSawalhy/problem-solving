@@ -7,8 +7,8 @@ snippet temp
     #ifdef SAWALHY
     #include "debug.hpp"
     #else
-    #define debug(...)      0
-    #define debug_itr(...)  0
+    #define debug(...) 0
+    #define debug_itr(...) 0
     #define debug_bits(...) 0
     #endif
 
@@ -29,7 +29,6 @@ snippet temp
     }
 
 
-
 # competitive programming template with multi-tests
 snippet tempt
     // ﷽
@@ -39,8 +38,8 @@ snippet tempt
     #ifdef SAWALHY
     #include "debug.hpp"
     #else
-    #define debug(...)      0
-    #define debug_itr(...)  0
+    #define debug(...) 0
+    #define debug_itr(...) 0
     #define debug_bits(...) 0
     #endif
 
@@ -67,6 +66,28 @@ snippet tempt
         return 0;
     }
 
+
+# increase the stack memory limit
+snippet code_largestack
+    static void run_with_stack_size(void (*func)(void), size_t stsize) {
+        char *stack, *send;
+        stack = (char *)malloc(stsize);
+        send = stack + stsize - 16;
+        send = (char *)((uintptr_t)send / 16 * 16);
+        asm volatile(
+            "mov %%rsp, (%0)\n"
+            "mov %0, %%rsp\n"
+            :
+            : "r"(send));
+        func();
+        asm volatile("mov (%0), %%rsp\n" : : "r"(send));
+        free(stack);
+    }
+
+    int32_t main() {
+        run_with_stack_size(main_, 1024 * 1024 * 1024 / 2); // run with a 512 MB stack
+        return 0;
+    }
 
 
 # Read an array of length n from the stdin
@@ -171,6 +192,31 @@ snippet code_sieve
         }
     }
 
+
+# Fast Sieve's algorithm to calc minimum prime
+snippet code_fast_seive
+    std::vector<int> minp, primes;
+    void sieve(int n) {
+        minp.assign(n + 1, 0);
+        primes.clear();
+        
+        for (int i = 2; i <= n; i++) {
+            if (minp[i] == 0) {
+                minp[i] = i;
+                primes.push_back(i);
+            }
+            
+            for (auto p : primes) {
+                if (i * p > n) {
+                    break;
+                }
+                minp[i * p] = p;
+                if (p == minp[i]) {
+                    break;
+                }
+            }
+        }
+    }
 
 
 # Dijkstra's TSP algorithm
@@ -962,6 +1008,7 @@ snippet code_persistent_sgtree
         }
     };
 
+
 # n-d binary indexed tree
 snippet code_bit
     template<class T, int... Ns>
@@ -989,6 +1036,36 @@ snippet code_bit
             return sum(r, args...) - sum(l - 1, args...);
         }
     }; // BIT<int,10,10> gives a 2D BIT
+
+
+# sparse table
+snippet code_sparsetable
+    template<typename T, class CMP = function<T(const T &, const T &)>>
+    class SparseTable {
+    public:
+        int n;
+        vector<vector<T>> sp;
+        CMP func;
+     
+        void build(const vector<T> &a, const CMP &f) {
+            func = f;
+            n = static_cast<int>(a.size());
+            int max_log = 32 - __builtin_clz(n);
+            sp.resize(max_log);
+            sp[0] = a;
+            for (int j = 1; j < max_log; ++j) {
+                sp[j].resize(n - (1 << j) + 1);
+                for (int i = 0; i <= n - (1 << j); ++i) {
+                    sp[j][i] = func(sp[j - 1][i], sp[j - 1][i + (1 << (j - 1))]);
+                }
+            }
+        }
+     
+        T query(int l, int r) const {
+            int lg = 32 - __builtin_clz(r - l + 1) - 1;
+            return func(sp[lg][l], sp[lg][r - (1 << lg) + 1]);
+        }
+    };
 
 
 # modular arithmetics stolen from Jiangly
@@ -1223,9 +1300,9 @@ snippet code_matrix
 # fast input scanner
 snippet code_scanner
     char in[1 << 24];
-    struct scanner {
+    struct Scanner {
         char const *o;
-        scanner() : o(in) { load(); }
+        Scanner() : o(in) { load(); }
         void load() { in[fread(in, 1, sizeof(in) - 4, stdin)] = 0; }
         unsigned readInt() {
             unsigned u = 0;
@@ -1235,7 +1312,7 @@ snippet code_scanner
                 u = u * 10 + (*o++ - '0');
             return u;
         }
-    };
+    } sc;
 
 
 
