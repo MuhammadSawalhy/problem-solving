@@ -27,7 +27,7 @@ int n, a[N], s[N], ans[N], dp[N][2];
 vector<int> adj[N];
 
 void calc(int i, int p) {
-    InstrumentationTimer timer("calc");
+    PROFILE_FUNCTION();
     s[i] = 1;
     dp[i][0] = dp[i][1] = 0;
     for (auto j: adj[i]) {
@@ -42,7 +42,7 @@ void calc(int i, int p) {
 }
 
 void setans(int i, int p, int withone, int withzero, int cnt) {
-    InstrumentationTimer timer("set ans");
+    PROFILE_FUNCTION();
     if (bit[i]) {
         ans[i] = withone + dp[i][0];
     } else {
@@ -66,7 +66,7 @@ void setans(int i, int p, int withone, int withzero, int cnt) {
 }
 
 void solve_bit(int b, bool target) {
-    InstrumentationTimer timer("solve bit");
+    PROFILE_FUNCTION();
     for (int i = 0; i < n; i++) {
         bit[i] = (a[i] >> b & 1) ^ target;
     }
@@ -77,7 +77,7 @@ void solve_bit(int b, bool target) {
 }
 
 void solve() {
-    InstrumentationTimer timer("solve");
+    PROFILE_FUNCTION();
     cin >> n;
     for (int i = 0; i < n; ++i)
         cin >> a[i];

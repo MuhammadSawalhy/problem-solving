@@ -112,7 +112,6 @@ snippet code_is_prime
     }
 
 
-
 # Miller & Rabin probabilistic primality test
 snippet code_miller_rabin_ptest
     bool miller_rabin_ptest(unsigned ll n, int k = 3) {
@@ -173,7 +172,6 @@ snippet code_totient
         for (int j = i << 1; j <= ${2:$1}; j += i)
             phi[j] -= phi[i];
     }
-
 
 
 # Sieve's algorithm to mark numbers as primes and composites
@@ -250,7 +248,6 @@ snippet code_dijkstra
     }
 
 
-
 # MST (minimum spanning tree), Kruskal's algorithm
 snippet code_mst_kruskal
     struct Edge {
@@ -281,7 +278,6 @@ snippet code_mst_kruskal
 
         return {cost, mst_edges};
     }
-
 
 
 # computational geometry stuff for competitive prgramming
@@ -748,7 +744,6 @@ snippet code_geo
     using namespace Geometry;
 
 
-
 # STL policy container (oset, omap)
 snippet code_otree
     #include<ext/pb_ds/assoc_container.hpp>
@@ -756,7 +751,6 @@ snippet code_otree
     using namespace __gnu_pbds;
     template<typename T>
     using ordered_set = tree<T, null_type, std::less<T>, rb_tree_tag, tree_order_statistics_node_update>;
-
 
 
 # optimized segment tree with basic operations
@@ -815,7 +809,6 @@ snippet code_segtree_simple
             return res.value;
         }
     };
-
 
 
 # segment tree data structure
@@ -1161,7 +1154,6 @@ snippet code_mint
     using Z = mint<int32_t, MOD>;
 
 
-
 # modular combinations
 snippet code_ncr
     vector<Z> fact = {1};
@@ -1181,7 +1173,6 @@ snippet code_ncr
         if ((int) fact.size() < n + 1) build_fact(n);
         return fact[n] * fact_inv[r] * fact_inv[n - r];
     }
-
 
 
 # disjoint set union
@@ -1213,7 +1204,6 @@ snippet code_dsu
             return true;
         }
     };
-
 
 
 # matrix exponentiation
@@ -1296,7 +1286,6 @@ snippet code_matrix
     };
 
 
-
 # fast input scanner
 snippet code_scanner
     char in[1 << 24];
@@ -1315,7 +1304,6 @@ snippet code_scanner
     } sc;
 
 
-
 # pascal triagle, useful for combinations
 snippet code_pascal
     vector<vector<Z>> pascal;
@@ -1332,7 +1320,6 @@ snippet code_pascal
             pascal.push_back(newrow);
         }
     }
-
 
 
 # Description
@@ -1442,7 +1429,6 @@ snippet code_bigint
     };
 
 
-
 # modular inverse for coprimes not only prime mod
 snippet code_modinv
     // source: https://codeforces.com/blog/entry/23365
@@ -1450,7 +1436,6 @@ snippet code_modinv
     ll mod_inv(ll a, ll b) {
         return 1 < a ? b - mod_inv(b % a, a) * b / a : 1;
     }
-
 
 
 # trie data structure
@@ -1492,7 +1477,6 @@ snippet code_trie
     };
 
 
-
 # string hashing implementation (polynomial hashing)
 snippet code_hash
     class hashed_string {
@@ -1527,7 +1511,6 @@ snippet code_hash
     const ll hashed_string::B = uniform_int_distribution<ll>(0, M - 1)(rng);
 
 
-
 # Eulerian path/circuit in directed graphs
 snippet code_dir_eulerian
     template<typename Edge>
@@ -1535,7 +1518,14 @@ snippet code_dir_eulerian
     public:
         int n, m;
         vector<vector<pair<int, Edge>>> adj;
-        DirectedEulerian(int n, int m, const vector<vector<pair<int, Edge>>> &adj) : adj(adj), n(n), m(m) {}
+
+        DirectedEulerian(int n, int m) : n(n), m(m) {
+            adj.assign(n, vector<pair<int, Edge>>());
+        }
+
+        void add_edge(int u, int v, Edge edge) {
+            adj[u].emplace_back(v, edge);
+        }
 
         vector<Edge> path(bool circuit = false) {
             vector<Edge> path;
@@ -1592,7 +1582,6 @@ snippet code_dir_eulerian
     };
 
 
-
 # Eulerian path/circuit in undirected graphs
 snippet code_undir_eulerian
     template<typename Edge>
@@ -1600,7 +1589,16 @@ snippet code_undir_eulerian
     public:
         int n, m;
         vector<vector<pair<int, Edge>>> adj; // NOTE: dont't add a self-edge twice
-        UndirectedEulerian(int n, int m, const vector<vector<pair<int, Edge>>> &adj) : adj(adj), n(n), m(m) {}
+
+        UndirectedEulerian(int n, int m) : n(n), m(m) {
+            adj.assign(n, vector<pair<int, Edge>>());
+        }
+
+        void add_edge(int u, int v, Edge edge) {
+            adj[u].emplace_back(v, edge);
+            adj[v].emplace_back(u, edge);
+        }
+
 
         vector<Edge> path(bool circuit = false) {
             vector<Edge> path;
@@ -1670,7 +1668,6 @@ snippet code_undir_eulerian
     };
 
 
-
 # MO's algorithm
 snippet code_mo
     int block_size;
@@ -1726,7 +1723,6 @@ snippet code_mo
     };
 
 
-
 # Torjan's algorithm
 snippet code_scc
     struct SCC {
@@ -1761,7 +1757,6 @@ snippet code_scc
     };
 
 
-
 # KMP string algorithm
 snippet code_kmp
     vector<int> KMP(const string &a, const string &b) {
@@ -1792,37 +1787,20 @@ snippet code_kmp
     }
 
 
+# z algorithm for strings
+snippet code_z
+    vector<int> zfunction(string s) {
+        int n = s.size();
 
-# random tree generator for stress testing
-snippet code_gen_tree
-    vector<int> gen_tree_parents(int n, int root) {
-        // in a tree, each node other than the root
-        // has exactly one parent
-        assert(1 <= root && root <= n);
-        vector<int> parents(n + 1, -1);
-        vector<int> order(n + 1);
-        if (n == 1) return parents;
-        iota(all(order), 0);
-        shuffle(order.begin() + 1, order.end(),
-                default_random_engine(rand()));
-        swap(order[1], *find(all(order), root));
-        for (int i = 2; i <= n; i++)
-            parents[order[i]] = order[gen(1, i - 1)];
-        return parents;
-    }
-
-    vector<pair<int, int>> gen_tree(int n, int root = -1) {
-        if (root == -1) root = gen(1, n);
-        auto parents = gen_tree_parents(n, root);
-        vector<pair<int, int>> edges;
-        for (int i = 1; i <= n; i++) {
-            if (i == root) continue;
-            edges.emplace_back(i, parents[i]);
+        vector<int> z(n);
+        for (int i = 1, l = 1, r = 1; i < n; i++) {
+            if (i < r) z[i] = min(z[i - l], r - i);
+            while (i + z[i] < n && s[i + z[i]] == s[z[i]]) z[i]++;
+            if (i + z[i] > r) r = i + z[i], l = i;
         }
-        assert(edges.size() == n - 1);
-        return edges;
-    }
 
+        return z;
+    }
 
 
 # random utils
@@ -1836,53 +1814,156 @@ snippet code_rand
     }
 
 
-
 # least common ancestor using binary lifting
-snippet code_lca
+snippet code_lca_binary_lifting
     struct LCA {
         int n, LOG;
         vector<int> depth;
-        vector<vector<int>> parent, adj;
+        vector<vector<int>> up, adj;
 
-        LCA() : n(0), LOG(-1e9) {}
+        LCA(int n, int root = 0) : n(n), LOG(log2(n) + 1) {
+            adj.resize(n), depth.resize(n);
+            up.assign(n, vector<int>(LOG, root));
+        }
 
-        LCA(const vector<vector<int>> &adj, int root = 0) : adj(adj), n(adj.size()), LOG(log2(n) + 1) {
-            depth.resize(n);
-            parent = vector<vector<int>>(n, vector<int>(LOG, root));
-            preprocess(root);
+        void add_edge(int u, int v) {
+            adj[u].push_back(v);
+            adj[v].push_back(u);
         }
 
         void dfs(int u, int p) {
             for (auto v: adj[u]) {
                 if (v == p) continue;
-                parent[v][0] = u;
+                up[v][0] = u;
                 depth[v] = depth[u] + 1;
                 dfs(v, u);
             }
         }
 
-        void preprocess(int root) {
+        void build(int root) {
             dfs(root, root);
             for (int k = 1; k < LOG; k++)
                 for (int u = 0; u < n; u++)
-                    parent[u][k] = parent[parent[u][k - 1]][k - 1];
+                    up[u][k] = up[up[u][k - 1]][k - 1];
         }
 
         int query(int u, int v) {
             if (depth[u] < depth[v]) swap(u, v);
             for (int k = LOG - 1; k >= 0; k--) {
-                if (depth[parent[u][k]] >= depth[v]) {
-                    u = parent[u][k];
+                if (depth[up[u][k]] >= depth[v]) {
+                    u = up[u][k];
                 }
             }
             if (u == v) return u;
             for (int k = LOG - 1; k >= 0; k--) {
-                if (parent[u][k] != parent[v][k]) {
-                    u = parent[u][k];
-                    v = parent[v][k];
+                if (up[u][k] != up[v][k]) {
+                    u = up[u][k];
+                    v = up[v][k];
                 }
             }
-            return parent[u][0];
+            return up[u][0];
+        }
+    };
+
+
+# least common ancestor using sparse table
+snippet code_lca_sparse_table
+    struct LCA {
+        int n, LOG, _time;
+        vector<int> first, depth;
+        vector<vector<int>> adj, table;
+
+        LCA(int n) : n(n), LOG(log2(n) + 3) {
+            adj.resize(n), depth.resize(n), first.resize(n);
+            table.assign(LOG, vector<int>(2 * n));
+        }
+
+        void add_edge(int u, int v) {
+            adj[u].push_back(v);
+            adj[v].push_back(u);
+        }
+
+        void dfs(int u, int p) {
+            first[u] = _time;
+            table[0][_time++] = u;
+            for (auto v: adj[u]) {
+                if (v == p) continue;
+                depth[v] = depth[u] + 1;
+                dfs(v, u);
+                table[0][_time++] = u;
+            }
+        }
+
+        void build(int root = 0) {
+            _time = 0;
+            dfs(root, root);
+            assert(_time < 2 * n);
+            for (int i = 1; i < LOG; i++) {
+                for (int j = 0; j + (1 << i) <= 2 * n; j++) {
+                    if (depth[table[i - 1][j]] < depth[table[i - 1][j + (1 << (i - 1))]]) {
+                        table[i][j] = table[i - 1][j];
+                    } else {
+                        table[i][j] = table[i - 1][j + (1 << (i - 1))];
+                    }
+                }
+            }
+        }
+
+        int query(int u, int v) {
+            u = first[u], v = first[v];
+            if (u == v) return table[0][u];
+            if (u > v) swap(u, v);
+            int lg = 31 - __builtin_clz(v - u + 1);
+            if (depth[table[lg][u]] < depth[table[lg][v - (1 << lg) + 1]]) {
+                return table[lg][u];
+            } else {
+                return table[lg][v - (1 << lg) + 1];
+            }
+        }
+    };
+
+
+# centroid decomposition of a tree
+snippet code_centroids
+    struct Centroids {
+        vector<vector<int>> edges;
+        vector<bool> removed;
+        vector<int> par;
+        vector<int> sz;
+        int n;
+
+        Centroids(int n) : n(n) {
+            edges.resize(n), removed.resize(n);
+            sz.resize(n), par.assign(n, -1);
+        }
+
+        void add_edge(int a, int b) {
+            edges[a].push_back(b);
+            edges[b].push_back(a);
+        }
+
+        void find_size(int v, int p = -1) {
+            sz[v] = 1;
+            for (int x: edges[v]) {
+                if (x == p || removed[x]) continue;
+                find_size(x, v), sz[v] += sz[x];
+            }
+        }
+
+        int find_centroid(int v, int p, int n) {
+            for (int x: edges[v]) {
+                if (x == p || removed[x]) continue;
+                if (sz[x] > n / 2) return find_centroid(x, v, n);
+            }
+            return v;
+        }
+
+        void build(int v = 0, int p = -1) {
+            find_size(v);
+            int c = find_centroid(v, -1, sz[v]);
+            removed[c] = true, par[c] = p;
+            for (int x: edges[c])
+                if (!removed[x]) build(x, c);
         }
     };
 
