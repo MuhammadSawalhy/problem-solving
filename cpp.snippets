@@ -1840,14 +1840,14 @@ snippet code_lca_binary_lifting
             }
         }
 
-        void build(int root) {
+        void build(int root = 0) {
             dfs(root, root);
             for (int k = 1; k < LOG; k++)
                 for (int u = 0; u < n; u++)
                     up[u][k] = up[up[u][k - 1]][k - 1];
         }
 
-        int query(int u, int v) {
+        int query(int u, int v) const {
             if (depth[u] < depth[v]) swap(u, v);
             for (int k = LOG - 1; k >= 0; k--) {
                 if (depth[up[u][k]] >= depth[v]) {
@@ -1909,7 +1909,7 @@ snippet code_lca_sparse_table
             }
         }
 
-        int query(int u, int v) {
+        int query(int u, int v) const {
             u = first[u], v = first[v];
             if (u == v) return table[0][u];
             if (u > v) swap(u, v);

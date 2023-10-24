@@ -121,7 +121,10 @@ def run(get_input):
     output = files[0].replace("_input.txt", "_output.txt")
     debug(f"Input:  {os.path.relpath(files[0])}")
     debug(f"Output: {os.path.relpath(output)}")
-    os.system(f"{args.executable} < '{files[0]}' > '{output}'")
+    out = os.system(f"{args.executable} < '{files[0]}' 1> '{output}' 2> /dev/null")
+    if out != 0:
+        debug_err("Execution failed")
+        exit(out)
 
 
 def main():
