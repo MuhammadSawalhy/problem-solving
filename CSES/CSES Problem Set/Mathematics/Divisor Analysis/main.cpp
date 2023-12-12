@@ -109,15 +109,6 @@ Z powers_sum(Z x, int k) {
     return x.power(k / 2 + 1) * s + s - (k % 2 == 0 ? x.power(k + 1) : 0);
 }
 
-Z powers_product(Z x, int k) {
-    if (k == 0) return 1;
-    Z s = powers_product(x, k / 2);
-    Z p = s * s * x.power((ll) (k / 2 + 1) * (k / 2 + 1));
-    if (k % 2 == 0)
-        p /= x.power(k + 1);
-    return p;
-}
-
 int32_t main() {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL), cout.tie(NULL);
@@ -133,7 +124,7 @@ int32_t main() {
 
     for (int i = 0; i < n; i++) {
         Z prod = product.power(fr[i] + 1);
-        Z pr = powers_product(p[i], fr[i]);
+        Z pr = Z(p[i]).power(fr[i] * (fr[i] + 1) / 2);
         product = prod * pr.power(num2.x);
         num2 *= fr[i] + 1;
     }

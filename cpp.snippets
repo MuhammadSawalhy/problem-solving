@@ -1091,7 +1091,7 @@ snippet code_mint
             assert(x != 0);
             return power(mod - 2);
         }
-        mint power(T b) const {
+        mint power(long long b) const {
             mint res = 1, a = x;
             for (; b; b >>= 1, a *= a) {
                 if (b & 1) res *= a;
@@ -1429,10 +1429,20 @@ snippet code_bigint
     };
 
 
+# extended Euclidian algorithm
+snippet code_extended_gcd
+    // a * x + b * y = gcd(a, b)
+    pair<ll, ll> exgcd(ll a, ll b) {
+        if (!b) return {1, 0};
+        pair<int, int> p = exgcd(b, a % b);
+        return {p.second, p.first - (a / b) * p.second};
+    }
+
+
 # modular inverse for coprimes not only prime mod
 snippet code_modinv
     // source: https://codeforces.com/blog/entry/23365
-    // a and b must be co-prime
+    // a and b must be co-prime. returns (1 / a) mod b.
     ll mod_inv(ll a, ll b) {
         return 1 < a ? b - mod_inv(b % a, a) * b / a : 1;
     }
@@ -1440,75 +1450,96 @@ snippet code_modinv
 
 # trie data structure
 snippet code_trie
-    template<int MAX_SIZE = 26>
-    struct trie {
-        trie *child[MAX_SIZE];
-        int count = 0;
-        char value;
-        bool is_leaf = false;
+    struct Trie {
+        vector<vector<int>> child;
+        vector<int> count;
 
-        trie() {
-            for (int i = 0; i < MAX_SIZE; i++)
-                child[i] = nullptr;
+        Trie() {
+            add_node();
         }
 
-        ~trie() {
-            for (int i = 0; i < MAX_SIZE; i++) {
-                if (child[i] == nullptr) continue;
-                delete child[i];
-            }
+        void add_node() {
+            count.push_back(0);
+            child.push_back(vector<int>(26));
         }
 
-        trie *insert(const char *str) {
-            count++;
-            if (*str == '\0') {
-                is_leaf = true;
-                return this;
+        void insert(const string &s) {
+            int cur = 0; // root
+            for (auto c: s) {
+                if (child[cur][c - 'a'] == 0) {
+                    child[cur][c - 'a'] = child.size();
+                    add_node();
+                }
+                cur = child[cur][c - 'a'];
+                count[cur]++;
             }
-
-            int cur = *str - 'a';
-            if (child[cur] == nullptr) {
-                child[cur] = new trie();
-                child[cur]->value = *str;
-            }
-
-            return child[cur]->insert(str + 1);
         }
     };
 
 
 # string hashing implementation (polynomial hashing)
 snippet code_hash
-    class hashed_string {
-    public:
-        // change M and B if you want
-        static const ll M = (1LL << 61) - 1;
-        static const ll B;
+    mt19937 rng(random_device{}());
+    const ll M = (1LL << 61) - 1;
+    vector<ll> B{1, uniform_int_distribution<ll>(0, M - 1)(rng)};
 
-    private:
-        // pow[i] contains P^i % M
-        static vector<mint<ll, M>> pow;
-        // hash of the prefixes
-        vector<mint<ll, M>> p_hash;
+    struct Hash {
+        vector<ll> p_hash;
 
-
-    public:
-        hashed_string(const string &s) : p_hash(s.size() + 1) {
-            while (pow.size() < (int) s.size())
-                pow.push_back(pow.back() * B);
+        Hash(const string &s) : p_hash(s.size() + 1) {
+            while (B.size() < (int) s.size())
+                B.push_back((__int128) B.back() * B[1] % M);
             for (int i = 0; i < s.size(); i++)
-                p_hash[i + 1] = p_hash[i] * B + s[i];
+                p_hash[i + 1] = ((__int128) p_hash[i] * B[1] + s[i]) % M;
         }
 
-        auto get_hash(int start, int end) {
-            auto raw_val = p_hash[end + 1] - p_hash[start] * pow[end - start + 1];
-            return raw_val;
+        ll get_hash(int start, int end) {
+            return (p_hash[end + 1] - (__int128) p_hash[start] * B[end - start + 1] % M + M) % M;
         }
     };
 
-    mt19937 rng((uint32_t) chrono::steady_clock::now().time_since_epoch().count());
-    vector<mint<ll, hashed_string::M>> hashed_string::pow = {1};
-    const ll hashed_string::B = uniform_int_distribution<ll>(0, M - 1)(rng);
+
+snippet code_multi_hash
+    const ll M = 1e9 + 7;
+    const int HASH_COUNT = 1;
+    mt19937 rng(random_device{}());
+    vector<array<int, HASH_COUNT>> B;
+
+    struct Hash {
+        vector<array<int, HASH_COUNT>> p_hash;
+
+        void assure_B() {
+            if (B.empty()) {
+                array<int, HASH_COUNT> b;
+                for (int i = 0; i < HASH_COUNT; i++) b[i] = 1;
+                B.push_back(b);
+                for (int i = 0; i < HASH_COUNT; i++)
+                    b[i] = uniform_int_distribution<ll>(0, M - 1)(rng);
+                B.push_back(b);
+            }
+
+            while (B.size() < p_hash.size()) {
+                array<int, HASH_COUNT> b;
+                for (int i = 0; i < HASH_COUNT; i++)
+                    b[i] = B.back()[i] * B[1][i] % M;
+                B.push_back(b);
+            }
+        }
+
+        Hash(const string &s) : p_hash(s.size() + 1) {
+            assure_B();
+            for (int i = 0; i < s.size(); i++)
+                for (int j = 0; j < HASH_COUNT; j++)
+                    p_hash[i + 1][j] = (1LL * p_hash[i][j] * B[1][j] + s[i]) % M;
+        }
+
+        auto get_hash(int start, int end) {
+            array<int, HASH_COUNT> ans;
+            for (int i = 0; i < HASH_COUNT; i++)
+                ans[i] = (M + p_hash[end + 1][i] - 1LL * p_hash[start][i] * B[end - start + 1][i] % M) % M;
+            return ans;
+        }
+    };
 
 
 # Eulerian path/circuit in directed graphs
