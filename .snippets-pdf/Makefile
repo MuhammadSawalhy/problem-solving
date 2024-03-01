@@ -8,5 +8,5 @@ build: snippets.tex
 
 .PHONY: extract
 extract: extract-files.py ../cpp.snippets
-	python extract-files.py -s ../cpp.snippets -o cod/
+	python3 extract-files.py -s ../cpp.snippets -o cod/
 
