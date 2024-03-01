@@ -1458,18 +1458,17 @@ snippet code_trie
             add_node();
         }
 
-        void add_node() {
+        int add_node() {
             count.push_back(0);
             child.push_back(vector<int>(26));
+            return count.size() - 1;
         }
 
         void insert(const string &s) {
             int cur = 0; // root
             for (auto c: s) {
-                if (child[cur][c - 'a'] == 0) {
-                    child[cur][c - 'a'] = child.size();
-                    add_node();
-                }
+                if (child[cur][c - 'a'] == 0)
+                    child[cur][c - 'a'] = add_node();
                 cur = child[cur][c - 'a'];
                 count[cur]++;
             }
@@ -1479,65 +1478,66 @@ snippet code_trie
 
 # string hashing implementation (polynomial hashing)
 snippet code_hash
-    mt19937 rng(random_device{}());
+    struct HashValue;
+    constexpr int HASH_ITER = 1;
     const ll M = (1LL << 61) - 1;
-    vector<ll> B{1, uniform_int_distribution<ll>(0, M - 1)(rng)};
+    vector<HashValue> B;
 
-    struct Hash {
-        vector<ll> p_hash;
-
-        Hash(const string &s) : p_hash(s.size() + 1) {
-            while (B.size() < (int) s.size())
-                B.push_back((__int128) B.back() * B[1] % M);
-            for (int i = 0; i < s.size(); i++)
-                p_hash[i + 1] = ((__int128) p_hash[i] * B[1] + s[i]) % M;
+    struct HashValue {
+        long long val[HASH_ITER]{};
+        HashValue(long long v = 0) {
+            for (int i = 0; i < HASH_ITER; i++) val[i] = v;
         }
-
-        ll get_hash(int start, int end) {
-            return (p_hash[end + 1] - (__int128) p_hash[start] * B[end - start + 1] % M + M) % M;
+        HashValue &operator-=(const HashValue &a) {
+            for (int i = 0; i < HASH_ITER; i++) val[i] = (val[i] - a.val[i] + M) % M;
+            return *this;
+        }
+        HashValue &operator+=(const HashValue &a) {
+            for (int i = 0; i < HASH_ITER; i++) val[i] = (val[i] + a.val[i]) % M;
+            return *this;
+        }
+        HashValue &operator*=(const HashValue &a) {
+            for (int i = 0; i < HASH_ITER; i++) val[i] = ((__int128) val[i] * a.val[i]) % M;
+            return *this;
+        }
+        HashValue operator+(const HashValue &a) { return HashValue(*this) += a; }
+        HashValue operator-(const HashValue &a) { return HashValue(*this) -= a; }
+        HashValue operator*(const HashValue &a) { return HashValue(*this) *= a; }
+        bool operator<(const HashValue &a) const {
+            for (int i = 0; i < HASH_ITER; i++)
+                if (val[i] != a.val[i]) return val[i] < a.val[i];
+            return false;
+        }
+        bool operator==(const HashValue &a) const {
+            for (int i = 0; i < HASH_ITER; i++)
+                if (val[i] != a.val[i]) return false;
+            return true;
         }
     };
 
-
-snippet code_multi_hash
-    const ll M = 1e9 + 7;
-    const int HASH_COUNT = 1;
-    mt19937 rng(random_device{}());
-    vector<array<int, HASH_COUNT>> B;
+    void setB(int n) {
+        if (B.size() == 0) {
+            HashValue v = 1;
+            B.push_back(v);
+            mt19937 rng(random_device{}());
+            for (int i = 0; i < HASH_ITER; i++)
+                v.val[i] = uniform_int_distribution<ll>(0, M - 1)(rng);
+            B.push_back(v);
+        }
+        while (B.size() <= n) B.push_back(B.back() * B[1]);
+    }
 
     struct Hash {
-        vector<array<int, HASH_COUNT>> p_hash;
-
-        void assure_B() {
-            if (B.empty()) {
-                array<int, HASH_COUNT> b;
-                for (int i = 0; i < HASH_COUNT; i++) b[i] = 1;
-                B.push_back(b);
-                for (int i = 0; i < HASH_COUNT; i++)
-                    b[i] = uniform_int_distribution<ll>(0, M - 1)(rng);
-                B.push_back(b);
-            }
-
-            while (B.size() < p_hash.size()) {
-                array<int, HASH_COUNT> b;
-                for (int i = 0; i < HASH_COUNT; i++)
-                    b[i] = B.back()[i] * B[1][i] % M;
-                B.push_back(b);
-            }
-        }
+        vector<HashValue> p_hash;
 
         Hash(const string &s) : p_hash(s.size() + 1) {
-            assure_B();
+            setB(s.size());
             for (int i = 0; i < s.size(); i++)
-                for (int j = 0; j < HASH_COUNT; j++)
-                    p_hash[i + 1][j] = (1LL * p_hash[i][j] * B[1][j] + s[i]) % M;
+                p_hash[i + 1] = p_hash[i] * B[1] + s[i];
         }
 
         auto get_hash(int start, int end) {
-            array<int, HASH_COUNT> ans;
-            for (int i = 0; i < HASH_COUNT; i++)
-                ans[i] = (M + p_hash[end + 1][i] - 1LL * p_hash[start][i] * B[end - start + 1][i] % M) % M;
-            return ans;
+            return p_hash[end + 1] - p_hash[start] * B[end - start + 1];
         }
     };
 

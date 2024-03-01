@@ -44,70 +44,56 @@ struct DSU {
 };
 
 int n, m, k;
-vector<array<int, 4>> cond;
 
-int ind(int a, int b) {
-    return a * m + b;
+pair<int, int> getRow(int x) {
+    return { x, n + x };
 }
 
-bool valid(array<char, 4> c) {
-    return c[0] != c[1] && c[2] != c[3] && c[0] != c[2] && c[1] != c[3] && (c[0] == c[3]) != (c[1] == c[2]);
-};
-
-void check(int i, int j, vector<char> &vec) {
-    if (i == n && j == m) {
-        for (int i = 0; i + 1 < n; i++) {
-            for (int j = 0; j + 1 < m; j++) {
-                if (!valid({vec[ind(i, j)], vec[ind(i + 1, j)], vec[ind(i, j + 1)], vec[ind(i + 1, j + 1)]})) {
-                    return;
-                }
-            }
-        }
-
-        for (int i = 0; i < k; i++) {
-            if (vec[ind(cond[i][0], cond[i][1])] != vec[ind(cond[i][2], cond[i][3])]) {
-                return;
-            }
-        }
-
-        debug(vec);
-        exit(0);
-        return;
-    }
-
-    for (int c = 0; c < 3; c++) {
-        vec.push_back("ABC"[c]);
-        if (i == n) check(0, j + 1, vec);
-        else check(i + 1, j, vec);
-        vec.pop_back();
-    }
+pair<int, int> getCol(int x) {
+    return { n + n + x, n + n + m + x };
 }
-
 
 void solve() {
     cin >> n >> m >> k;
-    cond.clear();
+    DSU dsu((n + m) << 1);
 
-    DSU dsu(n * m);
-
-    for (int i = 0, a, b, c, d; i < k; i++) {
-        cin >> a >> b >> c >> d;
-        a--, b--, c--, d--;
-        cond.push_back({a, b, c, d});
-        dsu.uni(ind(a, b), ind(c, d));
+    for (int i = 0; i < k; i++) {
+        int x1, y1, x2, y2;
+        cin >> x1 >> y1 >> x2 >> y2;
+        x1--, y1--, x2--, y2--;
+        if (y1 < y2) {
+            auto [r, ir] = getRow(x1);
+            auto [c, ic] = getCol(y1);
+            // diff
+            dsu.uni(r, ic);
+            dsu.uni(ir, c);
+        } else {
+            auto [r, ir] = getRow(x1);
+            auto [c, ic] = getCol(y2);
+            // same
+            dsu.uni(r, c);
+            dsu.uni(ir, ic);
+        }
     }
 
-    for (int i = 0; i + 1 < n; i++)
-        for (int j = 0; j + 1 < m; j++) {
-            if (dsu.connected(ind(i, j), ind(i + 1, j + 1)) && dsu.connected(ind(i, j + 1), ind(i + 1, j))) {
-                cout << "NO\n";
-                return;
-            }
+    for (int i = 0; i < n; i++) {
+        auto [r, ir] = getRow(i);
+        if (dsu.connected(r, ir)) {
+            cout << "NO\n";
+            return;
         }
+    }
+
+    for (int i = 0; i < m; i++) {
+        auto [c, ic] = getCol(i);
+        if (dsu.connected(c, ic)) {
+            cout << "NO\n";
+            return;
+        }
+    }
 
     cout << "YES\n";
 }
-
 
 int32_t main() {
     ios_base::sync_with_stdio(false);
