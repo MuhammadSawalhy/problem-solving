@@ -16,11 +16,10 @@ void indent(ostream &os) {
 }
 
 template<typename _CharT, typename _Traits>
-inline basic_ostream<_CharT, _Traits> &
-ENDL(basic_ostream<_CharT, _Traits> &__os) {
-    flush(__os.put(__os.widen('\n')));
-    indent(__os);
-    return __os;
+inline auto &ENDL(basic_ostream<_CharT, _Traits> &os) {
+    flush(os.put(os.widen('\n')));
+    indent(os);
+    return os;
 }
 
 template<typename T>
@@ -120,11 +119,11 @@ void debug_bits(const T val, int splitby = 4, int numofbits = 16) {
 #ifdef _STL_PAIR_H
 template<typename T, typename V>
 ostream &operator<<(ostream &os, const pair<T, V> &x) {
-    os << '{';
+    os << '(';
     debug_one(x.first);
     os << ", ";
     debug_one(x.second);
-    os << '}';
+    os << ')';
     return os;
 }
 #endif

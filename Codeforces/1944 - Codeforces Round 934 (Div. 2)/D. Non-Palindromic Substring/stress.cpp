@@ -1,7 +1,6 @@
 // ﷽
-// $(URL)
-
 #include <bits/stdc++.h>
+
 using namespace std;
 
 #ifdef SAWALHY
@@ -13,20 +12,12 @@ using namespace std;
 #endif
 
 #define ll long long
-#define int long long
 #define all(v) v.begin(), v.end()
-#define rall(v) v.rbegin(), v.rend()
-#define minit(v, x) v = min(v, x)
-#define maxit(v, x) v = max(v, x)
 
-void solve() {
-    return;
-}
 
-int32_t main(int32_t argc, char **argv) {
+int main(int argc, char **argv) {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL), cout.tie(NULL);
-    // stress(argc, argv);
 
     int t;
     cin >> t;

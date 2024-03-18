@@ -1,5 +1,5 @@
 // ﷽
-// $(URL)
+// https://codeforces.com/contest/1944/problem/C
 
 #include <bits/stdc++.h>
 using namespace std;
@@ -20,13 +20,32 @@ using namespace std;
 #define maxit(v, x) v = max(v, x)
 
 void solve() {
-    return;
+    int n;
+    cin >> n;
+    vector<int> a(n);
+    map<int, int> fr;
+    for (int i = 0; i < n; i++) cin >> a[i], fr[a[i]]++;
+
+    vector<int> one;
+    for (auto [x, f]: fr) {
+        if (f == 1) one.push_back(x);
+    }
+
+    if (one.size() > 1) {
+        a.erase(find(all(a), one[1]));
+    }
+
+    // find mex
+    fr.clear();
+    for (auto x: a) fr[x]++;
+    int mex = 0;
+    while (fr[mex]) mex++;
+    cout << mex << endl;
 }
 
-int32_t main(int32_t argc, char **argv) {
+int32_t main() {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL), cout.tie(NULL);
-    // stress(argc, argv);
 
     int t;
     cin >> t;

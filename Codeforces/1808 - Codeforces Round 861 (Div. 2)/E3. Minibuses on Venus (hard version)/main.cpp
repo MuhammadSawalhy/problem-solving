@@ -1,5 +1,5 @@
 // ﷽
-// $(URL)
+// https://codeforces.com/contest/1808/problem/E3
 
 #include <bits/stdc++.h>
 using namespace std;
@@ -23,10 +23,9 @@ void solve() {
     return;
 }
 
-int32_t main(int32_t argc, char **argv) {
+int32_t main() {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL), cout.tie(NULL);
-    // stress(argc, argv);
 
     int t;
     cin >> t;

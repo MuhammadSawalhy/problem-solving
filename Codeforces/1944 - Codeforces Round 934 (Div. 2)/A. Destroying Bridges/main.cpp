@@ -1,5 +1,5 @@
 // ﷽
-// $(URL)
+// https://codeforces.com/contest/1944/problem/A
 
 #include <bits/stdc++.h>
 using namespace std;
@@ -20,13 +20,18 @@ using namespace std;
 #define maxit(v, x) v = max(v, x)
 
 void solve() {
-    return;
+    int n, k;
+    cin >> n >> k;
+    if (k >= n - 1) { 
+        cout << 1 << endl;
+    } else {
+        cout << n << endl;
+    }
 }
 
-int32_t main(int32_t argc, char **argv) {
+int32_t main() {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL), cout.tie(NULL);
-    // stress(argc, argv);
 
     int t;
     cin >> t;

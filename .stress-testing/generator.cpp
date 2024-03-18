@@ -16,6 +16,13 @@ void tree_edges(int n) {
         println(a[i] + 1, a[rnd.next(0, i - 1)] + 1);
 }
 
+void str(int n) {
+    string s;
+    for (int i = 0; i < n; i++)
+        s += rnd.next('a', 'z');
+    println(s);
+}
+
 int main(int argc, char **argv) {
     registerGen(argc, argv, 1);
 
