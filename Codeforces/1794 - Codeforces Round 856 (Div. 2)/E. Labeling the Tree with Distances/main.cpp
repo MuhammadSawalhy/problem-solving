@@ -20,38 +20,38 @@ using namespace std;
 #define maxit(v, x) v = max(v, x)
 
 struct HashValue;
-constexpr int HASH_ITER = 1;
+constexpr int hashes = 1;
 mt19937 rng(random_device{}());
 const ll M = (1LL << 61) - 1;
 vector<HashValue> B;
 
 struct HashValue {
-    long long val[HASH_ITER]{};
+    long long val[hashes]{};
     HashValue(long long v = 0) {
-        for (int i = 0; i < HASH_ITER; i++) val[i] = v;
+        for (int i = 0; i < hashes; i++) val[i] = v;
     }
     HashValue &operator-=(const HashValue &a) {
-        for (int i = 0; i < HASH_ITER; i++) val[i] = (val[i] - a.val[i] + M) % M;
+        for (int i = 0; i < hashes; i++) val[i] = (val[i] - a.val[i] + M) % M;
         return *this;
     }
     HashValue &operator+=(const HashValue &a) {
-        for (int i = 0; i < HASH_ITER; i++) val[i] = (val[i] + a.val[i]) % M;
+        for (int i = 0; i < hashes; i++) val[i] = (val[i] + a.val[i]) % M;
         return *this;
     }
     HashValue &operator*=(const HashValue &a) {
-        for (int i = 0; i < HASH_ITER; i++) val[i] = ((__int128) val[i] * a.val[i]) % M;
+        for (int i = 0; i < hashes; i++) val[i] = ((__int128) val[i] * a.val[i]) % M;
         return *this;
     }
     HashValue operator+(const HashValue &a) { return HashValue(*this) += a; }
     HashValue operator-(const HashValue &a) { return HashValue(*this) -= a; }
     HashValue operator*(const HashValue &a) { return HashValue(*this) *= a; }
     bool operator<(const HashValue &a) const {
-        for (int i = 0; i < HASH_ITER; i++)
+        for (int i = 0; i < hashes; i++)
             if (val[i] != a.val[i]) return val[i] < a.val[i];
         return false;
     }
     bool operator==(const HashValue &a) const {
-        for (int i = 0; i < HASH_ITER; i++)
+        for (int i = 0; i < hashes; i++)
             if (val[i] != a.val[i]) return false;
         return true;
     }
@@ -61,7 +61,7 @@ void setB(int n) {
     if (B.size() == 0) {
         HashValue v;
         B.push_back(v + 1);
-        for (int i = 0; i < HASH_ITER; i++)
+        for (int i = 0; i < hashes; i++)
             v.val[i] = uniform_int_distribution<ll>(0, M - 1)(rng);
         B.push_back(v);
     }

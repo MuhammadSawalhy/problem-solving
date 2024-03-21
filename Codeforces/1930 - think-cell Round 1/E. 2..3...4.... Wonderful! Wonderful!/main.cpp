@@ -132,15 +132,19 @@ void solve() {
     cin >> n;
 
     for (int k = 1; k <= (n - 1) / 2; k++) {
-        Z ans = 0;
-        for (int i = 0; i < n; i++)
-            for (int j = i + 2; j < n; j++) {
-                // choose (k - 1) from left and right
-                ans += ncr(n - j - 1, k - 1) * ncr(i, k - 1);
-            }
+        Z ans = 1;
+        // one or more time
+        for (int m = 1; 2 * k * m <= n; m++) {
+            int zeros = 2 * k * m;
+            int ones = n - zeros;
 
+            Z total = ncr(n, ones);
+            Z bad = ncr(ones + 2 * k - 1, 2 * k - 1);
+            ans += total - bad;
+        }
         cout << ans << ' ';
     }
+
     cout << endl;
 }
 

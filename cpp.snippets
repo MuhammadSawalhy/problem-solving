@@ -1478,42 +1478,38 @@ snippet code_trie
 
 # string hashing implementation (polynomial hashing)
 snippet code_hash
-    constexpr int HASH_ITER = 3;
-    vector<valarray<ll>> B;
-    const valarray<ll> M = {
+    typedef valarray<ll> val;
+    constexpr int hashes = 2;
+    vector<val> B;
+    const val M = {
             1000000007,
             1444444447,
-            998244353,
+            // 998244353,
     };
 
     void setB(int n) {
         if (B.size() == 0) {
-            // random bases
             mt19937 rng(random_device{}());
-            valarray<ll> v(HASH_ITER);
-            B.push_back(v = 1);
-            for (int i = 0; i < HASH_ITER; i++)
-                v[i] = uniform_int_distribution<ll>(1, M[i] - 1)(rng);
-            B.push_back(v);
+            B.assign(2, val(1, hashes));
+            for (int i = 0; i < hashes; i++)
+                B.back()[i] = uniform_int_distribution<ll>(1, M[i] - 1)(rng);
         }
         while ((int) B.size() <= n) B.push_back(B.back() * B[1] % M);
     }
 
     struct Hash {
-        vector<valarray<ll>> h;
+        vector<val> h;
 
         Hash(const string &s) : h(s.size() + 1) {
-            setB(s.size());
-            h[0] = valarray<ll>(HASH_ITER);
-            for (int i = 0; i < s.size(); i++)
+            setB(s.size()), h[0] = val(hashes);
+            for (int i = 0; i < (int) s.size(); i++)
                 h[i + 1] = (h[i] * B[1] + s[i]) % M;
         }
 
         auto get(int l, int r) {
-            auto ans = (h[r + 1] - h[l] * B[r - l + 1] % M + M) % M;
-            array<ll, HASH_ITER> arr;
-            for (int i = 0; i < HASH_ITER; i++)
-                arr[i] = ans[i];
+            array<ll, hashes> arr;
+            val ans = (h[r + 1] - h[l] * B[r - l + 1] % M + M) % M;
+            for (int i = 0; i < hashes; i++) arr[i] = ans[i];
             return arr;
         }
     };
