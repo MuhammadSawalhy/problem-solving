@@ -1,0 +1,19 @@
+#!/bin/bash
+
+DIR="/home/ms/myp/problem-solving"
+
+copy_file() {
+    cp "$DIR"/.stress-testing/"$1" "$PWD"
+}
+
+if [ -f "stress.cpp" ]; then
+    echo "File stress.cpp already exists!"
+else
+    copy_file "stress.cpp"
+fi
+
+if [ -f "gen.cpp" ]; then
+	echo "File gen.cpp already exists!"
+else
+	copy_file "gen.cpp"
+fi

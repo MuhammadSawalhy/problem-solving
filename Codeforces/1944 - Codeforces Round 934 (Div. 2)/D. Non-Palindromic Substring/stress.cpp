@@ -6,16 +6,17 @@ using namespace std;
 #ifdef SAWALHY
 #include "debug.hpp"
 #else
-#define debug(...) 0
-#define debug_itr(...) 0
+#define debug(...)      0
+#define debug_itr(...)  0
 #define debug_bits(...) 0
 #endif
 
-#define ll long long
+#define ll     long long
 #define all(v) v.begin(), v.end()
 
+void solve() {}
 
-int main(int argc, char **argv) {
+int main() {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL), cout.tie(NULL);
 

@@ -1063,95 +1063,43 @@ snippet code_sparsetable
 
 # modular arithmetics stolen from Jiangly
 snippet code_mint
-    template<typename T = void> // default
-    struct BiggerType {
-        typedef ll type;
-    };
-
-    template<> // for long long
-    struct BiggerType<ll> {
-        typedef __int128 type;
-    };
-
-    template<typename T, T mod, typename V = typename BiggerType<T>::type>
+    template<int32_t mod>
     struct mint {
-    private:
-        inline T norm(T x) const {
-            if (x < 0) x += mod;
-            if (x >= mod) x -= mod;
-            return x;
+        using Z = mint;
+        int32_t x;
+        mint(int32_t x = 0) : x(norm(x)) {}
+        mint(ll x) : x(norm(x % mod)) {}
+        inline int32_t norm(int32_t x) const {
+            return x >= mod ? x - mod
+                   : x < 0  ? x + mod
+                            : x;
         }
-
-    public:
-        T x;
-        mint(T x = 0) : x(norm(x)) {}
-        mint(V x) : x(norm(x % mod)) {}
-        mint operator-() const { return mint(norm(mod - x)); }
-        mint inv() const {
-            assert(x != 0);
-            return power(mod - 2);
-        }
-        mint power(long long b) const {
-            mint res = 1, a = x;
-            for (; b; b >>= 1, a *= a) {
+        Z power(ll b) const {
+            Z res = 1, a = x;
+            for (; b; b >>= 1, a *= a)
                 if (b & 1) res *= a;
-            }
             return res;
         }
-        mint &operator*=(const mint &rhs) {
-            x = (V) x * rhs.x % mod;
-            return *this;
-        }
-        mint &operator+=(const mint &rhs) {
-            x = norm(x + rhs.x);
-            return *this;
-        }
-        mint &operator-=(const mint &rhs) {
-            x = norm(x - rhs.x);
-            return *this;
-        }
-        mint &operator/=(const mint &rhs) { return *this *= rhs.inv(); }
-        friend mint operator*(const mint &lhs, const mint &rhs) {
-            mint res = lhs;
-            res *= rhs;
-            return res;
-        }
-        friend mint operator+(const mint &lhs, const mint &rhs) {
-            mint res = lhs;
-            res += rhs;
-            return res;
-        }
-        friend mint operator-(const mint &lhs, const mint &rhs) {
-            mint res = lhs;
-            res -= rhs;
-            return res;
-        }
-        friend mint operator/(const mint &lhs, const mint &rhs) {
-            mint res = lhs;
-            res /= rhs;
-            return res;
-        }
-        friend bool operator==(const mint &lhs, const mint &rhs) {
-            return lhs.x == rhs.x;
-        }
-        friend std::istream &operator>>(std::istream &is, mint &a) {
-            T v;
-            return is >> v, a = mint(v), is;
-        }
-        friend std::ostream &operator<<(std::ostream &os, const mint &a) {
-            return os << a.x;
-        }
-        friend mint max(mint a, mint b) {
-            return a.x > b.x ? a : b;
-        }
-        friend mint min(mint a, mint b) {
-            return a.x < b.x ? a : b;
+        Z inv() const { return assert(x != 0), power(mod - 2); }
+        Z operator-() const { return -x; }
+        Z &operator*=(const Z &r) { return *this = (ll) x * r.x; }
+        Z &operator+=(const Z &r) { return *this = x + r.x; }
+        Z &operator-=(const Z &r) { return *this = x - r.x; }
+        Z &operator/=(const Z &r) { return *this *= r.inv(); }
+        friend Z operator*(const Z &l, const Z &r) { return Z(l) *= r; }
+        friend Z operator+(const Z &l, const Z &r) { return Z(l) += r; }
+        friend Z operator-(const Z &l, const Z &r) { return Z(l) -= r; }
+        friend Z operator/(const Z &l, const Z &r) { return Z(l) /= r; }
+        friend ostream &operator<<(ostream &os, const Z &a) { return os << a.x; }
+        friend istream &operator>>(istream &is, Z &a) {
+            ll y = 0;
+            return is >> y, a = y, is;
         }
     };
 
     // constexpr int MOD = 998244353;
     constexpr int MOD = 1000000007;
-    using Z = mint<int32_t, MOD>;
+    using Z = mint<MOD>;
 
 
 # modular combinations
@@ -1972,20 +1920,8 @@ snippet code_centroids
     };
 
 
-# stress testing mechanism
-snippet code_stress
-    void brute() {
-
-    }
-
-    mt19937 rng = mt19937(random_device()());
-
-    void seed(int s) { rng = mt19937(s); }
-
-    int rand_int(int x, int y) {
-        return uniform_int_distribution<int>(x, y)(rng);
-    }
-
+# generator utils for the stress tester
+snippet code_stress_gen
     struct Gen {
         static vector<int> perm(int n) {
             vector<int> a(n);
@@ -2032,11 +1968,25 @@ snippet code_stress
         }
     };
 
+
+# stress testing mechanism
+snippet code_stress
+    void brute() {
+
+    }
+
+    mt19937 rng = mt19937(random_device()());
+
+    void seed(int s) { rng = mt19937(s); }
+
+    int rand_int(int x, int y) {
+        return uniform_int_distribution<int>(x, y)(rng);
+    }
+
     void generate() {
         int n = rand_int(2, 20), q = rand_int(1, 5);
 
         cout << n << ' ' << q << endl;
-        cout << Gen::str(n) << endl;
 
         while (q--) {
             int l = rand_int(1ll, n - 1);

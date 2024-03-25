@@ -1,6 +1,6 @@
 .PHONY: compile stress-test clean
 CPPFLAGS := $(CPPFLAGS) -DSAWALHY
-FILES := main stress generator
+FILES := main stress gen
 
 stress-test: compile
 	@bash stress.sh

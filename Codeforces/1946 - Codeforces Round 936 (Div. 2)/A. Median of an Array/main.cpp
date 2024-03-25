@@ -1,6 +1,7 @@
 // ﷽
-// $(URL)
+// https://codeforces.com/contest/1946/problem/A
 
+#include <algorithm>
 #include <bits/stdc++.h>
 using namespace std;
 
@@ -14,22 +15,33 @@ using namespace std;
 
 #define ll long long
 #define int long long
-#define sz(v) (int) (v).size()
 #define all(v) v.begin(), v.end()
 #define rall(v) v.rbegin(), v.rend()
-#define minit(v, x...) v = min({v, x})
-#define maxit(v, x...) v = max({v, x})
-
-template<class T>
-using rpq = priority_queue<T, vector<T>, greater<T>>;
+#define minit(v, x) v = min(v, x)
+#define maxit(v, x) v = max(v, x)
 
 void solve() {
-    return;
+    int n;
+    cin >> n;
+    vector<int> a(n);
+    for (int i = 0; i < n; i++) {
+        cin >> a[i];
+    }
+
+    int ind = (n + 1) / 2;
+    ind--;
+
+    sort(all(a));
+
+    int j = upper_bound(all(a), a[ind]) - a.begin();
+    cout << j - ind << endl;
+
 }
 
 int32_t main(int32_t argc, char **argv) {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL), cout.tie(NULL);
+    // stress(argc, argv);
 
     int t;
     cin >> t;

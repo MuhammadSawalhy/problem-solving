@@ -1,0 +1,38 @@
+#!/bin/bash
+
+DIR="/home/ms/myp/problem-solving"
+STRESS_DIR="/tmp/stress-testing"
+
+if [ ! -f "stress.cpp" ]; then
+	echo "File stress.cpp not found!"
+	exit 1
+fi
+
+if [ ! -f "main.cpp" ]; then
+	echo "File main.cpp not found!"
+	exit 1
+fi
+
+if [ ! -f "gen.cpp" ]; then
+	echo "File gen.cpp not found!"
+	exit 1
+fi
+
+mkdir -p "$STRESS_DIR"
+
+link_file () {
+	ln -sf "$(realpath "$1")" "$2"
+}
+
+link_file stress.cpp "$STRESS_DIR"
+link_file main.cpp "$STRESS_DIR"
+link_file gen.cpp "$STRESS_DIR"
+
+cd "$DIR"/.stress-testing || exit
+
+link_file Makefile "$STRESS_DIR"
+link_file stress.sh "$STRESS_DIR"
+
+cd "$STRESS_DIR" || exit
+
+make

@@ -1,5 +1,5 @@
 // ﷽
-// $(URL)
+// https://codeforces.com/contest/1946/problem/D
 
 #include <bits/stdc++.h>
 using namespace std;
@@ -24,7 +24,22 @@ template<class T>
 using rpq = priority_queue<T, vector<T>, greater<T>>;
 
 void solve() {
-    return;
+    int n, x, ans = -1;
+    cin >> n >> x, x++;
+    vector<int> a(n), newa;
+    for (int i = 0; i < n; i++) cin >> a[i];
+    for (int b = 30; ~b; b--) {
+        int y = 0, i = 0;
+        for (newa.clear(); i < sz(a); i++) {
+            y ^= a[i];
+            if (~y >> b & 1) newa.push_back(y), y = 0;
+        }
+        if (x >> b & 1) {
+            if (~y >> b & 1) maxit(ans, sz(newa));
+        } else if (y >> b & 1) break;
+        else a = newa;
+    }
+    cout << ans << endl;
 }
 
 int32_t main(int32_t argc, char **argv) {
