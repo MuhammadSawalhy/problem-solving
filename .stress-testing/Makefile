@@ -1,14 +1,17 @@
-.PHONY: compile stress-test clean
-CPPFLAGS := $(CPPFLAGS) -DSAWALHY
-FILES := main stress gen
+.PHONY: compile stress clean interact
+CPPFLAGS       := $(CPPFLAGS) -DSAWALHY
+STRESS_FILES   := main stress gen
+INTERACT_FILES := main interactor
 
-stress-test: compile
+stress: $(STRESS_FILES)
 	@bash stress.sh
 
-compile: $(FILES)
+interact: $(INTERACT_FILES)
+	@python3 interact.py ./main ./interactor
 
 %: %.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $< -o $@
 
 clean:
-	rm $(FILES) stress-ans stress-inf stress-ouf
+	rm $(STRESS_FILES) stress-ans stress-inf stress-ouf
+	rm $(INTERACT_FILES)

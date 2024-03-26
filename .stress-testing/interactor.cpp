@@ -25,6 +25,11 @@ int rand_int(int x, int y) {
 
 void interact() {
     // cout to the solution and cin from it, interact and enjoy
+    int n = rand_int(1, 100);
+    cout << n << endl;
+    int ans, correct = sin(n);
+    cin >> ans;
+    assert(correct == ans);
 }
 
 int32_t main(int32_t argc, char *argv[]) {

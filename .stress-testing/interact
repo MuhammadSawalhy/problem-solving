@@ -5,32 +5,30 @@ set -e
 DIR="/home/ms/myp/problem-solving"
 STRESS_DIR="/tmp/stress-testing"
 
-check_file() {
+check_file () {
     if [ ! -f "$1" ]; then
         echo "File $1 not found!"
         exit 1
     fi
 }
 
-link_file() {
+link_file () {
     ln -sf "$(realpath "$1")" "$2"
 }
 
-check_file stress.cpp
 check_file main.cpp
-check_file gen.cpp
+check_file interactor.cpp
 
 mkdir -p "$STRESS_DIR"
 
-link_file stress.cpp "$STRESS_DIR"
 link_file main.cpp "$STRESS_DIR"
-link_file gen.cpp "$STRESS_DIR"
+link_file interactor.cpp "$STRESS_DIR"
 
 cd "$DIR"/.stress-testing
 
 link_file Makefile "$STRESS_DIR"
-link_file stress.sh "$STRESS_DIR"
+link_file interact.py "$STRESS_DIR"
 
 cd "$STRESS_DIR"
 
-make
+make interact
