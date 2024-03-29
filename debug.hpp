@@ -49,61 +49,27 @@ template<typename T>
 using is_iterable = decltype(debug_details::is_iterable_impl<T>(0));
 
 template<typename RandomIt>
-void debug_itr(RandomIt start, RandomIt end, int split = SPLIT) {
-    if (split > 0) {
-        cerr << "[";
-        indent_level++;
-        cerr << ENDL;
-
-        int counter = 0;
-        while (start != end) {
-            if (counter == split) {
-                cerr << ENDL;
-                counter = 0;
-            }
-
-            debug_one(*start);
-            start++;
-            if (start != end) {
-                cerr << ", ";
-            }
-
-            counter++;
-        }
-        indent_level--;
-        cerr << ENDL;
-        cerr << "]";
-    } else {
-        cerr << '[';
-        for (RandomIt it = start; it != end; it++)
-            cerr << (it != start ? ", " : ""), debug_one(*it);
-        cerr << ']';
-    }
+void debug_itr(RandomIt it, int n) {
+    cerr << "[";
+    for (; n; n--, it++)
+        debug_one(*it), cerr << (n > 1 ? ", " : "");
+    cerr << "]";
     if (!general_debugging)
         cerr << ENDL;
 }
 
-template<typename Iterable,
-         enable_if_t<is_iterable<Iterable>::value, bool> = true>
-void debug_itr(Iterable it, int len, int split = 0) {
-    debug_itr(begin(it), begin(it) + len, split);
-}
-
-template<typename T>
-void debug_itr(const T items[], int len, int split = 0) {
-    debug_itr(items, items + len, split);
-}
-
-template<typename T, size_t s>
-void debug_itr(const T items[][s], int len, int split = s) {
-    if (split != s) {
-        T newitems[len][split];
-        for (int i = 0; i < len; i++)
-            for (int j = 0; j < split; j++)
-                newitems[i][j] = items[i][j];
-        return debug_itr(&newitems[0][0], &newitems[0][0] + len * split, split);
+template<typename RandomIt>
+void debug_itr(RandomIt it, int n, int m) {
+    indent_level++;
+    cerr << "[";
+    while (n--) {
+        cerr << ENDL << "[";
+        for (int i = 0; i < m; i++)
+            debug_one(*it), cerr << (i < m - 1 ? ", " : "");
+        cerr << "],";
     }
-    debug_itr(&items[0][0], &items[0][0] + len * split, split);
+    indent_level--;
+    cerr << ENDL << "]";
 }
 
 template<typename T>
@@ -181,7 +147,7 @@ template<typename T,
 void debug_one_helper(T t) {
     bool gd = general_debugging;
     general_debugging = true;
-    debug_itr(begin(t), end(t));
+    debug_itr(begin(t), size(t));
     general_debugging = gd;
 }
 

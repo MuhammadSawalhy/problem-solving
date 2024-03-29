@@ -74,6 +74,22 @@ struct mint {
 constexpr int MOD = 1000000007;
 using Z = mint<MOD>;
 
+struct info {
+    int removed = 1e9;
+    Z ways = 0;
+    info operator+(int r) {
+        return {removed + r, ways};
+    }
+    info operator+(const info &r) const {
+        if (removed == r.removed) return {removed, ways + r.ways};
+        if (removed > r.removed) return r;
+        return *this;
+    }
+    friend ostream &operator<<(ostream &os, const info &a) {
+        return os << '(' << a.removed << "," << a.ways << ')';
+    }
+};
+
 void solve() {
     string s, t;
     cin >> s >> t;
@@ -90,74 +106,62 @@ void solve() {
 
     debug(s, pos);
     int n = s.size();
-    Z dp[2][n + 1][n + 2];
-    bool ok[2][n + 1][n + 2];
-    memset(dp, 0, sizeof dp);
-    memset(ok, 0, sizeof ok);
-    // dp[all removed?][removal or unremoved extend][removed cnt] = ways
 
-    dp[1][0][0] = 1;
-    ok[1][0][0] = 1;
+    info dp[2][n + 1];
+    bool ok[2][n + 1];
+    memset(ok, 0, sizeof ok);
+    // dp[all removed?][removal or unremoved extend] = { removed , ways }
+
+    dp[1][0] = {0, 1};
+    ok[1][0] = 1;
     for (int i = 0; i < sz(pos); i++) {
-        Z newdp[2][n + 1][n + 2];
-        bool newok[2][n + 1][n + 2];
-        memset(newdp, 0, sizeof newdp);
+        info newdp[2][n + 1];
+        bool newok[2][n + 1];
         memset(newok, 0, sizeof newok);
         pos[i]++; // 1-based
         int e = pos[i] + sz(t) - 1;
 
         // all removed = true
         for (int j = 0; j <= n; j++) {
-            for (int k = 0; k <= n; k++) {
-                if (!ok[1][j][k]) continue;
+            if (!ok[1][j]) continue;
+            if (j >= pos[i]) {
+                // already removed
+                newdp[1][j] = newdp[1][j] + dp[1][j];
+                newok[1][j] = 1;
+            } else {
                 // remove
-                newdp[1][e][k + 1] += dp[1][j][k];
-                newok[1][e][k + 1] = 1;
-                if (j >= pos[i]) {
-                    newdp[1][j][k] += dp[1][j][k];
-                    newok[1][j][k] = 1;
-                } else {
-                    newdp[0][e][k] += dp[1][j][k];
-                    newok[0][e][k] = 1;
-                }
+                newdp[1][e] = newdp[1][e] + (dp[1][j] + 1);
+                newok[1][e] = 1;
+                // keep
+                newdp[0][e] = newdp[0][e] + dp[1][j];
+                newok[0][e] = 1;
             }
         }
 
         // all removed = false
         for (int j = pos[i]; j <= e; j++) {
-            for (int k = 0; k <= n; k++) {
-                if (!ok[0][j][k]) continue;
-                // remove
-                newdp[1][e][k + 1] += dp[0][j][k];
-                newok[1][e][k + 1] = 1;
-                // keep
-                newdp[0][j][k] += dp[0][j][k];
-                newok[0][j][k] = 1;
-            }
+            if (!ok[0][j]) continue;
+            // remove
+            newdp[1][e] = newdp[1][e] + (dp[0][j] + 1);
+            newok[1][e] = 1;
+            // keep
+            newdp[0][j] = newdp[0][j] + dp[0][j];
+            newok[0][j] = 1;
         }
 
         memcpy(dp, newdp, sizeof newdp);
         memcpy(ok, newok, sizeof newok);
     }
 
-    for (int k = 0; k <= n; k++) {
-        Z ans = 0;
-        bool myok = false;
+    info ans;
 
-        for (int j = 0; j <= n; j++) {
-            if (ok[1][j][k]) {
-                myok = true;
-                ans += dp[1][j][k];
-            }
-        }
-
-        if (myok) {
-            cout << k << ' ' << ans << endl;
-            return;
+    for (int j = 0; j <= n; j++) {
+        if (ok[1][j]) {
+            ans = ans + dp[1][j];
         }
     }
 
-    assert(false);
+    cout << ans.removed << ' ' << ans.ways << endl;
 }
 
 int32_t main(int32_t argc, char **argv) {

@@ -1755,6 +1755,54 @@ snippet code_z
     }
 
 
+# Aho Corasick
+snippet code_aho_corasick
+    struct AhoCorasick {
+        static constexpr int K = 100;
+        vector<vector<int>> child, id;
+        vector<int> fail;
+
+        AhoCorasick() { add_node(); }
+
+        int add_node() {
+            id.push_back({}), fail.push_back(0);
+            child.push_back(vector<int>(K));
+            return child.size() - 1;
+        }
+
+        int insert(const string &s, int ind) {
+            int cur = 0; // root
+            for (auto c: s) {
+                if (child[cur][c - 'A'] == 0)
+                    child[cur][c - 'A'] = add_node();
+                cur = child[cur][c - 'A'];
+            }
+            id[cur].push_back(ind);
+            return cur;
+        }
+
+        int go(int cur, int nxt) {
+            while (cur && !child[cur][nxt]) cur = fail[cur];
+            return child[cur][nxt];
+        }
+
+        void build() {
+            queue<int> q;
+            for (int i = 0; i < K; i++)
+                if (child[0][i]) q.push(child[0][i]);
+            while (!q.empty()) {
+                int cur = q.front();
+                q.pop();
+                for (int nxt = 0; nxt < K; nxt++) {
+                    if (!child[cur][nxt]) continue;
+                    fail[child[cur][nxt]] = go(fail[cur], nxt);
+                    q.push(child[cur][nxt]);
+                }
+            }
+        }
+    };
+
+
 # random utils
 snippet code_rand
     mt19937 rng = mt19937(random_device()());
