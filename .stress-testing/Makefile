@@ -1,13 +1,11 @@
-.PHONY: compile stress clean interact
+.PHONY: compile clean stressing interaction
 CPPFLAGS       := $(CPPFLAGS) -DSAWALHY
 STRESS_FILES   := main stress gen
 INTERACT_FILES := main interactor
 
-stress: $(STRESS_FILES)
-	@bash stress.sh
+stressing: $(STRESS_FILES)
 
-interact: $(INTERACT_FILES)
-	@python3 interact.py ./main ./interactor
+interaction: $(INTERACT_FILES)
 
 %: %.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $< -o $@

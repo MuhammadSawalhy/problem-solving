@@ -3,6 +3,11 @@
 set -e
 
 i=0
+
+if [ $# -gt 0 ]; then
+  i=$1
+fi
+
 while true; do
   echo "$((++i))"
   ./gen $i 2> /dev/null 1> ./stress-inf

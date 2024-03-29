@@ -33,4 +33,6 @@ link_file stress.sh "$STRESS_DIR"
 
 cd "$STRESS_DIR"
 
-make
+make stressing
+
+bash stress.sh "$@"
