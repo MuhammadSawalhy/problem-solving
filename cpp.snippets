@@ -1070,9 +1070,7 @@ snippet code_mint
         mint(int32_t x = 0) : x(norm(x)) {}
         mint(ll x) : x(norm(x % mod)) {}
         inline int32_t norm(int32_t x) const {
-            return x >= mod ? x - mod
-                   : x < 0  ? x + mod
-                            : x;
+            return x >= mod ? x - mod : (x < 0  ? x + mod : x);
         }
         Z power(ll b) const {
             Z res = 1, a = x;
@@ -1623,11 +1621,9 @@ snippet code_undir_eulerian
 # MO's algorithm
 snippet code_mo
     int block_size;
-
     struct MO {
         struct Query {
-            int l, r, idx;
-            Query(int l, int r, int idx) : l(l), r(r), idx(idx) {}
+            int l, r, idx, k;
             bool operator<(const Query &q) const {
                 if (l / block_size != q.l / block_size)
                     return pair(l, r) < pair(q.l, q.r);
@@ -1637,10 +1633,28 @@ snippet code_mo
 
         vector<int> arr;
         vector<Query> queries;
-
-        MO(vector<int> &arr, vector<Query> &queries) : arr(arr), queries(queries) {}
-
         int l = 0, r = -1;
+
+        MO() {}
+        MO(const vector<int> &arr) : arr(arr) {}
+
+        void add_query(const Query &q) {
+            queries.push_back(q);
+        }
+
+        vector<int> get_ans() {
+            block_size = arr.size() / sqrt(queries.size()) + 1;
+            vector<int> ans(queries.size());
+            sort(all(queries));
+
+            l = queries.front().l, r = queries.front().l - 1;
+            for (auto &q: queries) {
+                set_range(q);
+                ans[q.idx] = ans_query(q);
+            }
+
+            return ans;
+        }
 
         void set_range(Query &q) {
             // [l, r] inclusive
@@ -1656,21 +1670,50 @@ snippet code_mo
         void remove(int x) {
         }
 
-        int getans(Query &q) {
+        int ans_query(Query &q) {
+        }
+    };
+
+
+# MO algorithm on a tree using euler tour
+snippet code_motree
+    struct MOTree {
+        vector<vector<int>> adj;
+        vector<int> arr, vals, st, en;
+        int n;
+        MO mo;
+        LCA lca;
+
+        MOTree(const vector<vector<int>> &adj, const vector<int> &vals) {
+            this->vals = vals, this->adj = adj, n = adj.size();
+            st.resize(n), en.resize(n);
+            lca = LCA(adj);
+            _dfs(0, 0, vals);
+            mo = MO(arr);
         }
 
-        vector<int> ans() {
-            block_size = arr.size() / sqrt(queries.size()) + 1;
-            vector<int> ans(queries.size());
-            sort(all(queries));
-
-            l = queries.front().l, r = queries.front().l - 1;
-            for (auto &q: queries) {
-                set_range(q);
-                ans[q.idx] = getans(q);
+        void _dfs(int i, int p, const vector<int> vals) {
+            st[i] = arr.size();
+            arr.push_back(vals[i]);
+            for (auto j: adj[i]) {
+                if (p == j) continue;
+                _dfs(j, i, vals);
             }
+            en[i] = arr.size();
+            arr.push_back(vals[i]);
+        }
 
-            return ans;
+        void add_query(int u, int v, MO::Query q) {
+            if (st[u] > st[v]) swap(u, v);
+            int lc = lca.query(u, v);
+            if (lc == u) q.l = st[u], q.r = st[v];
+            else q.l = en[u], q.r = st[v], q.lc_value = vals[lc];
+            mo.add_query(q);
+            debug(q.l, q.r);
+        }
+
+        auto get_ans() {
+            return mo.get_ans();
         }
     };
 
@@ -1871,32 +1914,28 @@ snippet code_lca_sparse_table
     struct LCA {
         int n, LOG, _time;
         vector<int> first, depth;
-        vector<vector<int>> adj, table;
+        vector<vector<int>> table;
 
-        LCA(int n) : n(n), LOG(log2(n) + 3) {
-            adj.resize(n), depth.resize(n), first.resize(n);
-            table.assign(LOG, vector<int>(2 * n));
-        }
+        LCA() {}
+        LCA(const vector<vector<int>> &adj) { build(adj); }
 
-        void add_edge(int u, int v) {
-            adj[u].push_back(v);
-            adj[v].push_back(u);
-        }
-
-        void dfs(int u, int p) {
+        void _dfs(int u, int p, const vector<vector<int>> &adj) {
             first[u] = _time;
             table[0][_time++] = u;
             for (auto v: adj[u]) {
                 if (v == p) continue;
                 depth[v] = depth[u] + 1;
-                dfs(v, u);
+                _dfs(v, u, adj);
                 table[0][_time++] = u;
             }
         }
 
-        void build(int root = 0) {
+        void build(const vector<vector<int>> &adj, int root = 0) {
+            n = sz(adj), LOG = log2(n) + 3;
+            depth.resize(n), first.resize(n);
+            table.assign(LOG, vector<int>(2 * n));
             _time = 0;
-            dfs(root, root);
+            _dfs(root, root, adj);
             assert(_time < 2 * n);
             for (int i = 1; i < LOG; i++) {
                 for (int j = 0; j + (1 << i) <= 2 * n; j++) {
@@ -2019,6 +2058,8 @@ snippet code_stress_gen
 
 # stress testing mechanism
 snippet code_stress
+    namespace stress {
+
     void brute() {
 
     }
@@ -2056,6 +2097,9 @@ snippet code_stress
     }
 
     void stress(int argc, char **argv) {
+    #ifndef STRESS
+        return;
+    #endif
         if (argc > 1) seed(stoi(argv[1]));
         for (int iter = 0; iter < 100000; iter++) {
             debug(iter);
@@ -2093,4 +2137,52 @@ snippet code_stress
         }
         exit(0);
     }
+
+    }
+
+
+# XOR basis
+snippet code_xorbasis
+    template<int bits>
+    struct XORBasis {
+        array<int, bits> basis;
+
+        void reset() { basis = array<int, bits>(); }
+
+        void insert(const vector<int> &v) {
+            for (auto x: v) insert(x);
+        }
+
+        bool insert(int x) {
+            for (int b = 0; x && b < bits; b++) {
+                if (x >> b & 1 ^ 1) continue;
+                if (!basis[b]) return basis[b] = x, true;
+                x ^= basis[b];
+            }
+            return false;
+        }
+
+        int size() {
+            int sz = 0;
+            for (auto b: basis) sz += !!b;
+            return sz;
+        }
+
+        int mask(int x) {
+            int m = 0;
+            for (int b = 0; b < bits; b++) {
+                if (x >> b & 1 ^ 1) continue;
+                if (!basis[b]) return -1;
+                x ^= basis[b], m |= 1 << b;
+            }
+            if (x != 0) return -1;
+            return m;
+        }
+
+        int reduce(int x) {
+            for (int b = 0; x && b < bits; b++)
+                if (x >> b & 1) x ^= basis[b];
+            return x;
+        }
+    };
 

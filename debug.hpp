@@ -77,7 +77,7 @@ void debug_bits(const T val, int splitby = 4, int numofbits = 16) {
     __int128 bits = (val);
     int start = numofbits - 1;
     for (int i = start; i >= 0; i--)
-        cerr << ((start - i) % splitby == 0 && i != start ? " " : "")
+        cerr << (splitby && (start - i) % splitby == 0 && i != start ? " " : "")
              << (int) (bits >> i & 1);
     cerr << ENDL;
 }
