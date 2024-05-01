@@ -1039,7 +1039,7 @@ snippet code_sparsetable
         int n;
         vector<vector<T>> sp;
         CMP func;
-     
+    
         void build(const vector<T> &a, const CMP &f) {
             func = f;
             n = static_cast<int>(a.size());
@@ -1053,7 +1053,7 @@ snippet code_sparsetable
                 }
             }
         }
-     
+    
         T query(int l, int r) const {
             int lg = 32 - __builtin_clz(r - l + 1) - 1;
             return func(sp[lg][l], sp[lg][r - (1 << lg) + 1]);
@@ -1623,7 +1623,7 @@ snippet code_mo
     int block_size;
     struct MO {
         struct Query {
-            int l, r, idx, k;
+            int l, r, idx;
             bool operator<(const Query &q) const {
                 if (l / block_size != q.l / block_size)
                     return pair(l, r) < pair(q.l, q.r);
@@ -1709,7 +1709,6 @@ snippet code_motree
             if (lc == u) q.l = st[u], q.r = st[v];
             else q.l = en[u], q.r = st[v], q.lc_value = vals[lc];
             mo.add_query(q);
-            debug(q.l, q.r);
         }
 
         auto get_ans() {

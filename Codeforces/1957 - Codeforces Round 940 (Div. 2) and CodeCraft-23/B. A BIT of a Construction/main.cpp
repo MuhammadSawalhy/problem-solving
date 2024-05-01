@@ -1,5 +1,5 @@
 // ﷽
-// $(URL)
+// https://codeforces.com/contest/1957/problem/B
 
 #include <bits/stdc++.h>
 #pragma GCC optimize("Ofast")
@@ -25,7 +25,20 @@ template<class T>
 using rpq = priority_queue<T, vector<T>, greater<T>>;
 
 void solve() {
-    return;
+    int n, k;
+    cin >> n >> k;
+
+    if (n == 1) {
+        cout << k << endl;
+        return;
+    }
+
+    vector<int> ans;
+    int p = (1 << 30) - 1;
+    while (p > k) p >>= 1;
+    cout << p << ' ' << k - p << ' ';
+    for (int i = 2; i < n; i++) cout << 0 << ' ';
+    cout << endl;
 }
 
 int32_t main(int32_t argc, char **argv) {
