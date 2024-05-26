@@ -2,7 +2,6 @@
 // https://cses.fi/problemset/task/1707
 
 #include <bits/stdc++.h>
-#pragma GCC optimize("Ofast")
 using namespace std;
 
 #ifdef SAWALHY
@@ -14,152 +13,42 @@ using namespace std;
 #endif
 
 #define ll long long
-#define int long long
 #define sz(v) (int) (v).size()
 #define all(v) v.begin(), v.end()
 #define rall(v) v.rbegin(), v.rend()
 #define minit(v, x...) v = min({v, x})
 #define maxit(v, x...) v = max({v, x})
 
-template<class T>
-using rpq = priority_queue<T, vector<T>, greater<T>>;
-
-struct Value;
-struct Update;
-struct Node;
-
-// Replaceable by primitives (using Value = long long)
-struct Value {
-    long long sum = 0, mn = 1e18, mx = 0;
-    Value() = default;
-    Value(ll value) { sum = mn = mx = value; }
-
-    Value &operator+=(const Value &other) {
-        sum += other.sum;
-        mn = min(mn, other.mn);
-        mx = max(mx, other.mx);
-        return *this;
-    }
-
-    Value operator+(const Value &other) const {
-        return Value(*this) += other;
-    }
-};
-
-struct Update {
-    // NOTE: Sometime you need to split the update, in these cases
-    // you should include the range [a, b] of the update in the struct Update
-    Value value;
-    enum State {
-        idle,
-        relative,
-        forced
-    } state = idle;
-
-    Update() = default;
-    Update(Value value, State state = forced) : value(value), state(state){};
-
-    Update &operator+=(const Update &other) {
-        if (state == idle || other.state == forced) {
-            *this = other;
-        } else {
-            assert(other.state == relative);
-            value += other.value;
-        }
-        return *this;
-    }
-
-    void apply_on(Value &other, int cnt) const {
-        if (state == forced) other = value;
-        else other += value;
-        other.sum += value.sum * (cnt - 1);
-    }
-
-    Update get(const Node &node) const { return *this; }
-};
-
-struct Node {
-    int l = -1, r = -1; // [l, r]
-    Update up;
-    Value value;
-
-    Node() = default;
-    Node(int l, int r, const Value &value) : l(l), r(r), value(value){};
-
-    void update(const Update &up) { this->up += up; }
-
-    void apply_update() {
-        up.apply_on(value, r - l + 1);
-        up.state = Update::idle;
-    }
-};
-
+// source: https://codeforces.com/blog/entry/18051
 struct Segtree {
     int n;
-    vector<Node> tree;
+    vector<int> tree;
 
-    Segtree(int n) {
-        if ((n & (n - 1)) != 0)
-            n = 1 << (32 - __builtin_clz(n));
-        this->n = n;
-        tree.assign(n << 1, Node());
-        for (int i = n; i < n << 1; i++)
-            tree[i].l = tree[i].r = i - n;
-        for (int i = n - 1; i > 0; i--)
-            tree[i].l = tree[i << 1].l, tree[i].r = tree[i << 1 | 1].r;
-    }
-
-    Segtree(const vector<Value> &values) : Segtree(values.size()) {
-        for (int i = 0; i < (int) values.size(); i++)
-            tree[i + n].value = values[i];
-        build();
+    Segtree() = default;
+    Segtree(int n) : n(n) {
+        tree.resize(n * 2);
     }
 
     void build() {
-        for (int i = n - 1; i > 0; --i) pull(i);
+        for (int i = n - 1; i > 0; --i)
+            tree[i] = tree[i << 1] + tree[i << 1 | 1];
     }
 
-    inline Value query(int i) { return query(1, i, i); }
-    inline Value query(int i, int j) { return query(1, i, j); }
-    inline void update(int i, const Update &val) { update(1, i, i, val); }
-    inline void update(int i, int j, const Update &val) { update(1, i, j, val); }
-
-private:
-    void pull(int i) {
-        tree[i].value = tree[i << 1].value + tree[i << 1 | 1].value;
+    void update(int i, int val, bool forces) {
+        for (forces ? tree[i += n] = val : tree[i] = max(tree[i += n], val); i > 1; i >>= 1)
+            tree[i >> 1] = max(tree[i], tree[i ^ 1]);
     }
 
-    void push(int i) {
-        if (tree[i].up.state != Update::idle) {
-            if (i < n) {
-                int l = i << 1, r = i << 1 | 1;
-                tree[l].update(tree[i].up.get(tree[l]));
-                tree[r].update(tree[i].up.get(tree[r]));
-            }
-            tree[i].apply_update();
+    auto query(int l, int r) {
+        int res = 0;
+        for (l += n, r += n + 1; l < r; l >>= 1, r >>= 1) {
+            if (l & 1) res = max(tree[l++], res);
+            if (r & 1) res = max(tree[--r], res);
         }
-    }
-
-    Value query(int i, int l, int r) {
-        push(i);
-        if (tree[i].r < l || r < tree[i].l) return Value(); // default
-        if (l <= tree[i].l && tree[i].r <= r) return tree[i].value;
-        return query(i << 1, l, r) + query(i << 1 | 1, l, r);
-    }
-
-    void update(int i, int l, int r, const Update &up) {
-        push(i);
-        if (tree[i].r < l || r < tree[i].l) return;
-        if (l <= tree[i].l && tree[i].r <= r) {
-            tree[i].update(up);
-            push(i); // to apply the update
-            return;
-        }
-        update(i << 1, l, r, up.get(tree[i << 1]));
-        update(i << 1 | 1, l, r, up.get(tree[i << 1 | 1]));
-        pull(i);
+        return res;
     }
 };
+
 
 const int N = 2505;
 Segtree sg(N);
@@ -192,19 +81,17 @@ void dfs(int i, int p) {
         back_depths.erase(back_depths.find(D[j]));
         // min depth >= D[j]
         auto Q2 = back_depths.lower_bound(D[j]);
-        debug(i, j);
         if (Q2 != back_depths.end())
-            minit(ans, D[i] - D[j] + 1 - max(Q.mx, D[i] - *Q2 - 1)), debug(*Q2);
-        debug(Q.mx);
-        minit(ans, D[i] - D[j] + 1 - Q.mx);
+            minit(ans, D[i] - D[j] + 1 - max(Q, D[i] - *Q2 - 1));
+        minit(ans, D[i] - D[j] + 1 - Q);
         back_depths.insert(D[j]);
     }
 
     // apply back_nodes
     for (auto j: back_nodes) {
-        auto q = sg.query(D[j], D[j]);
-        sg_updates.push_back({D[j], q.mx});
-        sg.update(D[j], Update(D[i] - D[j] - 1, Update::relative));
+        auto q = sg.tree[D[j] + sg.n];
+        sg_updates.push_back({D[j], q});
+        sg.update(D[j], D[i] - D[j] - 1, false);
     }
 
     // dfs to children
@@ -219,7 +106,7 @@ void dfs(int i, int p) {
     // revert updates
     reverse(all(sg_updates));
     for (auto [d, v]: sg_updates) {
-        sg.update(d, Update(v, Update::forced));
+        sg.update(d, v, true);
     }
 }
 
@@ -240,7 +127,7 @@ int32_t main(int32_t argc, char **argv) {
         adj[v].push_back(u);
     }
 
-    for (int iters = 5; iters; iters--) {
+    for (int iters = log(n) / log(3) + 1; iters; iters--) {
         for (int i = 1; i <= n; i++) {
             if (D[i] == 0) {
                 D[i] = 1;
