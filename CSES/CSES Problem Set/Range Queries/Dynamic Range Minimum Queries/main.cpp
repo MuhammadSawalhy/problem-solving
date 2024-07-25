@@ -12,34 +12,34 @@
 
 using namespace std;
 
-const int inf = 1e9 + 1;
-
-template<typename T>
-struct segtree {
-    int n;
+// source: https://codeforces.com/blog/entry/18051
+template<typename T = long long, T DEFAULT = T(1e18)>
+struct Segtree {
+    int n = 0;
     vector<T> tree;
 
-    segtree(int n) : n(n) {
-        tree.assign(n * 2, inf);
-    }
+    Segtree() = default;
+    Segtree(int n) : n(n) { tree.assign(n * 2, DEFAULT); }
+
+    inline T merge(const T &a, const T &b) { return min(a, b); }
 
     void build() {
-        for (int i = n - 1; i > 0; --i)
-            tree[i] = min(tree[i << 1], tree[i << 1 | 1]);
+        for (int i = n - 1; i > 0; i--)
+            tree[i] = merge(tree[i << 1], tree[i << 1 | 1]);
     }
 
     void update(int i, T val) {
         for (tree[i += n] = val; i > 1; i >>= 1)
-            tree[i >> 1] = min(tree[i], tree[i ^ 1]);
+            tree[i >> 1] = merge(tree[i], tree[i ^ 1]);
     }
 
-    T query(int l, int r) {
-        T res = inf;
+    auto query(int l, int r) {
+        T resl = DEFAULT, resr = resl;
         for (l += n, r += n + 1; l < r; l >>= 1, r >>= 1) {
-            if (l & 1) res = min(res, tree[l++]);
-            if (r & 1) res = min(res, tree[--r]);
+            if (l & 1) resl = merge(resl, tree[l++]);
+            if (r & 1) resr = merge(tree[--r], resr);
         }
-        return res;
+        return merge(resl, resr);
     }
 };
 
@@ -49,7 +49,7 @@ int32_t main() {
 
     int n, q, t, a, b;
     cin >> n >> q;
-    segtree<int> sg(n + 1);
+    Segtree<int> sg(n + 1);
 
     for (int i = 1; i <= n; i++) {
         cin >> sg.tree[i + n + 1];

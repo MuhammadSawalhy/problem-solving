@@ -10,11 +10,14 @@
 !*.py
 !*.java
 !*.txt
+!*.pdf
+!*.docx
 !*.snippets
 !.gitignore
 !.clang-format
-!Makefile
 !.snippets-pdf/
+!Makefile
+!go.mod
 .idea/
 build/
 .ccls-cache/

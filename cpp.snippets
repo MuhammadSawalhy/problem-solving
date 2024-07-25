@@ -100,7 +100,7 @@ snippet arr
     }
 
 
-# Brute force primality test
+# Primality test (Brute force)
 snippet code_is_prime
     bool is_prime(ll n) {
         if (n < 2) return false;
@@ -112,7 +112,7 @@ snippet code_is_prime
     }
 
 
-# Miller & Rabin probabilistic primality test
+# Primality test (Miller & Rabin probabilistic)
 snippet code_miller_rabin_ptest
     bool miller_rabin_ptest(unsigned ll n, int k = 3) {
         if (n < 2) return false;
@@ -197,13 +197,13 @@ snippet code_fast_seive
     void sieve(int n) {
         minp.assign(n + 1, 0);
         primes.clear();
-        
+
         for (int i = 2; i <= n; i++) {
             if (minp[i] == 0) {
                 minp[i] = i;
                 primes.push_back(i);
             }
-            
+
             for (auto p : primes) {
                 if (i * p > n) {
                     break;
@@ -217,7 +217,7 @@ snippet code_fast_seive
     }
 
 
-# Dijkstra's TSP algorithm
+# Dijkstra's algorithm
 snippet code_dijkstra
     long long dijkstra(int s, int e, vector<vector<pair<int, int>>> &adj) {
         int n = adj.size();
@@ -248,7 +248,7 @@ snippet code_dijkstra
     }
 
 
-# MST (minimum spanning tree), Kruskal's algorithm
+# MST (Kruskal's algorithm)
 snippet code_mst_kruskal
     struct Edge {
         int from, to;
@@ -280,7 +280,7 @@ snippet code_mst_kruskal
     }
 
 
-# computational geometry stuff for competitive prgramming
+# Geometry stuff for competitive prgramming
 snippet code_geo
     namespace Geometry
     {
@@ -753,65 +753,41 @@ snippet code_otree
     using ordered_set = tree<T, null_type, std::less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 
 
-# optimized segment tree with basic operations
+# Segment tree (Simple implementation)
 snippet code_segtree_simple
-    template<typename T = long long>
-    struct Sum {
-        T value;
-        Sum(T value = 0) : value(value) {}
-        Sum &operator+=(const Sum &other) { return value += other.value, *this; }
-        Sum operator+(const Sum &other) const { return value + other.value; }
-    };
-
-    template<typename T = long long>
-    struct Max {
-        T value;
-        Max(T value = numeric_limits<T>::min() / 2) : value(value) {}
-        Max &operator+=(const Max &other) { return value = max(value, other.value), *this; }
-        Max operator+(const Max &other) const { return Max(max(value, other.value)); }
-    };
-
-    template<typename T = long long>
-    struct Min {
-        T value;
-        Min(T value = numeric_limits<T>::max() / 2) : value(value) {}
-        Min &operator+=(const Min &other) { return value = min(value, other.value), *this; }
-        Min operator+(const Min &other) const { return Min(min(value, other.value)); }
-    };
-
     // source: https://codeforces.com/blog/entry/18051
-    template<typename T>
+    template<typename T = long long, T DEFAULT = T(1e18)>
     struct Segtree {
-        int n;
+        int n = 0;
         vector<T> tree;
 
         Segtree() = default;
-        Segtree(int n) : n(n) {
-            tree.resize(n * 2);
-        }
+        Segtree(int n) : n(n) { tree.assign(n * 2, DEFAULT); }
+
+        inline T merge(const T &a, const T &b) { return min(a, b); }
 
         void build() {
-            for (int i = n - 1; i > 0; --i)
-                tree[i] = tree[i << 1] + tree[i << 1 | 1];
+            for (int i = n - 1; i > 0; i--)
+                tree[i] = merge(tree[i << 1], tree[i << 1 | 1]);
         }
 
         void update(int i, T val) {
             for (tree[i += n] = val; i > 1; i >>= 1)
-                tree[i >> 1] = tree[i] + tree[i ^ 1];
+                tree[i >> 1] = merge(tree[i], tree[i ^ 1]);
         }
 
         auto query(int l, int r) {
-            T res;
+            T resl = DEFAULT, resr = resl;
             for (l += n, r += n + 1; l < r; l >>= 1, r >>= 1) {
-                if (l & 1) res += tree[l++];
-                if (r & 1) res += tree[--r];
+                if (l & 1) resl = merge(resl, tree[l++]);
+                if (r & 1) resr = merge(tree[--r], resr);
             }
-            return res.value;
+            return merge(resl, resr);
         }
     };
 
 
-# segment tree data structure
+# Segment tree (Sawalhy's implementation)
 snippet code_segtree
     struct Value;
     struct Update;
@@ -951,8 +927,61 @@ snippet code_segtree
     };
 
 
-# Persistent segtree
-snippet code_persistent_sgtree
+# Simple Segtree with lazy update
+snippet code_segtree_simplelazy
+    template <class T = long long, T DEFAULT = 0>
+    struct Segtree {
+        int n;
+        vector<T> tree, ups;
+
+        Segtree(int n) {
+            if ((n & (n - 1)) != 0)
+                n = 1 << (32 - __builtin_clz(n));
+            this->n = n;
+            tree.assign(n << 1, DEFAULT);
+            ups.assign(n << 1, DEFAULT);
+        }
+
+        inline T merge(const T &a, const T &b) { return a + b; }
+
+        inline void push(int i, int L, int R) {
+            if (ups[i] != DEFAULT) {
+                if (i < n) {
+                    ups[i << 1] = merge(ups[i << 1], ups[i]);
+                    ups[i << 1 | 1] = merge(ups[i << 1 | 1], ups[i]);
+                }
+                tree[i] = merge(tree[i], ups[i] * (R - L + 1));
+                ups[i] = DEFAULT;
+            }
+        }
+
+        T query(int l, int r, int i, int L, int R) {
+            push(i, L, R);
+            if (R < l || r < L) return DEFAULT;
+            if (l <= L && R <= r) return tree[i];
+            int mid = (L + R) / 2;
+            return merge(
+                    query(l, r, i << 1, L, mid),
+                    query(l, r, i << 1 | 1, mid + 1, R));
+        }
+
+        void update(int l, int r, const T &up, int i, int L, int R) {
+            push(i, L, R);
+            if (R < l || r < L) return;
+            if (l <= L && R <= r) {
+                ups[i] += up, push(i, L, R);
+                return;
+            }
+            int mid = (L + R) / 2;
+            update(l, r, up, i << 1, L, mid);
+            update(l, r, up, i << 1 | 1, mid + 1, R);
+            tree[i] = merge(tree[i << 1], tree[i << 1 | 1]);
+        }
+    };
+
+
+# Dynamic Segtree + Persistent Segtree
+snippet code_sgtree_dynamic
     const int MIN = -(1 << 30), MAX = (1 << 30) - 1;
     const int DEFAULT = 0;
 
@@ -1002,7 +1031,27 @@ snippet code_persistent_sgtree
     };
 
 
-# n-d binary indexed tree
+# BIT (1D simple implementation)
+snippet code_bit_simple
+    struct BIT {
+        int n;
+        vector<int> tree;
+
+        BIT(int size) : n(size) { tree.resize(n + 1, 0); }
+
+        void update(int i, int delta) {
+            for (; i <= n; i += i & -i) tree[i] += delta;
+        }
+
+        int query(int i) {
+            int sum = 0;
+            for (; i > 0; i -= i & -i) sum += tree[i];
+            return sum;
+        }
+    };
+
+
+# BIT (multiple dimensions)
 snippet code_bit
     template<class T, int... Ns>
     struct BIT {
@@ -1152,7 +1201,7 @@ snippet code_dsu
     };
 
 
-# matrix exponentiation
+# Matrix exponentiation
 snippet code_matrix
     constexpr ll MOD = 1e9 + 7;
 
@@ -1232,7 +1281,7 @@ snippet code_matrix
     };
 
 
-# fast input scanner
+# Fast input scanner
 snippet code_scanner
     char in[1 << 24];
     struct Scanner {
@@ -1250,7 +1299,7 @@ snippet code_scanner
     } sc;
 
 
-# pascal triagle, useful for combinations
+# Pascal triagle, useful for combinations
 snippet code_pascal
     vector<vector<Z>> pascal;
     void build_pascal(int d) {
@@ -1268,7 +1317,7 @@ snippet code_pascal
     }
 
 
-# Description
+# Big integer
 snippet code_bigint
     template<int base = 10>
     class bigint {
