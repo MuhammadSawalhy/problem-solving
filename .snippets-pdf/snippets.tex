@@ -1,18 +1,29 @@
-\documentclass[10pt]{article}
+\documentclass[14pt]{extarticle}
 
 \input src/headers.tex
 \input src/commands.tex
 \input src/styles.tex
 
 \title{\vspace{-4ex}\Large{C++ Snippets}}
-\author{Muhammad Samir Al-Sawalhy}
+\author{Muhammad Samir Assawalhy}
 \date{\today}
+
+\pagestyle{fancy}
+\fancyhead[L]{Assawalhy's Snippets}
+\fancyhead[R]{\thepage}
+\fancyfoot[C]{}
+
+\fancypagestyle{plain} {
+  \fancyhead[L]{Assawalhy's Snippets}
+  \fancyhead[R]{\thepage}
+  \fancyfoot[C]{}
+}
 
 \begin{document}
 
-\begin{landscape}
+% \begin{landscape}
 
-  \begin{multicols}{2}
+  % \begin{multicols}{2}
 
     \maketitle
     \vspace{-13ex}
@@ -23,8 +34,8 @@
 
     \input src/sections.tex
 
-  \end{multicols}
+  % \end{multicols}
 
-\end{landscape}
+% \end{landscape}
 
 \end{document}

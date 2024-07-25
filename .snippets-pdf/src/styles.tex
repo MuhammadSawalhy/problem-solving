@@ -4,20 +4,23 @@
   breaklines=true,
   xleftmargin=\parindent,
   showstringspaces=false,
-  basicstyle=\fontsize{5.5}{6}\ttfamily,
+  basicstyle=\fontsize{12}{14}\ttfamily,
   numbers=left,
-  numberstyle=\tiny\color{lightgray},
-  numbersep=6pt,
+  numberstyle=\tiny\color{gray},
+  numbersep=14pt,
   showspaces=false,
 }
+
 
 \lstdefinestyle{cpp} {
   style=shared,
   language=C++,
   otherkeywords={size, front, back, cin, cout, endl, sizeof, memset},
-  keywordstyle=\bfseries\color{Blue},
+  keywordstyle=\bfseries\color{Blue}, % Primary keyword style (e.g., std, typedef)
+  keywordstyle={[2]\bfseries\color{violet}}, % Secondary keyword style for control statements
+  morekeywords=[2]{if, else, switch, case, default, for, while, do}, % Secondary keywords
   commentstyle=\itshape\color{RoyalPurple},
-  identifierstyle=\color{Black},
+  identifierstyle=\color{black},
   stringstyle=\color{OliveGreen},
 }
 
@@ -39,13 +42,3 @@
 
 \lstset{escapechar=@}
 
-\pagestyle{fancy}
-\fancyhead[L]{Al-Sawalhy's Snippets}
-\fancyhead[R]{\thepage}
-\fancyfoot[C]{}
-
-\fancypagestyle{plain} {
-  \fancyhead[L]{Al-Sawalhy's Snippets}
-  \fancyhead[R]{\thepage}
-  \fancyfoot[C]{}
-}
