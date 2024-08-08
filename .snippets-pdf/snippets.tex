@@ -21,21 +21,38 @@
 
 \begin{document}
 
-% \begin{landscape}
+\maketitle
+\vspace{-13ex}
 
-  % \begin{multicols}{2}
+\tableofcontents
 
-    \maketitle
-    \vspace{-13ex}
+\pagestyle{fancy}
 
-    \tableofcontents
+\input src/sections.tex
 
-    \pagestyle{fancy}
+\section{Math & Miscellaneous}
 
-    \input src/sections.tex
+\subsection{Master's theorem}
 
-  % \end{multicols}
+Consider the recurrence relation:
+\[
+T(n) = a T\left(\frac{n}{b}\right) + f(n)
+\]
+where \( a \geq 1 \) and \( b > 1 \). The solution to this recurrence relation depends on the asymptotic behavior of \( f(n) \) compared to \( n^{\log_b a} \):
 
-% \end{landscape}
+\begin{enumerate}
+    \item If \( f(n) = O(n^c) \) where \( c < \log_b a \), then:
+    \[
+    T(n) = O(n^{\log_b a})
+    \]
+    \item If \( f(n) = \Theta(n^{\log_b a}) \), then:
+    \[
+    T(n) = \Theta(n^{\log_b a} \log n)
+    \]
+    \item If \( f(n) = \Omega(n^c) \) where \( c > \log_b a \), and if \( a f\left(\frac{n}{b}\right) \leq k f(n) \) for some constant \( k < 1 \) and sufficiently large \( n \), then:
+    \[
+    T(n) = \Theta(f(n))
+    \]
+\end{enumerate}
 
 \end{document}

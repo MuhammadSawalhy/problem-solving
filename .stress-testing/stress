@@ -5,34 +5,46 @@ set -e
 DIR="/home/ms/myp/problem-solving"
 STRESS_DIR="/tmp/stress-testing"
 
-check_file() {
-    if [ ! -f "$1" ]; then
-        echo "File $1 not found!"
+# Ensure necessary files exist
+for file in stress.cpp main.cpp gen.cpp; do
+    if [ ! -f "$file" ]; then
+        echo "Error: Required file $file not found!"
         exit 1
+    fi
+done
+
+# Create stress-testing directory
+mkdir -p "$STRESS_DIR"
+
+# Function to link files if they exist, or use default from DIR
+link_or_default() {
+    local file="$1"
+    local default="$2"
+
+    if [ -f "$file" ]; then
+        ln -sf "$(realpath "$file")" "$STRESS_DIR"
+    elif [ -f "$default" ]; then
+        ln -sf "$(realpath "$default")" "$STRESS_DIR"
     fi
 }
 
-link_file() {
-    ln -sf "$(realpath "$1")" "$2"
-}
+# Link required files
+for file in stress.cpp main.cpp gen.cpp; do
+    ln -sf "$(realpath "$file")" "$STRESS_DIR"
+done
 
-check_file stress.cpp
-check_file main.cpp
-check_file gen.cpp
+# Link optional files or defaults
+link_or_default "check.cpp"
+link_or_default "validate.cpp"
+link_or_default "Makefile" "$DIR/.stress-testing/Makefile"
+link_or_default "stress.sh" "$DIR/.stress-testing/stress.sh"
 
-mkdir -p "$STRESS_DIR"
+[ ! -f "check.cpp" ] && rm -f "$STRESS_DIR"/check* > /dev/null 2>&1
+[ ! -f "validate.cpp" ] && rm -f "$STRESS_DIR"/validate* > /dev/null 2>&1
 
-link_file stress.cpp "$STRESS_DIR"
-link_file main.cpp "$STRESS_DIR"
-link_file gen.cpp "$STRESS_DIR"
-
-cd "$DIR"/.stress-testing
-
-link_file Makefile "$STRESS_DIR"
-link_file stress.sh "$STRESS_DIR"
-
+# Change to stress-testing directory and compile
 cd "$STRESS_DIR"
-
 make stressing
 
+# Run the stress test script
 bash stress.sh "$@"

@@ -17,6 +17,7 @@
 !.clang-format
 !.snippets-pdf/
 !Makefile
+!.md
 !go.mod
 .idea/
 build/

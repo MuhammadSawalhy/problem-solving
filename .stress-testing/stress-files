@@ -4,6 +4,32 @@ set -e
 
 DIR="/home/ms/myp/problem-solving"
 
+print_help() {
+    cat <<- EOF
+┌──┬─────────────┬───────────────────────────────────────────────────┄┄┄┄┄┄┄┄┄
+│-h│ --help      │ Show this help message
+│-a│ --all       │ Get all stress files
+│-c│ --check     │ Also get check.cpp file
+│-v│ --validate  │ Also get validate.cpp file
+│-s│ --script    │ Also get stress.sh file
+│-m│ --make      │ Also get Makefile file
+└──┴─────────────┴───────────────────────────────────────────────────┄┄┄┄┄┄┄┄┄
+
+USAGE:
+  stress-files [...options]
+
+EXAMPLES:
+  # get basic stress files: stress.cpp gen.cpp
+  stress-files
+
+  # get extra files: check.cpp validate.cpp
+  stress-files -c -v
+
+  # get all files
+  stress-files -a
+EOF
+}
+
 copy_file() {
     if [ -f "$1" ]; then
         echo "Already exists: $1"
@@ -15,3 +41,35 @@ copy_file() {
 
 copy_file stress.cpp
 copy_file gen.cpp
+
+for arg in "$@"; do
+    case $arg in
+        -c|--check)
+            copy_file check.cpp
+            ;;
+        -v|--validate)
+            copy_file validate.cpp
+            ;;
+        -m|--make)
+            copy_file Makefile
+            ;;
+        -s|--script)
+            copy_file stress.sh
+            ;;
+        -a|--all)
+            copy_file check.cpp
+            copy_file validate.cpp
+            copy_file Makefile
+            copy_file stress.sh
+            ;;
+        -h|--help)
+            print_help
+            exit 0
+            ;;
+        *)
+            echo "Unknown option: $arg"
+            print_help
+            exit 1
+            ;;
+    esac
+done

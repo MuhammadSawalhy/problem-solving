@@ -15,6 +15,7 @@ using namespace std;
 
 #define ll long long
 #define int long long
+#define pii pair<int, int>
 #define sz(v) (int) (v).size()
 #define all(v) v.begin(), v.end()
 #define rall(v) v.rbegin(), v.rend()
@@ -32,7 +33,7 @@ int32_t main(int32_t argc, char **argv) {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL), cout.tie(NULL);
 
-    int t;
+    int t = 1;
     cin >> t;
     while (t--)
         solve();

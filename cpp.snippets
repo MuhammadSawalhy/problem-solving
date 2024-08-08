@@ -14,6 +14,7 @@ snippet temp
 
     #define ll long long
     #define int long long
+    #define pii pair<int, int>
     #define all(v) v.begin(), v.end()
     #define rall(v) v.rbegin(), v.rend()
     #define minit(v, x) v = min(v, x)
@@ -45,6 +46,7 @@ snippet tempt
 
     #define ll long long
     #define int long long
+    #define pii pair<int, int>
     #define all(v) v.begin(), v.end()
     #define rall(v) v.rbegin(), v.rend()
     #define minit(v, x) v = min(v, x)
@@ -58,7 +60,7 @@ snippet tempt
         ios_base::sync_with_stdio(false);
         cin.tie(NULL), cout.tie(NULL);
 
-        int t;
+        int t = 1;
         cin >> t;
         while (t--)
             solve();
@@ -317,14 +319,19 @@ snippet code_geo
         Point(T _x, T _y) : x(_x), y(_y) {}
         Point operator+(const Point &p) const { return Point(x + p.x, y + p.y); }
         Point operator-(const Point &p) const { return Point(x - p.x, y - p.y); }
-        Point operator/(T denom) const { return Point(x / denom, y / denom); }
-        Point operator*(T scaler) const { return Point(x * scaler, y * scaler); }
+        Point operator/(T s) const { return Point(x / s, y / s); }
+        Point operator*(T s) const { return Point(x * s, y * s); }
 
         T dot(const Point &p) const { return x * p.x + y * p.y; }
         T cross(const Point &p) const { return x * p.y - y * p.x; }
         T dot(const Point &a, const Point &b) const { return (a - *this).dot(b - *this); }
         T cross(const Point &a, const Point &b) const { return (a - *this).cross(b - *this); }
         T norm() const { return dot(*this); }
+
+        Point scale(long double l) {
+            auto a = ang();
+            return Point{l * cos(a), l * sin(a)};
+        };
 
         long double len() const { return sqrtl(dot(*this)); }
         long double ang(bool pos = true) const {
@@ -388,6 +395,7 @@ snippet code_geo
     struct Line : public Segment {
         Line() {}
         Line(pt a, pt b) : Segment(a, b) {}
+        Line(pt a, long double slope) : Segment(a, a + Point(1, 0).rotate(slope)) {}
         bool operator==(const Line &l) const { return iseq0((a - b).cross(l.a - l.b)); };
     };
 
@@ -745,7 +753,7 @@ snippet code_geo
 
 
 # STL policy container (oset, omap)
-snippet code_otree
+snippet code_ordered_set
     #include<ext/pb_ds/assoc_container.hpp>
     #include<ext/pb_ds/tree_policy.hpp>
     using namespace __gnu_pbds;
@@ -814,7 +822,7 @@ snippet code_segtree
     struct Update {
         // NOTE: Sometime you need to split the update, in these cases
         // you should include the range [a, b] of the update in the struct Update
-        Value value;
+        int value;
         enum State {
             idle,
             relative,
@@ -822,22 +830,22 @@ snippet code_segtree
         } state = idle;
 
         Update() = default;
-        Update(Value value, State state = forced) : value(value), state(state){};
+        Update(int value, State state = forced) : value(value), state(state){};
 
         Update &operator+=(const Update &other) {
             if (state == idle || other.state == forced) {
                 *this = other;
             } else {
                 assert(other.state == relative);
-                value += other.value;
+                value += other.value; // NOTE: merge updates
             }
             return *this;
         }
 
         void apply_on(Value &other, int cnt) const {
-            if (state == forced) other = value;
-            else other += value;
-            other.sum += value.sum * (cnt - 1);
+            // if (state == forced) other = value;
+            // else other += value;
+            // other.sum += value.sum * (cnt - 1);
         }
 
         Update get(const Node &node) const { return *this; }
@@ -929,35 +937,38 @@ snippet code_segtree
 
 # Simple Segtree with lazy update
 snippet code_segtree_simplelazy
-    template <class T = long long, T DEFAULT = 0>
     struct Segtree {
         int n;
-        vector<T> tree, ups;
+        typedef long long T;
+        const T def = 0;
+        const int updef = 0;
+        vector<T> tree;
+        vector<int> ups;
 
         Segtree(int n) {
             if ((n & (n - 1)) != 0)
                 n = 1 << (32 - __builtin_clz(n));
             this->n = n;
-            tree.assign(n << 1, DEFAULT);
-            ups.assign(n << 1, DEFAULT);
+            tree.assign(n << 1, def);
+            ups.assign(n << 1, updef);
         }
 
         inline T merge(const T &a, const T &b) { return a + b; }
 
         inline void push(int i, int L, int R) {
-            if (ups[i] != DEFAULT) {
+            if (ups[i] != updef) {
                 if (i < n) {
-                    ups[i << 1] = merge(ups[i << 1], ups[i]);
-                    ups[i << 1 | 1] = merge(ups[i << 1 | 1], ups[i]);
+                    ups[i << 1] += ups[i];
+                    ups[i << 1 | 1] += ups[i];
                 }
-                tree[i] = merge(tree[i], ups[i] * (R - L + 1));
-                ups[i] = DEFAULT;
+                tree[i] += ups[i] * (R  - L + 1);
+                ups[i] = updef;
             }
         }
 
         T query(int l, int r, int i, int L, int R) {
             push(i, L, R);
-            if (R < l || r < L) return DEFAULT;
+            if (R < l || r < L) return def;
             if (l <= L && R <= r) return tree[i];
             int mid = (L + R) / 2;
             return merge(
@@ -965,7 +976,7 @@ snippet code_segtree_simplelazy
                     query(l, r, i << 1 | 1, mid + 1, R));
         }
 
-        void update(int l, int r, const T &up, int i, int L, int R) {
+        void update(int l, int r, int up, int i, int L, int R) {
             push(i, L, R);
             if (R < l || r < L) return;
             if (l <= L && R <= r) {
@@ -1176,11 +1187,9 @@ snippet code_dsu
         vector<int> size, parent;
         int forests;
 
-        DSU(int n) {
-            forests = n;
+        DSU(int n): forests(n) {
             size.assign(n, 1);
-            parent.resize(n);
-            iota(all(parent), 0);
+            parent.resize(n), iota(all(parent), 0);
         }
 
         bool connected(int x, int y) { return find(x) == find(y); }
@@ -1190,12 +1199,12 @@ snippet code_dsu
             return parent[x] = find(parent[x]);
         }
 
-        bool uni(int x, int y) {
+        bool uni(int x, int y) { // merge x into y
             x = find(x), y = find(y);
             if (x == y) return false;
             forests--;
-            parent[y] = x;
-            size[x] += size[y];
+            parent[x] = y;
+            size[y] += size[x];
             return true;
         }
     };
@@ -2191,9 +2200,10 @@ snippet code_stress
 
 # XOR basis
 snippet code_xorbasis
-    template<int bits>
+    const int bits = 20;
+
     struct XORBasis {
-        array<int, bits> basis;
+        array<int, bits> basis{};
 
         void reset() { basis = array<int, bits>(); }
 
@@ -2203,7 +2213,7 @@ snippet code_xorbasis
 
         bool insert(int x) {
             for (int b = 0; x && b < bits; b++) {
-                if (x >> b & 1 ^ 1) continue;
+                if ((x >> b & 1) == 0) continue;
                 if (!basis[b]) return basis[b] = x, true;
                 x ^= basis[b];
             }
@@ -2221,7 +2231,7 @@ snippet code_xorbasis
             for (int b = 0; b < bits; b++) {
                 if (x >> b & 1 ^ 1) continue;
                 if (!basis[b]) return -1;
-                x ^= basis[b], m |= 1 << b;
+                x ^= basis[b], m |= 1LL << b;
             }
             if (x != 0) return -1;
             return m;

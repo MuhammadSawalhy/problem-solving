@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -e
-
 i=0
 
 if [ $# -gt 0 ]; then
@@ -11,10 +9,22 @@ fi
 while true; do
   echo "$((++i))"
   ./gen $i 2> /dev/null 1> ./stress-inf
+
+  if [ -f validate ]; then
+    ./validate < ./stress-inf ||
+      { echo && echo "ERROR: validtor failed" >&2 && exit 1; }
+  fi
+
   ./stress < ./stress-inf 2> /dev/null 1> ./stress-ans
   ./main < ./stress-inf 2> /dev/null  1> ./stress-ouf
-  # ./checker ./stress-inf ./stress-ouf ./stress-ans
-  if ! diff ./stress-ouf ./stress-ans; then
+
+  if [ -f check ]; then
+    ./check ./stress-inf ./stress-ouf ./stress-ans
+  else
+    diff ./stress-ouf ./stress-ans
+  fi
+
+  if (($?)); then
     echo
     echo "--------------------"
     echo "INPUT:"

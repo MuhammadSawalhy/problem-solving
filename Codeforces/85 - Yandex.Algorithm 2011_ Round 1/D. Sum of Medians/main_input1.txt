@@ -1,0 +1,15 @@
+14
+add 1
+add 7
+add 2
+add 5
+sum
+add 6
+add 8
+add 9
+add 3
+add 4
+add 10
+sum
+del 1
+sum
