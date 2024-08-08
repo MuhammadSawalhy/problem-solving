@@ -30,9 +30,9 @@ Run `stress-files --help` for help. You should also check `setup.sh` in the repo
 1. Run `stress-files --check --validate --script` to get `stress.cpp`, `gen.cpp`, `check.cpp`, `validate.cpp` and `stress.sh` files
 1. Fill your files
 1. Run `stress`, so the following will happen:
-  1. Validate the generated test case using the validator
-  1. Run the solution and store the result
-  1. Check it using the checker
+   1. Validate the generated test case using the validator
+   1. Run the solution and store the result
+   1. Check it using the checker
 
 ## Future work
 
