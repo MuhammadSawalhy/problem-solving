@@ -1,6 +1,6 @@
 # Stress testing scripts
 
-> [NOTE]
+> [!NOTE]
 > Understanding how [Polygon](https://polygon.codeforces.com) works will help you understand these scripts.
 
 Here are scripts for different use cases and scenarios.
