@@ -84,14 +84,29 @@ struct Gen {
 };
 
 void gen() {
-    int n = rnd.next(2, 20), q = rnd.next(1, 5);
+    int n = rnd.next(1, 10), m = rnd.next(1, 10), k = rnd.next(1, 10);
+    println(n, m);
 
-    println(n, q, Gen::str(10, 2));
+    vi owner(m);
+    vi val(n);
 
-    while (q--) {
-        int l = rnd.next(1ll, n - 1);
-        int r = rnd.next(l + 1, n);
-        println(l, r);
+    for (int i = 0; i < m; i++) {
+        owner[i] = rnd.next(1ll, n);
+    }
+
+    for (int i = 0; i < n; i++) {
+        val[i] = rnd.next(1, 100);
+    }
+
+    println(owner);
+    println(val);
+    println(k);
+
+    for (int i = 0; i < k; i++) {
+        int l = rnd.next(1ll, m);
+        int r = rnd.next(1ll, m);
+        int a = rnd.next(1, 100);
+        println(l, r, a);
     }
 }
 

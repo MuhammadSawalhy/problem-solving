@@ -30,24 +30,44 @@ void solve() {
     int n, k;
     cin >> n >> k;
     vector<int> a(n);
+
     for (int i = 0; i < n; i++) {
         cin >> a[i];
     }
 
     int rest = n - (n - 1) / k * k;
 
-    debug(n, k, res);
+    debug(n, k, rest);
     debug(a);
 
     int l = 0, r = 1e9 + 1;
+    vector<int> dp(n);
+
+    const int inf = 1e18;
+
     while (r - l > 1) {
-        int mid = (l + r) / 2;
+        int x = (l + r) / 2;
+        // count items >= x such that
+        // the count is > rest / 2
 
-        // count items <= mid such that the count is >= (k + 1) / 2
+        dp.assign(n, -inf);
 
+        for (int i = n - 1; i >= 0; i--) {
+            if (i % k == rest - 1) {
+                maxit(dp[i], i + k < n ? dp[i + k] : -inf, 1ll * (a[i] >= x));
+            } else {
+                maxit(dp[i], i + k < n ? dp[i + k] : -inf, dp[i + 1] + (a[i] >= x));
+            }
+        }
+
+        if (dp[0] > rest / 2) {
+            l = x;
+        } else {
+            r = x;
+        }
     }
 
-    cout << r << endl;
+    cout << l << endl;
 }
 
 int32_t main(int32_t argc, char **argv) {

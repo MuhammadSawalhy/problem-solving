@@ -1,5 +1,5 @@
 // ﷽
-// https://codeforces.com/contest/1993/problem/F1
+// https://codeforces.com/contest/1998/problem/A
 
 #include <bits/stdc++.h>
 #pragma GCC optimize("Ofast")
@@ -25,48 +25,21 @@ using namespace std;
 template<class T>
 using rpq = priority_queue<T, vector<T>, greater<T>>;
 
-int getLR(char c) {
-    if (c == 'L') return -1;
-    if (c == 'R') return +1;
-    return 0;
-}
-
-int getUD(char c) {
-    if (c == 'D') return -1;
-    if (c == 'U') return +1;
-    return 0;
-}
-
 void solve() {
-    int n, k, w, h;
-    cin >> n >> k >> w >> h;
-    string s;
-    cin >> s;
+    int x, y, k;
+    cin >> x >> y >> k;
 
-    int ans = 0;
-
-    map<pii, int> fr;
-
-    h *= 2, w *= 2;
-    int x = 0, y = 0;
-    for (int i = 0; i < n; i++) {
-        x += getLR(s[i]);
-        y += getUD(s[i]);
-        x = (x % w + w) % w;
-        y = (y % h + h) % h;
-        fr[{x, y}]++;
-    }
-
-    int xx = 0, yy = 0;
-
+    int xx[k], yy[k];
     for (int i = 0; i < k; i++) {
-        ans += fr[{(w - xx) % w, (h - yy) % h}];
-        xx += x, yy += y;
-        xx = (xx % w + w) % w;
-        yy = (yy % h + h) % h;
+        xx[i] = x;
     }
-
-    cout << ans << endl;
+    for (int i = 0; i < k / 2; i++) {
+        xx[i] = x - i - 1;
+        xx[k - 1 - i] = x + i + 1;
+    }
+    for (int i = 0; i < k; i++) {
+        cout << xx[i] << ' ' << y << endl;
+    }
 }
 
 int32_t main(int32_t argc, char **argv) {

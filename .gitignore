@@ -15,7 +15,7 @@
 !*.snippets
 !*.md
 !.gitignore
-!.clang-format
+!.clang*
 !.snippets-pdf/
 !Makefile
 !go.mod
