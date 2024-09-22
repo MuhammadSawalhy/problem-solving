@@ -1,0 +1,9 @@
+4
+2
+aa
+3
+aba
+4
+abcb
+12
+abcabcabcabc

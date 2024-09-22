@@ -18,6 +18,7 @@ using namespace std;
 #define vi vector<int>
 #define vvi vector<vector<int>>
 #define pii pair<int, int>
+#define vvi vector<vector<int>>
 #define sz(v) (int) (v).size()
 #define all(v) v.begin(), v.end()
 #define rall(v) v.rbegin(), v.rend()

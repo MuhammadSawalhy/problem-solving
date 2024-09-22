@@ -12,142 +12,70 @@
 
 using namespace std;
 
-using ValueType = ll;
+template<typename T = ll, bool persist = false>
+struct DynamicSegTree {
+    static const int MIN = -(1 << 30), MAX = (1 << 30) - 1;
+    static const T DEFAULT = 0;
 
-struct Node {
-    ValueType sum = 0, mn = 1e18, mx = -1e18;
-    ll relative_update = 0;
-    bool pending_update = false;
+    static T merge(ll a, ll b) { return a + b; }
 
-    Node() = default;
-    Node(ValueType value) { update(value); };
+    struct Node {
+        T x = DEFAULT;
+        ll up = 0;
+        Node *l = nullptr, *r = nullptr;
 
-    int count_children(int node, int tree_size) const {
-        return 1 << (31 - __builtin_clz(tree_size / (node + 1)));
-    }
+        Node() = default;
+        Node(Node *l, Node *r) : l(l), r(r) { pull(); }
+        ~Node() { delete l, delete r; }
 
-    void update(const ValueType &val) {
-        sum = mn = mx = val;
-        relative_update = 0;
-        pending_update = true;
-    }
-
-    void propagate(int node, vector<Node> &tree) {
-        int left = node << 1, right = node << 1 | 1;
-        int sz = tree.size();
-
-        if (pending_update) {
-            if (left < sz) tree[left].update(sum);
-            if (right < sz) tree[right].update(sum);
-            pending_update = false;
+        inline void pull() {
+            if (l) x = merge(l->x, r->x);
         }
 
-        relupdate(count_children(node, sz));
-        if (left < sz) tree[left].relative_update += relative_update;
-        if (right < sz) tree[right].relative_update += relative_update;
-        relative_update = 0;
-    }
+        inline void update(int val) { up += val; }
 
-    void relupdate(int cnt) {
-        sum += 1LL * cnt * relative_update;
-        mn += relative_update;
-        mx += relative_update;
-    }
-
-    Node operator+(const Node &other) const {
-        Node ans = *this;
-        ans.sum += other.sum;
-        ans.mn = min(ans.mn, other.mn);
-        ans.mx = max(ans.mx, other.mx);
-        return ans;
-    }
-};
-
-struct segtree {
-    int n;
-    vector<Node> tree;
-
-    segtree(int n) {
-        if ((n & (n - 1)) != 0)
-            n = 1 << (32 - __builtin_clz(n));
-        this->n = n;
-        tree.assign(n << 1, Node());
-    }
-
-    void build() {
-        for (int i = n - 1; i > 0; --i)
-            tree[i] = tree[i << 1] + tree[i << 1 | 1];
-    }
-
-    void update(int i, int j, const ValueType &val) {
-        update(1, 0, n - 1, i, j, val);
-    }
-
-    void update(int i, const ValueType &val) {
-        update(i, i, val);
-    }
-
-    void relative_update(int i, int j, ll val) {
-        relative_update(1, 0, n - 1, i, j, val);
-    }
-
-    Node query(int l, int r) {
-        return query(1, 0, n - 1, l, r);
-    }
-
-    int lower_bound(const ValueType &x) {
-        return lower_bound(x, 1, 0, n - 1);
-    }
-
-private:
-    Node query(int i, int l, int r, int L, int R) {
-        tree[i].propagate(i, tree);
-        if (R < l || r < L) return ValueType(0); // default
-        if (L <= l && r <= R) return tree[i];
-
-        int mid = (r + l) >> 1;
-        const auto &lval = query(i << 1, l, mid, L, R);
-        const auto &rval = query(i << 1 | 1, mid + 1, r, L, R);
-
-        return lval + rval;
-    }
-
-    void update(int i, int l, int r, int L, int R, const ValueType &val) {
-        tree[i].propagate(i, tree);
-        if (R < l || r < L) return;
-        if (L <= l && r <= R) {
-            tree[i].update(val);
-            tree[i].propagate(i, tree);
-            return;
+        void push(int cnt) {
+            if (cnt > 1 && !l) l = new Node(), r = new Node();
+            if (up == 0) return;
+            x = merge(x, up * (cnt)); // apply update
+            if (cnt > 1) l->update(up), r->update(up), up = 0;
+            up = 0;
         }
+    };
 
-        int mid = (r + l) >> 1;
-        update(i << 1, l, mid, L, R, val);
-        update(i << 1 | 1, mid + 1, r, L, R, val);
-        tree[i] = tree[i << 1] + tree[i << 1 | 1];
+    // ~DynamicSegTree() { delete root; }
+
+    Node *root = new Node();
+
+    Node *update(int l, int r, ll up) {
+        return root = update(l, r, up, root, MIN, MAX);
     }
 
-    void relative_update(int i, int l, int r, int L, int R, ll val) {
-        tree[i].propagate(i, tree);
-        if (R < l || r < L) return;
-        if (L <= l && r <= R) {
-            tree[i].relative_update += val;
-            tree[i].propagate(i, tree);
-            return;
+    ll query(int l, int r) { return query(l, r, root, MIN, MAX); }
+
+    Node *update(int l, int r, ll up, Node *node, int L, int R) {
+        if (node) node->push(R - L + 1);
+        if (!node || l > R || r < L || L > R) return node;
+        if (persist) node = new Node(*node);
+        if (l <= L && R <= r) {
+            node->update(up), node->push(R - L + 1);
+            debug(L, R, node->x);
+            return node;
         }
-
-        int mid = (r + l) >> 1;
-        relative_update(i << 1, l, mid, L, R, val);
-        relative_update(i << 1 | 1, mid + 1, r, L, R, val);
-        tree[i] = tree[i << 1] + tree[i << 1 | 1];
+        int mid = L + (R - L) / 2;
+        node->l = update(l, r, up, node->l, L, mid);
+        node->r = update(l, r, up, node->r, mid + 1, R);
+        node->pull();
+        debug(L, R, node->x);
+        return node;
     }
 
-    int lower_bound(const ValueType &x, int i, int l, int r) {
-        if (l == r) return l;
-        int mid = (l + r) / 2;
-        if (tree[i << 1].sum >= x)
-            return lower_bound(x, i << 1, l, mid);
-        return lower_bound(x - tree[i << 1].sum, i << 1 | 1, mid + 1, r);
+    T query(int l, int r, Node *node, int L, int R) {
+        if (!node || l > R || r < L || L > R) return DEFAULT;
+        node->push(R - L + 1);
+        if (l <= L && R <= r) return node->x;
+        int mid = L + (R - L) / 2;
+        return merge(query(l, r, node->l, L, mid), query(l, r, node->r, mid + 1, R));
     }
 };
 
@@ -157,20 +85,23 @@ int32_t main() {
 
     int n, q;
     cin >> n >> q;
-    segtree sg(n);
+    DynamicSegTree sg;
+    vector<int> v(n);
 
     for (int i = 0, a; i < n; i++) {
-        cin >> a;
-        sg.update(i, a);
+        cin >> v[i];
+        sg.update(i, i, v[i]);
     }
 
     while (q--) {
         int t, a, b;
         cin >> t >> a >> b;
+        debug(t, a, b);
         if (t == 1) {
-            sg.update(a - 1, b);
+            sg.update(a - 1, a - 1, -v[a - 1] + b);
+            v[a - 1] = b;
         } else {
-            cout << sg.query(a - 1, b - 1).sum << endl;
+            cout << sg.query(a - 1, b - 1) << endl;
         }
     }
 

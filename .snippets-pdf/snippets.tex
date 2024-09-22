@@ -28,7 +28,7 @@
 
 \pagestyle{fancy}
 
-\input src/sections.tex
+% \input src/sections.tex
 
 \section{Math & Miscellaneous}
 
@@ -54,5 +54,55 @@ where \( a \geq 1 \) and \( b > 1 \). The solution to this recurrence relation d
     T(n) = \Theta(f(n))
     \]
 \end{enumerate}
+
+\subsection{Euler Totient $\phi(n)$}
+
+\begin{itemize}
+  \item $\phi(n)$ is the count of co-primes of $n$ from $1$ to $n$.
+  \item So that $\phi(4) = 2$ which are $3$ and $1$.
+  \item $\phi(p) = p - 1$ for a prime $p$.
+\end{itemize}
+
+The following is Euler's theorem which can be used to compute modular inverse of $a$ only if $\gcd(a, m) = 1$.
+
+\[
+  a^{\phi(m)} \equiv 1 \mod m
+\]
+
+When $g = \gcd(a, m) > 1$ and you want to compute $a^x$ when $x$ is too large to do with binary exponentiation:
+
+\begin{align*}
+    a^{\phi(m)} \not\equiv 1 &\pmod{m} \\
+    a^{x} \equiv \left(\frac{a}{g}\right)^x \cdot g^x &\pmod{m} \\
+    a^{\phi\left(\frac m g\right)} \equiv g^{\phi\left(\frac m g\right)} \equiv 1 &\pmod{\frac{m}{g}} \\
+    g \cdot g^{\phi\left(\frac m g\right)} \equiv g &\pmod{m} \\
+    a^{x} \equiv \left(\frac{a}{g}\right)^{x \bmod m} \cdot g^x &\pmod{m}
+\end{align*}
+
+To compute $g^x \bmod m$ we should handle two cases:
+
+\begin{enumerate}
+  \item When $x \lte m$ we can simply do it using binary expo.
+  \item When $x \ge m$:
+    \begin{itemize}
+      \item 
+    \end{itemize}
+\end{enumerate}
+
+
+\subsection{Modular arithmetics}
+
+Get inverse of number module prime $p$ for all values in $[1, x]$:
+
+\begin{algorithm}
+    \begin{algorithmic}[1]
+        \State Initialize $inv$ array with $1$s of size $x + 1$
+        \For{$i \gets 2$ to $x$}
+            \State $inv_i \gets - \frac p i \cdot inv_{p \bmod i} \mod p$
+        \EndFor
+    \end{algorithmic}
+\end{algorithm}
+
+
 
 \end{document}

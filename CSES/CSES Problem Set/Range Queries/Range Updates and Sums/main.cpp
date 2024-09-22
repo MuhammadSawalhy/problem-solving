@@ -17,140 +17,106 @@ using namespace std;
 #define ll long long
 #define all(v) v.begin(), v.end()
 
-struct Value;
-struct Update;
-struct Node;
-
 // Replaceable by primitives (using Value = long long)
-struct Value {
-    long long sum = 0, mn = 1e18, mx = -1e18;
-    Value() = default;
-    Value(ll value) { sum = mn = mx = value; }
+struct Val {
+    ll sum = 0;
+    Val() = default;
+    Val(ll s): sum(s) {}
 
-    Value &operator+=(const Value &other) {
-        sum += other.sum;
-        mn = min(mn, other.mn);
-        mx = max(mx, other.mx);
+    Val &operator+=(const Val &val) {
+        sum += val.sum;
         return *this;
     }
 
-    Value operator+(const Value &other) const {
-        return Value(*this) += other;
+    Val operator+(const Val &val) const {
+        return Val(*this) += val;
     }
 };
 
-struct Update {
+struct Upd {
     // NOTE: Sometime you need to split the update, in these cases
     // you should include the range [a, b] of the update in the struct Update
-    Value value;
+    int x;
     enum State {
         idle,
         relative,
         forced
     } state = idle;
 
-    Update() = default;
-    Update(Value value, State state = forced) : value(value), state(state){};
+    Upd() = default;
+    Upd(int x, State state) : x(x), state(state){};
 
-    Update &operator+=(const Update &other) {
-        if (state == idle || other.state == forced) {
-            *this = other;
+    Upd &operator+=(const Upd &up) {
+        if (state == idle || up.state == forced) {
+            *this = up;
         } else {
-            assert(other.state == relative);
-            value += other.value;
+            assert(up.state == relative);
+            x += up.x; // NOTE: merge updates
         }
         return *this;
     }
 
-    void apply_on(Value &other, int cnt) const {
-        if (state == forced) other = value;
-        else other += value;
-        other.sum += value.sum * (cnt - 1);
+    void apply_on(Val &val, int cnt) const {
+        if (state == forced) val = x * cnt;
+        else val += x * cnt;
     }
-
-    Update get(Node &node) const { return *this; }
 };
 
 struct Node {
-    int l = -1, r = -1; // [l, r]
-    Update up;
-    Value value;
+    Val val;
+    Upd up;
+    Node *l = nullptr, *r = nullptr;
 
     Node() = default;
-    Node(int l, int r, const Value &value) : l(l), r(r), value(value){};
+    Node(Node *l, Node *r) : l(l), r(r) { pull(); }
+    ~Node() { delete l, delete r; }
 
-    void update(const Update &up) { this->up += up; }
+    inline void pull() { val = l->val + r->val; }
 
-    void apply_update() {
-        up.apply_on(value, r - l + 1);
-        up.state = Update::idle;
+    void push(int cnt) {
+        if (cnt > 1 && !l) l = new Node(), r = new Node();
+        if (up.state == Upd::idle) return;
+        up.apply_on(val, cnt);
+        if (l) l->up += up, r->up += up;
+        up.state = Upd::idle;
     }
 };
 
-struct Segtree {
-    int n;
-    vector<Node> tree;
+template<bool persist = false>
+struct DynamicSegTree {
+    static const int MIN = -1e9, MAX = 1e9;
 
-    Segtree(int n) {
-        if ((n & (n - 1)) != 0)
-            n = 1 << (32 - __builtin_clz(n));
-        this->n = n;
-        tree.assign(n << 1, Node());
-        for (int i = n; i < n << 1; i++)
-            tree[i].l = tree[i].r = i - n;
-        for (int i = n - 1; i > 0; i--)
-            tree[i].l = tree[i << 1].l, tree[i].r = tree[i << 1 | 1].r;
+    // ~DynamicSegTree() { delete root; }
+
+    Node *root = new Node();
+
+    Node *update(int l, int r, const Upd &up) {
+        return root = update(l, r, up, root, MIN, MAX);
     }
 
-    Segtree(const vector<Value> &values) : Segtree(values.size()) {
-        for (int i = 0; i < (int) values.size(); i++)
-            tree[i + n].value = values[i];
-        build();
-    }
+    Val query(int l, int r) { return query(l, r, root, MIN, MAX); }
 
-    void build() {
-        for (int i = n - 1; i > 0; --i) pull(i);
-    }
-
-    inline Value query(int i) { return query(1, i, i); }
-    inline Value query(int i, int j) { return query(1, i, j); }
-    inline void update(int i, const Update &val) { update(1, i, i, val); }
-    inline void update(int i, int j, const Update &val) { update(1, i, j, val); }
-
-private:
-    void pull(int i) {
-        tree[i].value = tree[i << 1].value + tree[i << 1 | 1].value;
-    }
-
-    void push(int i) {
-        int l = i << 1, r = i << 1 | 1;
-        if (tree[i].up.state != Update::idle) {
-            if (i < n) {
-                tree[l].update(tree[i].up.get(tree[l]));
-                tree[r].update(tree[i].up.get(tree[r]));
-            }
-            tree[i].apply_update();
+    Node *update(int l, int r, const Upd &up, Node *node, int L, int R) {
+        if (node) node->push(R - L + 1);
+        if (!node || l > R || L > r || L > R) return node;
+        if (persist) node = new Node(*node);
+        if (l <= L && R <= r) {
+            node->up += up, node->push(R - L + 1);
+            return node;
         }
+        int mid = L + (R - L) / 2;
+        node->l = update(l, r, up, node->l, L, mid);
+        node->r = update(l, r, up, node->r, mid + 1, R);
+        node->pull();
+        return node;
     }
 
-    Value query(int i, int l, int r) {
-        push(i);
-        if (tree[i].r < l || r < tree[i].l) return Value(); // default
-        if (l <= tree[i].l && tree[i].r <= r) return tree[i].value;
-        return query(i << 1, l, r) + query(i << 1 | 1, l, r);
-    }
-
-    void update(int i, int l, int r, const Update &up) {
-        push(i);
-        if (tree[i].r < l || r < tree[i].l) return;
-        if (l <= tree[i].l && tree[i].r <= r) {
-            tree[i].update(up);
-            push(i); // to apply the update
-            return;
-        }
-        update(i << 1, l, r, up.get(tree[i << 1]));
-        update(i << 1 | 1, l, r, up.get(tree[i << 1 | 1]));
-        pull(i);
+    Val query(int l, int r, Node *node, int L, int R) {
+        if (!node || l > R || L > r || L > R) return Val();
+        node->push(R - L + 1);
+        if (l <= L && R <= r) return node->val;
+        int mid = L + (R - L) / 2;
+        return query(l, r, node->l, L, mid) + query(l, r, node->r, mid + 1, R);
     }
 };
 
@@ -160,20 +126,20 @@ int32_t main() {
 
     int n, q;
     cin >> n >> q;
-    vector<Value> values(n);
-    for (int i = 0, a; i < n; i++) cin >> a, values[i] = a;
-
-    Segtree sg(values);
+    vector<int> values(n);
+    DynamicSegTree sg;
+    for (int i = 0, a; i < n; i++) cin >> values[i], sg.update(i, i, Upd(values[i], Upd::forced));
 
     while (q--) {
         int t, a, b, x;
         cin >> t >> a >> b, a--, b--;
         if (t == 1) {
             cin >> x;
-            sg.update(a, b, Update(x, Update::relative));
+            sg.update(a, b, Upd(x, Upd::relative));
         } else if (t == 2) {
             cin >> x;
-            sg.update(a, b, Update(x));
+            debug(a, b, x);
+            sg.update(a, b, Upd(x, Upd::forced));
         } else {
             cout << sg.query(a, b).sum << endl;
         }

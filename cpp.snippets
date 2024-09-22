@@ -17,6 +17,7 @@ snippet temp
     #define vi vector<int>
     #define vvi vector<vector<int>>
     #define pii pair<int, int>
+    #define vvi vector<vector<int>>
     #define all(v) v.begin(), v.end()
     #define rall(v) v.rbegin(), v.rend()
     #define minit(v, x) v = min(v, x)
@@ -51,6 +52,7 @@ snippet tempt
     #define vi vector<int>
     #define vvi vector<vector<int>>
     #define pii pair<int, int>
+    #define vvi vector<vector<int>>
     #define all(v) v.begin(), v.end()
     #define rall(v) v.rbegin(), v.rend()
     #define minit(v, x) v = min(v, x)
@@ -836,7 +838,7 @@ snippet code_segtree
         } state = idle;
 
         Update() = default;
-        Update(int value, State state = forced) : value(value), state(state){};
+        Update(int value, State state) : value(value), state(state){};
 
         Update &operator+=(const Update &other) {
             if (state == idle || other.state == forced) {
@@ -898,12 +900,9 @@ snippet code_segtree
             for (int i = n - 1; i > 0; --i) pull(i);
         }
 
-        inline Value query(int i) { return query(1, i, i); }
         inline Value query(int i, int j) { return query(1, i, j); }
-        inline void update(int i, const Update &val) { update(1, i, i, val); }
         inline void update(int i, int j, const Update &val) { update(1, i, j, val); }
 
-    private:
         void pull(int i) {
             tree[i].value = tree[i << 1].value + tree[i << 1 | 1].value;
         }
@@ -998,7 +997,7 @@ snippet code_segtree_simplelazy
 
 
 # Dynamic Segtree + Persistent Segtree
-snippet code_sgtree_dynamic
+snippet code_segtree_dynamic
     const int MIN = -(1 << 30), MAX = (1 << 30) - 1;
     const int DEFAULT = 0;
 
@@ -1044,6 +1043,112 @@ snippet code_sgtree_dynamic
             if (L <= l && r <= R) return node->value;
             int mid = l + (r - l) / 2;
             return query(L, R, node->l, l, mid) + query(L, R, node->r, mid + 1, r);
+        }
+    };
+
+
+# Dynamic lazy Segtree
+snippet code_segtree_dynamic_lazy
+    // Replaceable by primitives (using Value = long long)
+    struct Val {
+        ll sum = 0;
+        Val() = default;
+        Val(ll s): sum(s) {}
+
+        Val &operator+=(const Val &val) {
+            sum += val.sum;
+            return *this;
+        }
+
+        Val operator+(const Val &val) const {
+            return Val(*this) += val;
+        }
+    };
+
+    struct Upd {
+        // NOTE: Sometime you need to split the update, in these cases
+        // you should include the range [a, b] of the update in the struct Update
+        int x;
+        enum State {
+            idle,
+            relative,
+            forced
+        } state = idle;
+
+        Upd() = default;
+        Upd(int x, State state) : x(x), state(state){};
+
+        Upd &operator+=(const Upd &up) {
+            if (state == idle || up.state == forced) {
+                *this = up;
+            } else {
+                assert(up.state == relative);
+                x += up.x; // NOTE: merge updates
+            }
+            return *this;
+        }
+
+        void apply_on(Val &val, int cnt) const {
+            if (state == forced) val = x * cnt;
+            else val += x * cnt;
+        }
+    };
+
+    struct Node {
+        Val val;
+        Upd up;
+        Node *l = nullptr, *r = nullptr;
+
+        Node() = default;
+        Node(Node *l, Node *r) : l(l), r(r) { pull(); }
+        ~Node() { delete l, delete r; }
+
+        inline void pull() { val = l->val + r->val; }
+
+        void push(int cnt) {
+            if (cnt > 1 && !l) l = new Node(), r = new Node();
+            if (up.state == Upd::idle) return;
+            up.apply_on(val, cnt);
+            if (l) l->up += up, r->up += up;
+            up.state = Upd::idle;
+        }
+    };
+
+    template<bool persist = false>
+    struct DynamicSegTree {
+        static const int MIN = -1e9, MAX = 1e9;
+
+        // ~DynamicSegTree() { delete root; }
+
+        Node *root = new Node();
+
+        Node *update(int l, int r, const Upd &up) {
+            return root = update(l, r, up, root, MIN, MAX);
+        }
+
+        Val query(int l, int r) { return query(l, r, root, MIN, MAX); }
+
+        Node *update(int l, int r, const Upd &up, Node *node, int L, int R) {
+            if (node) node->push(R - L + 1);
+            if (!node || l > R || L > r || L > R) return node;
+            if (persist) node = new Node(*node);
+            if (l <= L && R <= r) {
+                node->up += up, node->push(R - L + 1);
+                return node;
+            }
+            int mid = L + (R - L) / 2;
+            node->l = update(l, r, up, node->l, L, mid);
+            node->r = update(l, r, up, node->r, mid + 1, R);
+            node->pull();
+            return node;
+        }
+
+        Val query(int l, int r, Node *node, int L, int R) {
+            if (!node || l > R || L > r || L > R) return Val();
+            node->push(R - L + 1);
+            if (l <= L && R <= r) return node->val;
+            int mid = L + (R - L) / 2;
+            return query(l, r, node->l, L, mid) + query(l, r, node->r, mid + 1, R);
         }
     };
 
@@ -1785,32 +1890,42 @@ snippet code_motree
 snippet code_scc
     struct SCC {
         int N, ID = 0, COMP = 0;
-        vector<vector<int>> adj;
+        const vvi &adj;
         vector<int> id, comp, st;
 
-        SCC(const vector<vector<int>> &adj) : adj(adj), N(adj.size()) {
-            id.resize(N), comp = vector<int>(N, -1);
+        SCC(const vvi &adj) : adj(adj), N(adj.size()) {
+            id = comp = vector<int>(N, -1);
             go();
         }
 
         void go() {
             for (int i = 0; i < N; i++)
-                if (!id[i]) dfs(i);
+                if (id[i] == -1) dfs(i);
         }
 
         int dfs(int i) {
-            int low = id[i] = ++ID;
+            int low = id[i] = ID++;
             st.push_back(i);
             for (int j: adj[i])
                 if (comp[j] == -1)
-                    // id[j] != 0 -> in stack, don't dfs
-                    low = min(low, id[j] ?: dfs(j));
+                    low = min(low, id[j] == -1 ? dfs(j) : id[j]);
             if (low == id[i]) {
-                COMP++;
                 for (int j = -1; j != i;)
                     comp[j = st.back()] = COMP, st.pop_back();
+                COMP++;
             }
             return low;
+        }
+
+        vvi dag(bool reverse = false) {
+            vvi newadj(COMP);
+            for (int i = 0; i < N; i++)
+                for (auto j: adj[i])
+                    if (comp[i] != comp[j]) {
+                        if (reverse) newadj[comp[j]].push_back(comp[i]);
+                        else newadj[comp[i]].push_back(comp[j]);
+                    }
+            return newadj;
         }
     };
 

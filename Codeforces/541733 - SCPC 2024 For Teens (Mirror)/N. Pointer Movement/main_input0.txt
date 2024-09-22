@@ -1,0 +1,10 @@
+3
+5 2 2
+abcab
+ab
+6 2 2
+abcabc
+ab
+4 3 1
+hgaa
+gaa
