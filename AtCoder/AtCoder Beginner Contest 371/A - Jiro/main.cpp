@@ -1,5 +1,5 @@
 // ﷽
-// $(URL)
+// https://atcoder.jp/contests/abc371/tasks/abc371_a
 
 #include <bits/stdc++.h>
 #pragma GCC optimize("Ofast")
@@ -28,19 +28,41 @@ template<class T>
 using rpq = priority_queue<T, vector<T>, greater<T>>;
 
 void solve() {
-    return;
+    char ab, ac, bc;
+    cin >> ab >> ac >> bc;
+
+
+    if (ab == '<') {
+        if (bc == '<') {
+            cout << 'B' << endl;
+        } else if (ac == '<') {
+            cout << 'C' << endl;
+        } else {
+            cout << 'A' << endl;
+        }
+    }
+
+    // a c b 
+
+    if (ab == '>') {
+        if (bc == '>') {
+            cout << 'B' << endl;
+        } else if (ac == '>') {
+            cout << 'C' << endl;
+        } else {
+            cout << 'A' << endl;
+        }
+    }
+
 }
 
 int32_t main(int32_t argc, char **argv) {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL), cout.tie(NULL);
 
-    int T = 1;
-    cin >> T;
-    for (int t = 1; t <= T; t++) {
-        debug("--------", t);
+    int t = 1;
+    while (t--)
         solve();
-    }
 
     return 0;
 }

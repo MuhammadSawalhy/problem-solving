@@ -1,5 +1,5 @@
 // ﷽
-// https://codeforces.com/contest/1808/problem/E3
+// https://codeforces.com/contest/2009/problem/D
 
 #include <bits/stdc++.h>
 #pragma GCC optimize("Ofast")
@@ -15,8 +15,6 @@ using namespace std;
 
 #define ll long long
 #define int long long
-#define vi vector<int>
-#define vvi vector<vector<int>>
 #define pii pair<int, int>
 #define sz(v) (int) (v).size()
 #define all(v) v.begin(), v.end()
@@ -28,10 +26,35 @@ template<class T>
 using rpq = priority_queue<T, vector<T>, greater<T>>;
 
 void solve() {
-    int n, k, m;
-    cin >> n >> k >> m;
+    int n;
+    cin >> n;
+    bool p[n + 1][2];
+    memset(p, 0, sizeof p);
 
-    
+    for (int i = 0, x, y; i < n;i ++) {
+        cin >> x >> y;
+        p[x][y] = 1;
+    }
+
+    debug(n);
+    int ans = 0;
+    for (int i = 0, cnt = 0, cnt2= 0; i <= n;i++) {
+        ans += (p[i][0] + p[i][1]) * cnt;
+        ans += (p[i][0] && p[i][1]) * cnt2;
+        cnt += p[i][0] && p[i][1];
+        cnt2 += p[i][0] + p[i][1];
+        debug(i, cnt, cnt2);
+    }
+
+    for (int i = 1; i < n;i++) {
+        ans += p[i][0] * p[i - 1][1] * p[i + 1][1];
+    }
+
+    for (int i = 1; i < n;i++) {
+        ans += p[i][1] * p[i - 1][0] * p[i + 1][0];
+    }
+
+    cout << ans << endl;
 }
 
 int32_t main(int32_t argc, char **argv) {
@@ -39,7 +62,7 @@ int32_t main(int32_t argc, char **argv) {
     cin.tie(NULL), cout.tie(NULL);
 
     int t = 1;
-    /*cin >> t;*/
+    cin >> t;
     while (t--)
         solve();
 

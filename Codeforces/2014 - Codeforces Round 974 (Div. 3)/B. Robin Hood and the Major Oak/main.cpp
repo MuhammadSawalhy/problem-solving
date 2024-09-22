@@ -1,5 +1,5 @@
 // ﷽
-// $(URL)
+// https://codeforces.com/contest/2014/problem/B
 
 #include <bits/stdc++.h>
 #pragma GCC optimize("Ofast")
@@ -28,19 +28,29 @@ template<class T>
 using rpq = priority_queue<T, vector<T>, greater<T>>;
 
 void solve() {
-    return;
+    int n, k;
+    cin >> n >> k;
+
+    // sum from (n - k + 1) up to (n) { i ^ i }
+
+    int x = n - k + 1;
+
+    int cnt = (((n - x + 1) & 1) & (x & 1)) + (n - x + 1) / 2 ;
+    if (cnt & 1) {
+        cout << "NO\n";
+    } else {
+        cout << "YES\n";
+    }
 }
 
 int32_t main(int32_t argc, char **argv) {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL), cout.tie(NULL);
 
-    int T = 1;
-    cin >> T;
-    for (int t = 1; t <= T; t++) {
-        debug("--------", t);
+    int t = 1;
+    cin >> t;
+    while (t--)
         solve();
-    }
 
     return 0;
 }

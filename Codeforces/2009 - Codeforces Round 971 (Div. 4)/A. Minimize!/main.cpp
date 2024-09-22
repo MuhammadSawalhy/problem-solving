@@ -1,5 +1,5 @@
 // ﷽
-// $(URL)
+// https://codeforces.com/contest/2009/problem/0
 
 #include <bits/stdc++.h>
 #pragma GCC optimize("Ofast")
@@ -15,8 +15,6 @@ using namespace std;
 
 #define ll long long
 #define int long long
-#define vi vector<int>
-#define vvi vector<vector<int>>
 #define pii pair<int, int>
 #define sz(v) (int) (v).size()
 #define all(v) v.begin(), v.end()
@@ -28,19 +26,19 @@ template<class T>
 using rpq = priority_queue<T, vector<T>, greater<T>>;
 
 void solve() {
-    return;
+    int a, b;
+    cin >> a >> b;
+    cout << b - a << endl;
 }
 
 int32_t main(int32_t argc, char **argv) {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL), cout.tie(NULL);
 
-    int T = 1;
-    cin >> T;
-    for (int t = 1; t <= T; t++) {
-        debug("--------", t);
+    int t = 1;
+    cin >> t;
+    while (t--)
         solve();
-    }
 
     return 0;
 }
