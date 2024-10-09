@@ -26,50 +26,54 @@ using namespace std;
 const int N = 1e5 + 5;
 vector<int> adj[N];
 int n, m;
-bool vis[N];
-vector<int> topsort;
-
-void dfs(int i) {
-    if (vis[i]) return;
-    vis[i] = true;
-    for (int child: adj[i])
-        dfs(child);
-    topsort.push_back(i);
-}
 
 int32_t main() {
     ios_base::sync_with_stdio(false);
     cin.tie(NULL), cout.tie(NULL);
 
     cin >> n >> m;
+    vector<int> outdeg(n);
 
     for (int i = 0; i < m; i++) {
         int a, b;
         cin >> a >> b;
         a--, b--;
         adj[b].push_back(a);
+        outdeg[a]++;
     }
 
-    for (int i = 0; i < n; i++) sort(all(adj[i]));
-
-    deque<int> ans;
+    priority_queue<int> pq;
 
     for (int i = 0; i < n; i++) {
-        dfs(i);
-        debug(i, topsort);
-        reverse(all(topsort));
-        while (topsort.size()) {
-            ans.push_front(topsort.back());
-            topsort.pop_back();
+        if (outdeg[i] == 0) {
+            pq.push(i);
         }
-        debug(ans);
     }
 
-    reverse(all(ans));
+    vector<int> labels(n);
 
-    for (auto i: ans) {
+    for (int label = n - 1; label >= 0; label--) {
+        int node = pq.top();
+        pq.pop();
+
+        labels[node] = label;
+
+        for (auto i: adj[node]) {
+            outdeg[i]--;
+            if (outdeg[i] == 0) {
+                pq.push(i);
+            }
+        }
+    }
+
+    vector<int> ans(n);
+
+    for (int i = 0; i < n; i++) ans[labels[i]] = i;
+
+    for (auto i: labels) {
         cout << i + 1 << " ";
     }
 
     return 0;
 }
+

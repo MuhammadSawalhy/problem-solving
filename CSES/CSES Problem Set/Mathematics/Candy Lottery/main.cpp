@@ -37,7 +37,7 @@ int32_t main() {
     for (int i = 1; i <= k; i++)
         ans += dp[n][i] * i;
 
-    cout << fixed << ans;
+    cout << fixed << roundeven(ans * 1e6) / 1e6;
 
     return 0;
 }
