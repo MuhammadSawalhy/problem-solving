@@ -1,5 +1,5 @@
 // ﷽
-// $(URL)
+// https://codeforces.com/contest/2025/problem/0
 
 #include <bits/stdc++.h>
 #pragma GCC optimize("Ofast")
@@ -18,7 +18,7 @@ using namespace std;
 #define vi vector<int>
 #define vvi vector<vector<int>>
 #define pii pair<int, int>
-#define vii vector<pii>
+#define vvi vector<vector<int>>
 #define sz(v) (int) (v).size()
 #define all(v) v.begin(), v.end()
 #define rall(v) v.rbegin(), v.rend()
@@ -29,7 +29,19 @@ template<class T>
 using rpq = priority_queue<T, vector<T>, greater<T>>;
 
 void solve() {
-    return;
+    string a, b;
+    cin >> a >> b;
+
+    if (sz(a) > sz(b)) swap(a, b);
+    debug(a);
+    debug(b);
+
+    int i = 0;
+    while (i < sz(a) && a[i] == b[i]) i++;
+    debug(i);
+
+
+    cout << sz(a) + sz(b) - i + (i != 0) << '\n';
 }
 
 int32_t main(int32_t argc, char **argv) {

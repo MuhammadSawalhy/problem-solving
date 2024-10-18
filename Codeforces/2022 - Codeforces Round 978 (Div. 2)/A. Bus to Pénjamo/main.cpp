@@ -1,5 +1,5 @@
 // ﷽
-// https://cses.fi/problemset/task/1700
+// https://codeforces.com/contest/2022/problem/A
 
 #include <bits/stdc++.h>
 #pragma GCC optimize("Ofast")
@@ -28,55 +28,31 @@ using namespace std;
 template<class T>
 using rpq = priority_queue<T, vector<T>, greater<T>>;
 
-map<vector<int>, int> values;
-
-int dfs(int u, int p, vvi &adj) {
-    vector<int> cur;
-    for (int v: adj[u]) {
-        if (v == p) continue;
-        cur.push_back(dfs(v, u, adj));
-    }
-
-    sort(all(cur));
-
-    if (values.count(cur)) {
-        return values[cur];
-    } else {
-        values[cur] = sz(values) + 1;
-        return values[cur];
-    }
-}
-
-
 void solve() {
-    int n;
-    cin >> n;
-
-    values.clear();
-
-    vvi adj1(n + 1);
-    for (int i = 0; i < n - 1; i++) {
-        int u, v;
-        cin >> u >> v;
-        adj1[u].push_back(v);
-        adj1[v].push_back(u);
+    int n, r;
+    cin >> n >> r;
+    vector<int> a(n);
+    int ans = 0;
+    int odd = 0;
+    for (int i = 0; i < n; i++) {
+        cin >> a[i];
+        odd += a[i] & 1;
+        ans += a[i] / 2;
     }
 
-    vvi adj2(n + 1);
-    for (int i = 0; i < n - 1; i++) {
-        int u, v;
-        cin >> u >> v;
-        adj2[u].push_back(v);
-        adj2[v].push_back(u);
-    }
+    r -= ans;
+    debug(odd, r);
 
-    auto x = dfs(1, 0, adj1);
-    auto y = dfs(1, 0, adj2);
-
-    if (x == y) {
-        cout << "YES\n";
+    if (odd > r) {
+        odd -= r;
+        r -= odd;
+        ans *= 2;
+        ans += r;
+        cout << ans << '\n';
     } else {
-        cout << "NO\n";
+        ans *= 2;
+        ans += odd;
+        cout << ans << '\n';
     }
 }
 

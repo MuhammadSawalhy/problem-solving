@@ -17,7 +17,7 @@ snippet temp
     #define vi vector<int>
     #define vvi vector<vector<int>>
     #define pii pair<int, int>
-    #define vvi vector<vector<int>>
+    #define vii vector<pii>
     #define all(v) v.begin(), v.end()
     #define rall(v) v.rbegin(), v.rend()
     #define minit(v, x) v = min(v, x)
@@ -52,7 +52,7 @@ snippet tempt
     #define vi vector<int>
     #define vvi vector<vector<int>>
     #define pii pair<int, int>
-    #define vvi vector<vector<int>>
+    #define vii vector<pii>
     #define all(v) v.begin(), v.end()
     #define rall(v) v.rbegin(), v.rend()
     #define minit(v, x) v = min(v, x)
@@ -772,28 +772,28 @@ snippet code_ordered_set
 # Segment tree (Simple implementation)
 snippet code_segtree_simple
     // source: https://codeforces.com/blog/entry/18051
-    template<typename T = long long, T DEFAULT = T(1e18)>
     struct Segtree {
+        constexpr static ll DEFAULT = 1e18;
         int n = 0;
-        vector<T> tree;
+        vector<ll> tree;
 
         Segtree() = default;
         Segtree(int n) : n(n) { tree.assign(n * 2, DEFAULT); }
 
-        inline T merge(const T &a, const T &b) { return min(a, b); }
+        inline ll merge(const ll &a, const ll &b) { return min(a, b); }
+
+        void pull(int i) { tree[i] = merge(tree[i << 1], tree[i << 1 | 1]); }
 
         void build() {
-            for (int i = n - 1; i > 0; i--)
-                tree[i] = merge(tree[i << 1], tree[i << 1 | 1]);
+            for (int i = n - 1; i > 0; i--) pull(i);
         }
 
-        void update(int i, T val) {
-            for (tree[i += n] = val; i > 1; i >>= 1)
-                tree[i >> 1] = merge(tree[i], tree[i ^ 1]);
+        void update(int i, ll val) {
+            for (tree[i += n] = val; i > 1; i >>= 1) pull(i);
         }
 
         auto query(int l, int r) {
-            T resl = DEFAULT, resr = resl;
+            ll resl = DEFAULT, resr = resl;
             for (l += n, r += n + 1; l < r; l >>= 1, r >>= 1) {
                 if (l & 1) resl = merge(resl, tree[l++]);
                 if (r & 1) resr = merge(tree[--r], resr);
@@ -1266,8 +1266,8 @@ snippet code_mint
         }
     };
 
-    // constexpr int MOD = 998244353;
-    constexpr int MOD = 1000000007;
+    #define MOD 998244353
+    #define MOD 1000000007
     using Z = mint<MOD>;
 
 
@@ -1392,6 +1392,15 @@ snippet code_matrix
             return res;
         }
 
+        friend ostream &operator<<(ostream &os, const matrix &mat) {
+            os << "[";
+            for (int i = 0, j; i < mat.n; i++) {
+                for (j = 0, os << "\n\t"; j < mat.m; j++)
+                    os << mat.mat[i][j] << (j == mat.m - 1 ? "" : ", ");
+            }
+            return os << "]";
+        }
+
         static matrix identity(int size) {
             matrix I = vv(size, vector<T>(size));
             for (int i = 0; i < size; i++)
@@ -1410,11 +1419,16 @@ snippet code_scanner
         void load() { in[fread(in, 1, sizeof(in) - 4, stdin)] = 0; }
         unsigned readInt() {
             unsigned u = 0;
-            while (*o && *o <= 32)
-                ++o;
+            while (*o && *o <= 32) ++o;
             while (*o >= '0' && *o <= '9')
                 u = u * 10 + (*o++ - '0');
             return u;
+        }
+        unsigned readDigit() {
+            while (*o && *o <= 32) ++o;
+            if (*o >= '0' && *o <= '9')
+                return *o++ - '0';
+            assert(false);
         }
     } sc;
 
@@ -1594,7 +1608,7 @@ snippet code_trie
 # string hashing implementation (polynomial hashing)
 snippet code_hash
     constexpr int H = 2;
-    typedef array<int, H> val;
+    typedef array<long long, H> val;
     vector<val> B;
     const val M = {
             1000000007,
@@ -1638,10 +1652,18 @@ snippet code_hash
     struct Hash {
         vector<val> h;
 
-        Hash(const vector<int> &s) : h(s.size() + 1) {
+        Hash(const string &s) : Hash(vector<int>(s.begin(), s.end())) {}
+
+        Hash(const vector<int> &s) {
+            vector<val> v;
+            for (auto x: s) v.push_back(getval(x));
+            *this = Hash(v);
+        }
+
+        Hash(const vector<val> &s) : h(s.size() + 1) {
             setB(s.size());
             for (int i = 0; i < (int) s.size(); i++)
-                h[i + 1] = h[i] * B[1] + getval(s[i]);
+                h[i + 1] = h[i] * B[1] + s[i];
         }
 
         val get(int l, int r) { return h[r + 1] - h[l] * B[r - l + 1]; }
@@ -1997,7 +2019,7 @@ snippet code_z
 # Aho Corasick
 snippet code_aho_corasick
     struct AhoCorasick {
-        static constexpr int K = 100;
+        static constexpr int K = 26;
         vector<vector<int>> child, id;
         vector<int> fail;
 
@@ -2009,14 +2031,14 @@ snippet code_aho_corasick
             return child.size() - 1;
         }
 
-        int insert(const string &s, int ind) {
+        int insert(const string &s, int s_id) {
             int cur = 0; // root
             for (auto c: s) {
                 if (child[cur][c - 'A'] == 0)
                     child[cur][c - 'A'] = add_node();
                 cur = child[cur][c - 'A'];
             }
-            id[cur].push_back(ind);
+            id[cur].push_back(s_id);
             return cur;
         }
 
@@ -2025,6 +2047,7 @@ snippet code_aho_corasick
             return child[cur][nxt];
         }
 
+        // calculate fail links
         void build() {
             queue<int> q;
             for (int i = 0; i < K; i++)
@@ -2382,4 +2405,71 @@ snippet code_xorbasis
             return x;
         }
     };
+
+# Treaps (Catesian tree) data structure
+snippet code_treap
+    struct Node {
+        int prior, value, cnt, sum;
+        bool rev;
+        Node *l = nullptr, *r = nullptr;
+
+        Node(int val) {
+            prior = rand(), rev = false, cnt = 1, value = sum = val;
+        }
+    };
+
+    inline int cnt(Node *it) { return it ? it->cnt : 0; }
+    inline int sum(Node *it) { return it ? it->sum : 0; }
+
+    void pull(Node *it) {
+        if (it) it->cnt = cnt(it->l) + cnt(it->r) + 1,
+                it->sum = sum(it->l) + sum(it->r) + it->value;
+    }
+
+    void push(Node *it) {
+        if (it && it->rev) {
+            it->rev = false;
+            swap(it->l, it->r);
+            if (it->l) it->l->rev ^= true;
+            if (it->r) it->r->rev ^= true;
+        }
+    }
+
+    void merge(Node *&t, Node *l, Node *r) {
+        push(l), push(r);
+        if (!l || !r) t = l ? l : r;
+        else if (l->prior > r->prior)
+            merge(l->r, l->r, r), t = l;
+        else
+            merge(r->l, l, r->l), t = r;
+        pull(t);
+    }
+
+    void split(Node *t, Node *&l, Node *&r, int key, int add = 0) {
+        if (!t) return void(l = r = nullptr);
+        push(t);
+        int cur_key = add + cnt(t->l);
+        if (key <= cur_key)
+            split(t->l, l, t->l, key, add), r = t;
+        else
+            split(t->r, t->r, r, key, add + 1 + cnt(t->l)), l = t;
+        pull(t);
+    }
+
+    void rev(Node *t, int l, int r) {
+        Node *t1, *t2, *t3;
+        split(t, t1, t2, l);
+        split(t2, t2, t3, r - l + 1);
+        t2->rev ^= true;
+        merge(t, t1, t2);
+        merge(t, t, t3);
+    }
+
+    Node *get_index(Node *t, int i) {
+        if (!t) return nullptr;
+        push(t);
+        if (cnt(t->l) == i) return t;
+        if (cnt(t->l) > i) return get_index(t->l, i);
+        return get_index(t->r, i - cnt(t->l) - 1);
+    }
 

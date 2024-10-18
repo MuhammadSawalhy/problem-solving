@@ -1,5 +1,5 @@
 // ﷽
-// https://cses.fi/problemset/task/1700
+// https://cses.fi/problemset/task/2143
 
 #include <bits/stdc++.h>
 #pragma GCC optimize("Ofast")
@@ -28,55 +28,41 @@ using namespace std;
 template<class T>
 using rpq = priority_queue<T, vector<T>, greater<T>>;
 
-map<vector<int>, int> values;
+const int N = 5e4 + 4;
+bitset<N> reach[N];
+vvi adj;
+int n, m, q;
 
-int dfs(int u, int p, vvi &adj) {
-    vector<int> cur;
-    for (int v: adj[u]) {
-        if (v == p) continue;
-        cur.push_back(dfs(v, u, adj));
-    }
+bool vis[N];
 
-    sort(all(cur));
-
-    if (values.count(cur)) {
-        return values[cur];
-    } else {
-        values[cur] = sz(values) + 1;
-        return values[cur];
+void dfs(int i, const vvi &adj) {
+    if (vis[i]) return;
+    vis[i] = true;
+    reach[i][i] = true;
+    for (auto j: adj[i]) {
+        dfs(j, adj);
+        reach[i] |= reach[j];
     }
 }
 
-
 void solve() {
-    int n;
-    cin >> n;
+    cin >> n >> m;
 
-    values.clear();
+    adj = vvi(n);
 
-    vvi adj1(n + 1);
-    for (int i = 0; i < n - 1; i++) {
+    for (int i = 0; i < m; i++) {
         int u, v;
         cin >> u >> v;
-        adj1[u].push_back(v);
-        adj1[v].push_back(u);
+        u--, v--;
+        adj[u].push_back(v);
     }
 
-    vvi adj2(n + 1);
-    for (int i = 0; i < n - 1; i++) {
-        int u, v;
-        cin >> u >> v;
-        adj2[u].push_back(v);
-        adj2[v].push_back(u);
+    for (int i = 0; i < n; i++) {
+        dfs(i, adj);
     }
 
-    auto x = dfs(1, 0, adj1);
-    auto y = dfs(1, 0, adj2);
-
-    if (x == y) {
-        cout << "YES\n";
-    } else {
-        cout << "NO\n";
+    for (int i = 0; i < n;i++) {
+        cout << reach[i].count() << ' ';
     }
 }
 
@@ -85,7 +71,7 @@ int32_t main(int32_t argc, char **argv) {
     cin.tie(NULL), cout.tie(NULL);
 
     int T = 1;
-    cin >> T;
+    // cin >> T;
     for (int t = 1; t <= T; t++) {
         debug("--------", t);
         solve();
@@ -93,3 +79,4 @@ int32_t main(int32_t argc, char **argv) {
 
     return 0;
 }
+

@@ -1,5 +1,5 @@
 // ﷽
-// https://cses.fi/problemset/task/1700
+// https://cses.fi/problemset/task/1706
 
 #include <bits/stdc++.h>
 #pragma GCC optimize("Ofast")
@@ -28,56 +28,41 @@ using namespace std;
 template<class T>
 using rpq = priority_queue<T, vector<T>, greater<T>>;
 
-map<vector<int>, int> values;
+const int N = 1e5 + 1;
+vector<int> adj[N];
+bitset<N> b, vis;
 
-int dfs(int u, int p, vvi &adj) {
-    vector<int> cur;
-    for (int v: adj[u]) {
-        if (v == p) continue;
-        cur.push_back(dfs(v, u, adj));
+int dfs(int i) {
+    vis[i] = true;
+    int cnt = 1;
+    for (auto x: adj[i]) {
+        if (vis[x]) continue;
+        cnt += dfs(x);
     }
-
-    sort(all(cur));
-
-    if (values.count(cur)) {
-        return values[cur];
-    } else {
-        values[cur] = sz(values) + 1;
-        return values[cur];
-    }
+    return cnt;
 }
 
-
 void solve() {
-    int n;
-    cin >> n;
+    int n, m;
+    cin >> n >> m;
 
-    values.clear();
-
-    vvi adj1(n + 1);
-    for (int i = 0; i < n - 1; i++) {
+    for (int i = 0; i < m; i++) {
         int u, v;
         cin >> u >> v;
-        adj1[u].push_back(v);
-        adj1[v].push_back(u);
+        adj[u].push_back(v);
+        adj[v].push_back(u);
     }
 
-    vvi adj2(n + 1);
-    for (int i = 0; i < n - 1; i++) {
-        int u, v;
-        cin >> u >> v;
-        adj2[u].push_back(v);
-        adj2[v].push_back(u);
+    b[0] = 1;
+    for (int i = 1; i <= n; i++) {
+        if (vis[i]) continue;
+        int cnt = dfs(i);
+        debug(cnt);
+        b |= b << cnt;
     }
-
-    auto x = dfs(1, 0, adj1);
-    auto y = dfs(1, 0, adj2);
-
-    if (x == y) {
-        cout << "YES\n";
-    } else {
-        cout << "NO\n";
-    }
+    auto ans = b.to_string().substr(N - n - 1, n);
+    reverse(all(ans));
+    cout << ans << endl;
 }
 
 int32_t main(int32_t argc, char **argv) {
@@ -85,7 +70,6 @@ int32_t main(int32_t argc, char **argv) {
     cin.tie(NULL), cout.tie(NULL);
 
     int T = 1;
-    cin >> T;
     for (int t = 1; t <= T; t++) {
         debug("--------", t);
         solve();

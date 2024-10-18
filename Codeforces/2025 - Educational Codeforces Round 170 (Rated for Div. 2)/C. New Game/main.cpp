@@ -1,5 +1,5 @@
 // ﷽
-// $(URL)
+// https://codeforces.com/contest/2025/problem/C
 
 #include <bits/stdc++.h>
 #pragma GCC optimize("Ofast")
@@ -18,7 +18,7 @@ using namespace std;
 #define vi vector<int>
 #define vvi vector<vector<int>>
 #define pii pair<int, int>
-#define vii vector<pii>
+#define vvi vector<vector<int>>
 #define sz(v) (int) (v).size()
 #define all(v) v.begin(), v.end()
 #define rall(v) v.rbegin(), v.rend()
@@ -29,7 +29,40 @@ template<class T>
 using rpq = priority_queue<T, vector<T>, greater<T>>;
 
 void solve() {
-    return;
+    int k, n;
+    cin >> n >> k;
+
+    vector<int> a(n);
+    map<int, int> fr;
+    for (int i = 0; i < n; i++) {
+        cin >> a[i];
+        fr[a[i]]++;
+    }
+
+    vector<pii> b(all(fr));
+    debug(b);
+
+    queue<pii> d;
+
+    int ans = 0, cur = 0;
+
+    for (int i = sz(b) - 1; ~i; i--) {
+        if (i + 1 < n && b[i].first + 1 != b[i + 1].first) {
+            while (d.size()) d.pop();
+            cur = 0;
+        }
+
+        if (d.size() && b[i].first + k <= d.front().first) {
+            cur -= d.front().second;
+            d.pop();
+        }
+
+        d.push({b[i].first, b[i].second});
+        cur += b[i].second;
+        maxit(ans, cur);
+    }
+
+    cout << ans << '\n';
 }
 
 int32_t main(int32_t argc, char **argv) {

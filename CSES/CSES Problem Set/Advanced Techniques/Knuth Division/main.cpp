@@ -1,5 +1,5 @@
 // ﷽
-// $(URL)
+// https://cses.fi/problemset/task/2088
 
 #include <bits/stdc++.h>
 #pragma GCC optimize("Ofast")
@@ -28,8 +28,33 @@ using namespace std;
 template<class T>
 using rpq = priority_queue<T, vector<T>, greater<T>>;
 
+const int N = 5005;
+int a[N];
+int dp[N][N];
+
+void go(int l, int r) {
+    if (l == r) return;
+    int mid = (l + r) / 2;
+    go(l, mid);
+    go(mid + 1, r);
+
+    int cost = a[r] - a[l - 1];
+    for (int l = mid + 1; l <= r; l++) {
+        
+    }
+
+}
+
 void solve() {
-    return;
+    int n;
+    cin >> n;
+    for (int i = 1; i <= n; i++) {
+        cin >> a[i];
+    }
+
+    go(1, n);
+
+    cout << dp[1][n] << '\n';
 }
 
 int32_t main(int32_t argc, char **argv) {
@@ -37,7 +62,6 @@ int32_t main(int32_t argc, char **argv) {
     cin.tie(NULL), cout.tie(NULL);
 
     int T = 1;
-    cin >> T;
     for (int t = 1; t <= T; t++) {
         debug("--------", t);
         solve();
