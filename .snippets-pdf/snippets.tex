@@ -103,6 +103,28 @@ Get inverse of number module prime $p$ for all values in $[1, x]$:
     \end{algorithmic}
 \end{algorithm}
 
+\subsection{Floor intervals and next ceil and floor}
 
+Get the maximum divisor $d_{max}$ that gives the same floor as $d$.
+
+\begin{align*}
+    f &= \left\lfloor\frac x d \right\rfloor\\
+    d_{max} &= \left\lfloor\frac x f \right\rfloor
+\end{align*}
+
+Get the minimum divisor $d_{min}$ that gives the same floor as $d$.
+
+\begin{align*}
+    d_{min} &= \left\lfloor\frac x {f + 1} \right\rfloor + 1
+\end{align*}
+
+So the range of divisors that gives the same floor as $d$ is $[d_{min}, d_{max}]$.
+
+$$
+    \left[\left\lfloor\frac x {f + 1} \right\rfloor + 1, \left\lfloor\frac x f \right\rfloor\right]
+$$
+
+You should handle the special case when $d > x$ in other words $f = 0$, so the range is $[x+1,\infty]$. But what about $\operator{ceil}$?
+The same equation can be used based on the fact that $\left\lceil\frac x d \right\rceil = \left\lfloor\frac {x - 1} {d} \right\rfloor + 1$ and just get the range of the same floor for $x - 1$ instead.
 
 \end{document}
