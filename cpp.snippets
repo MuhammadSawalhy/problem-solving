@@ -24,8 +24,7 @@ snippet temp
     #define maxit(v, x) v = max(v, x)
 
     int32_t main() {
-        ios_base::sync_with_stdio(false);
-        cin.tie(NULL), cout.tie(NULL);
+        cin.tie(nullptr)->sync_with_stdio(false);
 
         ${0}
 
@@ -63,8 +62,7 @@ snippet tempt
     }
 
     int32_t main() {
-        ios_base::sync_with_stdio(false);
-        cin.tie(NULL), cout.tie(NULL);
+        cin.tie(nullptr)->sync_with_stdio(false);
 
         int T = 1;
         cin >> T;
@@ -202,7 +200,7 @@ snippet code_sieve
 
 
 # Fast Sieve's algorithm to calc minimum prime
-snippet code_fast_seive
+snippet code_fast_sieve
     std::vector<int> minp, primes;
     void sieve(int n) {
         minp.assign(n + 1, 0);
@@ -838,7 +836,7 @@ snippet code_segtree
         } state = idle;
 
         Update() = default;
-        Update(int value, State state) : value(value), state(state){};
+        Update(int value, State state = forced) : value(value), state(state){};
 
         Update &operator+=(const Update &other) {
             if (state == idle || other.state == forced) {
@@ -851,9 +849,9 @@ snippet code_segtree
         }
 
         void apply_on(Value &other, int cnt) const {
-            // if (state == forced) other = value;
+            if (state == forced) other = value;
             // else other += value;
-            // other.sum += value.sum * (cnt - 1);
+            // other.sum += value * (cnt - 1);
         }
 
         Update get(const Node &node) const { return *this; }
@@ -1162,14 +1160,16 @@ snippet code_bit_simple
         BIT(int size) : n(size) { tree.resize(n + 1, 0); }
 
         void update(int i, int delta) {
-            for (; i <= n; i += i & -i) tree[i] += delta;
+            for (i++; i <= n; i += i & -i) tree[i] += delta;
         }
 
-        int query(int i) {
+        int sum(int i) {
             int sum = 0;
-            for (; i > 0; i -= i & -i) sum += tree[i];
+            for (i++; i > 0; i -= i & -i) sum += tree[i];
             return sum;
         }
+
+        int query(int l, int r) { return sum(r) - sum(l - 1); }
     };
 
 
@@ -1675,10 +1675,10 @@ snippet code_dir_eulerian
     template<typename Edge>
     class DirectedEulerian {
     public:
-        int n, m;
+        int n;
         vector<vector<pair<int, Edge>>> adj;
 
-        DirectedEulerian(int n, int m) : n(n), m(m) {
+        DirectedEulerian(int n) : n(n) {
             adj.assign(n, vector<pair<int, Edge>>());
         }
 
@@ -1699,7 +1699,7 @@ snippet code_dir_eulerian
                     out += outdeg[i] - indeg[i], start = i;
             }
 
-            if (m == 0 || !((in == 0 && out == 0) || (in == 1 && out == 1 && !circuit))) {
+            if (!((in == 0 && out == 0) || (in == 1 && out == 1 && !circuit))) {
                 return {};
             }
 
@@ -1746,10 +1746,10 @@ snippet code_undir_eulerian
     template<typename Edge>
     class UndirectedEulerian {
     public:
-        int n, m;
-        vector<vector<pair<int, Edge>>> adj; // NOTE: dont't add a self-edge twice
+        int n;
+        vector<vector<pair<int, Edge>>> adj;
 
-        UndirectedEulerian(int n, int m) : n(n), m(m) {
+        UndirectedEulerian(int n, int m) : n(n) {
             adj.assign(n, vector<pair<int, Edge>>());
         }
 
@@ -1775,7 +1775,7 @@ snippet code_undir_eulerian
                 }
             }
 
-            if (m == 0 || !(odds == 0 || (odds == 2 && !circuit))) {
+            if (!(odds == 0 || (odds == 2 && !circuit))) {
                 return {};
             }
 
@@ -2184,44 +2184,44 @@ snippet code_lca_sparse_table
 # centroid decomposition of a tree
 snippet code_centroids
     struct Centroids {
-        vector<vector<int>> edges;
+        vector<vector<int>> adj;
         vector<bool> removed;
-        vector<int> par;
-        vector<int> sz;
+        vector<int> par, sz;
         int n;
 
         Centroids(int n) : n(n) {
-            edges.resize(n), removed.resize(n);
+            adj.resize(n), removed.resize(n);
             sz.resize(n), par.assign(n, -1);
         }
 
         void add_edge(int a, int b) {
-            edges[a].push_back(b);
-            edges[b].push_back(a);
+            adj[a].push_back(b);
+            adj[b].push_back(a);
         }
 
-        void find_size(int v, int p = -1) {
-            sz[v] = 1;
-            for (int x: edges[v]) {
-                if (x == p || removed[x]) continue;
-                find_size(x, v), sz[v] += sz[x];
+        void find_size(int i, int p = -1) {
+            sz[i] = 1;
+            for (int j: adj[i]) {
+                if (j == p || removed[j]) continue;
+                find_size(j, i), sz[i] += sz[j];
             }
         }
 
-        int find_centroid(int v, int p, int n) {
-            for (int x: edges[v]) {
-                if (x == p || removed[x]) continue;
-                if (sz[x] > n / 2) return find_centroid(x, v, n);
+        int find_centroid(int i, int p, int n) {
+            for (int j: adj[i]) {
+                if (j == p || removed[j]) continue;
+                if (sz[j] > n / 2) return find_centroid(j, i, n);
             }
-            return v;
+            return i;
         }
 
-        void build(int v = 0, int p = -1) {
+        int build(int v = 0, int p = -1) {
             find_size(v);
             int c = find_centroid(v, -1, sz[v]);
             removed[c] = true, par[c] = p;
             for (int x: edges[c])
                 if (!removed[x]) build(x, c);
+            return c;
         }
     };
 

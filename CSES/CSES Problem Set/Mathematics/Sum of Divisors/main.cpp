@@ -116,7 +116,10 @@ int32_t main() {
 
     for (ll i = 1, r; i <= n; i++) {
         r = n / (n / i);
-        ans += Z(n / i) * (Z(i + r) * (r - i + 1) / 2);
+        // sum [x = i ... r] { floor(n / x) * x }
+        // sum [x = i ... r] { floor(n / i) * x }
+        // floor(n / i) * sum [x = i ... r] { x }
+        ans += Z(n / i) * (Z(r + i) * (r - i + 1) / 2);
         i = r;
     }
 
