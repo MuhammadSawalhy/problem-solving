@@ -2215,12 +2215,12 @@ snippet code_centroids
             return i;
         }
 
-        int build(int v = 0, int p = -1) {
-            find_size(v);
-            int c = find_centroid(v, -1, sz[v]);
+        int build(int i = 0, int p = -1) {
+            find_size(i);
+            int c = find_centroid(i, -1, sz[i]);
             removed[c] = true, par[c] = p;
-            for (int x: edges[c])
-                if (!removed[x]) build(x, c);
+            for (int j: adj[c])
+                if (!removed[j]) build(j, c);
             return c;
         }
     };

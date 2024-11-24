@@ -25,7 +25,7 @@ struct Gen {
     static vi tree_parents(int n, int root = 1) {
         vector<int> p(n - 1);
         auto a = rnd.perm(n);
-        for (int i = 0; i < n; i++) a[i]++;
+        for (int i = 1; i < n; i++) a[i]++;
         for (int i = 1; i < n; i++)
             if (a[i] == root) swap(a[0], a[i]);
         for (int i = 0; i < n - 1; i++) p[i] = a[rnd.next(0ll, i)];
@@ -36,7 +36,7 @@ struct Gen {
     static vector<pii> tree_edges(int n) {
         auto a = rnd.perm(n);
         vector<pair<int, int>> edges;
-        for (int i = 0; i < n; i++) a[i]++;
+        for (int i = 1; i < n; i++) a[i]++;
         for (int i = 1; i < n; i++)
             edges.emplace_back(a[i], a[rnd.next(0ll, i - 1)]);
         return edges;

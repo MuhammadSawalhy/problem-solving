@@ -25,7 +25,7 @@ struct Gen {
     static vi tree_parents(int n, int root = 1) {
         vector<int> p(n - 1);
         auto a = rnd.perm(n);
-        for (int i = 0; i < n; i++) a[i]++;
+        for (int i = 1; i < n; i++) a[i]++;
         for (int i = 1; i < n; i++)
             if (a[i] == root) swap(a[0], a[i]);
         for (int i = 0; i < n - 1; i++) p[i] = a[rnd.next(0ll, i)];
@@ -84,14 +84,11 @@ struct Gen {
 };
 
 void gen() {
-    int n = rnd.next(2, 20), q = rnd.next(1, 5);
-
-    println(n, q, Gen::str(10, 2));
-
-    while (q--) {
-        int l = rnd.next(1ll, n - 1);
-        int r = rnd.next(l + 1, n);
-        println(l, r);
+    int n = rnd.next(2, 5);
+    println(n);
+    println(Gen::str(n));
+    for (int i = 2; i <=n; i++) {
+        println(i - 1, i);
     }
 }
 

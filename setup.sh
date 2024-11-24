@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ "$(id -u)" = 0 ]; then
+	echo "You shouldn't run this script as sudo"
+	exit 1
+fi
+
 link_file() {
   ln -sf "$(realpath "$1")" "$(realpath "$2")"
 }
