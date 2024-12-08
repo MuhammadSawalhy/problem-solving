@@ -736,6 +736,48 @@ snippet code_geo
         }
     };
 
+    bool cut(const Polygon &ploy, const Line &l, double d) {
+        auto &p = poly.verts;
+        int n = p.size();
+        vector<pt> new_polygon;
+        bool has_intersection = false;
+        bool active = true;
+
+        pt u = ((l.b - l.a) / (l.b - l.a).len()).rotate(PI / 2) * d;
+        Line newl = Line(l.a + u, l.b + u);
+
+        for (int i = 0; i < n; i++) {
+            pt cur = p[i];
+            pt next = p[(i + 1) % n];
+            if (cur.x == next.x && cur.y == next.y) continue;
+            pt inter;
+
+            double v1 = (newl.b - newl.a).cross(cur - newl.a);
+            double v2 = (newl.b - newl.a).cross(next - newl.a);
+
+            if (active) {
+                new_polygon.push_back(cur);
+            }
+
+            if (v1 * v2 < 0 && intersection(newl.a, newl.b, cur, next, inter)) {
+                if ((next - cur).cross(newl.b - newl.a) > EPS) {
+                    active = false;
+                } else if ((next - cur).cross(newl.b - newl.a) < EPS) {
+                    if (!has_intersection) new_polygon.clear();
+                    active = true;
+                }
+
+                new_polygon.push_back(inter);
+                has_intersection = true;
+            }
+        }
+
+        bool in_correct_dir = (p[0] - newl.a).dot(u) > -EPS;
+        if (!has_intersection && !in_correct_dir) return false;
+        p = new_polygon;
+        return true;
+    }
+
     struct Welzl {
         vector<pt> points;
         Welzl(vector<pt> &_points) : points(_points) {
@@ -2233,28 +2275,27 @@ snippet code_stress_gen
             vector<int> a(n);
             for (int i = 0; i < n; i++)
                 a[i] = i;
-            random_shuffle(a.begin(), a.end());
+            shuffle(a.begin(), a.end());
             return a;
         }
 
         static vector<int> tree_parents(int n) {
             vector<int> p(n - 1);
             auto a = perm(n);
-            // a.begin(), node 1, is the root
-            random_shuffle(a.begin() + 1, a.end());
-            for (int i = 1; i < n; i++)
-                p[i - 1] = a[rand_int(0, i - 1)] + 1;
+            // a[0] = 1, is the root
+            shuffle(a.begin() + 1, a.end());
+            for (int32_t i = 1; i < n; i++)
+                p[i - 1] = a[rnd.next(0, i - 1)] + 1;
             return p;
         }
 
         static vector<pair<int, int>> tree_edges(int n) {
             auto a = perm(n);
             vector<pair<int, int>> edges;
-            for (int i = 1; i < n; i++)
-                edges.push_back({a[i] + 1, a[rand_int(0, i - 1)] + 1});
+            for (int32_t i = 1; i < n; i++)
+                edges.push_back({a[i] + 1, a[rnd.next(0, i - 1)] + 1});
             return edges;
         }
-
 
         static vector<vector<int>> tree_adj(int n) {
             vector<vector<int>> adj(n);
@@ -2269,7 +2310,7 @@ snippet code_stress_gen
         static string str(int n) {
             string s;
             for (int i = 0; i < n; i++)
-                s += rand_int('a', 'z');
+                s += rnd.next('a', 'z');
             return s;
         }
     };

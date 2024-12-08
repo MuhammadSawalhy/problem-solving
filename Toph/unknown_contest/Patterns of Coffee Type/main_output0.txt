@@ -1,0 +1,5 @@
+Test Case: 1
+1 1.00
+2 5.00
+Test Case: 2
+No Pattern
