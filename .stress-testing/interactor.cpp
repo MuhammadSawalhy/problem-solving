@@ -1,42 +1,23 @@
 // ﷽
 #include <bits/stdc++.h>
+#include "testlib.h"
 
 using namespace std;
 
-#ifdef SAWALHY
-#include "debug.hpp"
-#else
-#define debug(...)
-#define debug_itr(...)
-#define debug_bits(...)
-#endif
-
 #define int long long
-#define ll long long
 #define all(v) v.begin(), v.end()
-
-mt19937 rng = mt19937(random_device()());
-
-void seed(int s) { rng = mt19937(s); }
-
-int rand_int(int x, int y) {
-    return uniform_int_distribution<int>(x, y)(rng);
-}
 
 void interact() {
     // cout to the solution and cin from it, interact and enjoy
-    int n = rand_int(1, 100);
-    cout << n << endl;
+    int n = rnd.next(1, 100);
+    println(n);
     int ans, correct = sin(n);
     cin >> ans;
     assert(correct == ans);
 }
 
 int32_t main(int32_t argc, char *argv[]) {
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL), cout.tie(NULL);
-    if (argc > 1) srand(atoi(argv[1]));
-    else srand(time(NULL));
+    registerGen(argc, argv, 1);
 
     int t = 1;
     cout << t << endl;

@@ -31,6 +31,6 @@ link_file interact.py "$STRESS_DIR"
 
 cd "$STRESS_DIR"
 
-make interaction
+make interaction || true
 
-python3 interact.py ./main ./interactor
+python3 interact.py "$@" ./main ./interactor

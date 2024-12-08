@@ -13,4 +13,4 @@ copy_file() {
     fi
 }
 
-copy_file interact.cpp
+copy_file interactor.cpp
