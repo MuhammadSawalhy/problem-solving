@@ -1,0 +1,4 @@
+0011
+
+Output:
+EQUAL

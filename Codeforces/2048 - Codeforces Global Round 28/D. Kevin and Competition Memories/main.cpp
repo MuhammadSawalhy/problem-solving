@@ -1,5 +1,5 @@
 // ﷽
-// https://acm.hdu.edu.cn/showproblem.php?pid=4129
+// https://codeforces.com/contest/2048/problem/D
 
 #include <bits/stdc++.h>
 #pragma GCC optimize("Ofast")
@@ -28,28 +28,42 @@ using namespace std;
 template<class T>
 using rpq = priority_queue<T, vector<T>, greater<T>>;
 
-int n, m, mink, maxk, p;
-
 void solve() {
-    debug(n, m, mink, maxk, p);
-    int x[n], y[n];
-
-    for (int i = 0; i < n; i++) {
-        cin >> x[i] >> y[i];
-        cerr << x[i] << ' ' << y[i] << endl;
-    }
-
+    int n, m;
+    cin >> n >> m;
+    int a[n];
+    int b[m];
+    for (int i = 0; i < n; i++) cin >> a[i];
+    for (int i = 0; i < m; i++) cin >> b[i];
+    sort(a + 1, a + n);
+    debug_itr(b, m);
     for (int i = 0; i < m; i++) {
-        int u, v, w;
-        cin >> u >> v >> w;
-        cerr << "Segment " << x[u] << ' ' << y[u] << ' ' << x[v] << ' ' << y[v] << endl;
+        if (b[i] <= a[0]) b[i] = 1;
+        else {
+            int j = (a + n) - lower_bound(a + 1, a + n, b[i]);
+            b[i] = j + 1;
+        }
     }
+    debug_itr(b, m);
+    sort(b, b + m);
+
+    for (int k = 1; k <= m; k++) {
+        int sum = 0;
+        for (int j = k; j <= m; j += k) {
+            sum += b[j - 1];
+        }
+        cout << sum << ' ';
+    }
+    cout << endl;
 }
 
 int32_t main(int32_t argc, char **argv) {
     cin.tie(nullptr)->sync_with_stdio(false);
 
-    while (cin >> n >> m >> mink >> maxk >> p, n && m) {
+    int T = 1;
+    cin >> T;
+    for (int t = 1; t <= T; t++) {
+        debug("--------", t);
         solve();
     }
 

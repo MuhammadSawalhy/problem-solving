@@ -1,0 +1,5 @@
+Input:
+0111
+
+Output:
+ROTATE
