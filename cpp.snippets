@@ -829,7 +829,7 @@ snippet code_segtree_simple
         }
 
         void update(int i, ll val) {
-            for (tree[i += n] = val; i > 1; i >>= 1) pull(i);
+            for (tree[i += n] = val; i > 1; i >>= 1) pull(i >> 1);
         }
 
         auto query(int l, int r) {
