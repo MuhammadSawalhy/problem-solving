@@ -1,6 +1,6 @@
-// ﷽
 #include <bits/stdc++.h>
 #include <cmath>
+#include <quadmath.h> // For __float128 and related functions
 
 using namespace std;
 
@@ -23,34 +23,34 @@ int32_t main() {
     int n;
     cin >> n;
 
-    long double ans = 0, dp[101];
-
-    for (int i = 0; i < 101; i++) dp[i] = 0;
+    __float128 ans = 0;
 
     int f[n + 1];
     for (int i = 1; i <= n; i++) {
         cin >> f[i];
-        for (int x = 1; x <= f[i]; x++) {
-            ans += (long double) 1.0 / f[i] * dp[x];
-            dp[x] += (long double) 1.0L * (f[i] - x) * 1e7L / f[i];
+        for (int j = 1; j < i; j++) {
+            int cnt = 0;
+            for (int r = 1; r <= f[j]; r++) {
+                cnt += min(r - 1, f[i]);
+            }
+            ans += (__float128)cnt * 1e6 / (f[i] * f[j]);
         }
     }
 
-    ans *= 1e-1;
-    cerr << setprecision(20) << fixed;
-    debug(ans);
-
-    if (abs(ans - (int) ans) == 0.5) {
-        if ((int) ceil(ans) % 2 == 1) {
-            ans = floor(ans);
-        } else {
-            ans = ceil(ans);
-        }
+    auto d = ans - (int) ans;
+    int res = 0;
+    if (d == 0.5) {
+        res = (int) ans;
+        if (res & 1) res++;
+    } else if (d > 0.5) {
+        ans += 1;
+        res = (int) ans;
     } else {
-        ans = round(ans);
+        res = (int) ans;
     }
 
-    cout << fixed << ans / 1e6;
+    // Print the result with six decimal places
+    cout << fixed << setprecision(6) << res / 1e6 << endl;
 
     return 0;
 }

@@ -1,157 +1,81 @@
-// ﷽
-// https://cses.fi/problemset/task/2080
-
 #include <bits/stdc++.h>
-#pragma GCC optimize("Ofast")
+typedef long long ll;
 using namespace std;
 
-#ifdef SAWALHY
-#include "debug.hpp"
-#else
-#define debug(...) 0
-#define debug_itr(...) 0
-#define debug_bits(...) 0
-#endif
+int n, a, b;
+vector<int> graph[200001];
+int subtree[200001];
 
-#define ll long long
-#define int long long
-#define vi vector<int>
-#define vvi vector<vector<int>>
-#define pii pair<int, int>
-#define vii vector<pii>
-#define sz(v) (int) (v).size()
-#define all(v) v.begin(), v.end()
-#define rall(v) v.rbegin(), v.rend()
-#define minit(v, x...) v = min({v, x})
-#define maxit(v, x...) v = max({v, x})
+ll ans = 0, bit[200001];
+int total_cnt[200001]{1}, mx_depth;
+int cnt[200001], subtree_depth;
+bool processed[200001];
 
-template<class T>
-using rpq = priority_queue<T, vector<T>, greater<T>>;
-
-int n, k1, k2;
-
-const int N = 2e5 + 5;
-vi edges[N];
-int par[N], siz[N], fr[N], lazy[N];
-bool removed[N];
-
-struct Centroids {
-    int n;
-
-    Centroids(int n) : n(n) {}
-
-    void add_edge(int a, int b) {
-        edges[a].push_back(b);
-        edges[b].push_back(a);
-    }
-
-    void find_size(int i, int p = -1) {
-        siz[i] = 1;
-        for (int j: edges[i]) {
-            if (j == p || removed[j]) continue;
-            find_size(j, i), siz[i] += siz[j];
-        }
-    }
-
-    int find_centroid(int i, int p, int n) {
-        for (int j: edges[i]) {
-            if (j == p || removed[j]) continue;
-            if (siz[j] > n / 2) return find_centroid(j, i, n);
-        }
-        return i;
-    }
-
-    int mx;
-
-    int calc(int i, int p, int d) {
-        if (d > k2) return 0;
-        // apply lazy updates
-        int l = k1 - d, r = k2 - d;
-        int ans = l > mx ? 0 : fr[min(mx, r)] - (l > 0 ? fr[l - 1] : 0);
-        debug(i, ans);
-        for (int j: edges[i]) {
-            if (j == p || removed[j]) continue;
-            ans += calc(j, i, d + 1);
-            if (p == -1) {
-                add(j, i, d + 1);
-                for (int i = 0; i <= mx; i++) {
-                    lazy[i + 1] += lazy[i];
-                    fr[i] += lazy[i];
-                    lazy[i] = 0;
-                }
-                assert(lazy[mx + 1] == fr[mx]);
-            }
-        }
-        return ans;
-    }
-
-    void add(int i, int p, int d) {
-        if (d > k2) return;
-        maxit(mx, d); // changes applied up to mx
-        lazy[d]++;
-        for (int j: edges[i]) {
-            if (j == p || removed[j]) continue;
-            add(j, i, d + 1);
-        }
-    }
-
-    int build(int v = 0, int p = -1) {
-        find_size(v);
-        int c = find_centroid(v, -1, siz[v]);
-        mx = 0, lazy[1] = fr[0] = 1;
-        debug(c);
-        int ans = calc(c, -1, 0);
-        for (int i = 0; i <= siz[v]; i++) fr[i] = lazy[i] = 0;
-        removed[c] = true, par[c] = p;
-
-        for (int x: edges[c])
-            if (!removed[x]) ans += build(x, c);
-        return ans;
-    }
-};
-
-char in[1 << 24];
-struct Scanner {
-    char const *o;
-    Scanner() : o(in) { load(); }
-    void load() { in[fread(in, 1, sizeof(in) - 4, stdin)] = 0; }
-    unsigned readInt() {
-        unsigned u = 0;
-        while (*o && *o <= 32) ++o;
-        while (*o >= '0' && *o <= '9')
-            u = u * 10 + (*o++ - '0');
-        return u;
-    }
-    unsigned readDigit() {
-        while (*o && *o <= 32) ++o;
-        if (*o >= '0' && *o <= '9')
-            return *o++ - '0';
-        assert(false);
-    }
-} sc;
-
-void solve() {
-    n = sc.readInt(), k1 = sc.readInt(), k2 = sc.readInt();
-
-    Centroids G(n);
-    for (int i = 0; i < n - 1; i++) {
-        int a = sc.readInt(), b = sc.readInt();
-        a--, b--;
-        G.add_edge(a, b);
-    }
-
-    int ans = G.build();
-    cout << ans << '\n';
+int get_subtree_sizes(int node, int parent = 0) {
+	subtree[node] = 1;
+	for (int i : graph[node])
+		if (!processed[i] && i != parent) subtree[node] += get_subtree_sizes(i, node);
+	return subtree[node];
 }
 
-int32_t main(int32_t argc, char **argv) {
-    cin.tie(nullptr)->sync_with_stdio(false);
+int get_centroid(int desired, int node, int parent = 0) {
+	for (int i : graph[node])
+		if (!processed[i] && i != parent && subtree[i] >= desired)
+			return get_centroid(desired, i, node);
+	return node;
+}
 
-    int T = 1;
-    for (int t = 1; t <= T; t++) {
-        debug("--------", t);
-        solve();
-    }
+void get_cnt(int node, int parent, int depth = 1) {
+	if (depth > b) return;
+	subtree_depth = max(subtree_depth, depth);
+	cnt[depth]++;
+	for (int i : graph[node])
+		if (!processed[i] && i != parent) get_cnt(i, node, depth + 1);
+}
 
-    return 0;
+void centroid_decomp(int node = 1) {
+	int centroid = get_centroid(get_subtree_sizes(node) >> 1, node);
+	processed[centroid] = true;
+	mx_depth = 0;
+	long long partial_sum_init = (a == 1 ? 1ll : 0ll);
+	for (int i : graph[centroid])
+		if (!processed[i]) {
+			subtree_depth = 0;
+			get_cnt(i, centroid);
+
+			long long partial_sum = partial_sum_init;
+			for (int depth = 1; depth <= subtree_depth; depth++) {
+				ans += partial_sum * cnt[depth];
+				int dremove = b - depth;
+				if (dremove >= 0) partial_sum -= total_cnt[dremove];
+				int dadd = a - (depth + 1);
+				if (dadd >= 0) partial_sum += total_cnt[dadd];
+			}
+
+			for (int depth = a - 1; depth <= b - 1 && depth <= subtree_depth; depth++)
+				partial_sum_init += cnt[depth];
+
+			for (int depth = 1; depth <= subtree_depth; depth++)
+				total_cnt[depth] += cnt[depth];
+			mx_depth = max(mx_depth, subtree_depth);
+
+			fill(cnt, cnt + subtree_depth + 1, 0);
+		}
+	fill(total_cnt + 1, total_cnt + mx_depth + 1, 0);
+	for (int i : graph[centroid])
+		if (!processed[i]) centroid_decomp(i);
+}
+
+int main() {
+	cin.tie(0)->sync_with_stdio(0);
+	cin >> n >> a >> b;
+	for (int i = 1; i < n; i++) {
+		int u, v;
+		cin >> u >> v;
+		graph[u].push_back(v);
+		graph[v].push_back(u);
+	}
+	centroid_decomp();
+	cout << ans;
+	return 0;
 }

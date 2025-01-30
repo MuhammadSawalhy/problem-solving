@@ -179,4 +179,4 @@ void debug_all(T t, V... v) {
     debug_all(v...);
 }
 
-#define debug(x...) (#x[0] != '\0' && (cerr << #x << " = ")), debug_all(x)
+#define debug(x...) (#x[0] != '\0' && (cerr << setw(3) << __LINE__ <<": " #x << " = ")), debug_all(x)

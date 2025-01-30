@@ -1,31 +1,32 @@
-import math
+from decimal import Decimal, getcontext
 
+
+def expected_inversions(n: int, r):
+    # Set the precision high enough to handle calculations
+    getcontext().prec = 100  # Adjust precision as needed
+
+    total = Decimal(0.0)
+    for a in range(n):
+        for b in range(a + 1, n):
+            r_a, r_b = r[a], r[b]
+            cnt = 0
+            for i in range(1, r_b + 1):
+                cnt += max(r_a - i, 0)
+            # Normalize by r_a * r_b
+            p = Decimal(cnt) / (r_a * r_b)
+            total += p
+    return total
+
+
+# Read input
 n = int(input())
+r = list(map(int, input().split()))
 
-dp = [(0, 1)] * 101
+# Compute expected inversions
+result = expected_inversions(n, r)
 
-f = list(map(int, input().split()))
+# Round to six decimal places (round half to even)
+rounded_result = round(result, 6)
 
-
-def add(fraca: tuple[int, int], fracb: tuple[int, int]):
-    x = fraca[0] * fracb[1] + fracb[0] * fraca[1]
-    y = fraca[1] * fracb[1]
-    g = math.gcd(x, y)
-    return (x // g, y // g)
-
-
-def mul(fraca: tuple[int, int], fracb: tuple[int, int]):
-    x = fraca[0] * fracb[0]
-    y = fraca[1] * fracb[1]
-    g = math.gcd(x, y)
-    return (x // g, y // g)
-
-ans = (0, 1)
-
-for i in range(n):
-    for x in range(1, f[i] + 1):
-        ans = add(ans, mul(dp[x], (1, f[i])))
-        dp[x] = add(dp[x], (f[i] - x, f[i]))
-
-print(f"{ans[0] / ans[1]:.6f}")
-
+# Print the result with six decimal places
+print(f"{float(rounded_result):.6f}")

@@ -75,6 +75,16 @@ snippet tempt
     }
 
 
+snippet dbg
+    #ifdef SAWALHY
+    #include "debug.hpp"
+    #else
+    #define debug(...) 0
+    #define debug_itr(...) 0
+    #define debug_bits(...) 0
+    #endif
+
+
 # increase the stack memory limit
 snippet code_largestack
     static void run_with_stack_size(void (*func)(void), size_t stsize) {
@@ -1286,6 +1296,7 @@ snippet code_mint
             return x >= mod ? x - mod : (x < 0  ? x + mod : x);
         }
         Z power(ll b) const {
+            assert(b >= 0);
             Z res = 1, a = x;
             for (; b; b >>= 1, a *= a)
                 if (b & 1) res *= a;
@@ -2514,3 +2525,79 @@ snippet code_treap
         return get_index(t->r, i - cnt(t->l) - 1);
     }
 
+
+# Min cost flow algorithm
+snippet code_mincostflow
+    class MinCostMaxFlow {
+    public:
+        struct Edge {
+            int u, cap, cost, v;
+        };
+
+        MinCostMaxFlow(int n) : graph(n), dist(n), in_queue(n), parent(n), parent_edge(n) {}
+
+        void add_edge(int from, int to, int capacity, int cost) {
+            graph[from].push_back({to, capacity, cost, (int) graph[to].size()});
+            graph[to].push_back({from, 0, -cost, (int) graph[from].size() - 1});
+        }
+
+        pair<int, int> get(int source, int sink) {
+            int max_flow = 0, min_cost = 0;
+            while (spfa(source, sink)) {
+
+                int path_flow = INF;
+                for (int v = sink; v != source; v = parent[v]) {
+                    Edge &e = graph[parent[v]][parent_edge[v]];
+                    path_flow = min(path_flow, e.cap);
+                }
+
+                int cost = 0;
+                for (int v = sink; v != source; v = parent[v]) {
+                    Edge &e = graph[parent[v]][parent_edge[v]];
+                    e.cap -= path_flow;
+                    graph[v][e.v].cap += path_flow;
+                    cost += path_flow * e.cost;
+                }
+
+                if (cost > 100) break;
+                min_cost += cost;
+                max_flow += path_flow;
+            }
+            return {max_flow, min_cost};
+        }
+
+    private:
+        vector<vector<Edge>> graph;
+        vector<int> dist;
+        vector<bool> in_queue;
+        vector<int> parent, parent_edge;
+
+        bool spfa(int source, int sink) {
+            fill(dist.begin(), dist.end(), INF);
+            fill(in_queue.begin(), in_queue.end(), false);
+            dist[source] = 0;
+            queue<int> q;
+            q.push(source);
+            in_queue[source] = true;
+
+            while (!q.empty()) {
+                int u = q.front();
+                q.pop();
+                in_queue[u] = false;
+
+                for (int i = 0; i < graph[u].size(); ++i) {
+                    Edge &e = graph[u][i];
+                    if (e.cap > 0 && dist[u] + e.cost < dist[e.u]) {
+                        dist[e.u] = dist[u] + e.cost;
+                        parent[e.u] = u;
+                        parent_edge[e.u] = i;
+                        if (!in_queue[e.u]) {
+                            q.push(e.u);
+                            in_queue[e.u] = true;
+                        }
+                    }
+                }
+            }
+            return dist[sink] != INF;
+        }
+    };
