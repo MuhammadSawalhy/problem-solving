@@ -1,12 +1,15 @@
 #include <bits/stdc++.h>
 using namespace std;
 #define int long long
-#define ll long long
-#define all(v) begin(v), end(v)
-#define rall(v) rbegin(v), rend(v)
 
 void solve() {
-    ;
+    int x, y;
+    cin >> x >> y;
+    if (y == x + 1 || (y < x && (x - y + 1) % 9 == 0)) {
+        cout << "Yes\n";
+    } else {
+        cout << "No\n";
+    }
 }
 
 signed main() {

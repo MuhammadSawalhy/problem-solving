@@ -25,60 +25,72 @@ using namespace std;
 #define minit(v, x...) v = min({v, x})
 #define maxit(v, x...) v = max({v, x})
 
-template<class T>
-using rpq = priority_queue<T, vector<T>, greater<T>>;
-
-template<int32_t mod>
-struct mint {
-    using Z = mint;
-    int32_t x;
-    mint(int32_t x = 0) : x(norm(x)) {}
-    mint(ll x) : x(norm(x % mod)) {}
-    inline int32_t norm(int32_t x) const {
-        return x >= mod ? x - mod : (x < 0 ? x + mod : x);
-    }
-    Z power(ll b) const {
-        Z res = 1, a = x;
-        for (; b; b >>= 1, a *= a)
-            if (b & 1) res *= a;
-        return res;
-    }
-    Z inv() const { return assert(x != 0), power(mod - 2); }
-    Z operator-() const { return -x; }
-    Z &operator*=(const Z &r) { return *this = (ll) x * r.x; }
-    Z &operator+=(const Z &r) { return *this = x + r.x; }
-    Z &operator-=(const Z &r) { return *this = x - r.x; }
-    Z &operator/=(const Z &r) { return *this *= r.inv(); }
-    friend Z operator*(const Z &l, const Z &r) { return Z(l) *= r; }
-    friend Z operator+(const Z &l, const Z &r) { return Z(l) += r; }
-    friend Z operator-(const Z &l, const Z &r) { return Z(l) -= r; }
-    friend Z operator/(const Z &l, const Z &r) { return Z(l) /= r; }
-    friend ostream &operator<<(ostream &os, const Z &a) { return os << a.x; }
-    friend istream &operator>>(istream &is, Z &a) {
-        ll y = 0;
-        return is >> y, a = y, is;
-    }
-};
-
-#define MOD 998244353
-using Z = mint<MOD>;
-const int N = 2e3 + 1;
-
-bool vis[N][N];
-Z dp[N][N];
-vector<int> adj[N];
-
-Z doit(int i, int p) {
-
-}
 
 void solve() {
-    int n;
-    cin >> n;
-    for (int i = 0; i < n; i++) {
-
+    int n, q;
+    cin >> n >> q;
+    vector<int> adj[n];
+    vector<int> deg(n), par(n);
+    for (int i = 0; i < n - 1; i++) {
+        int u, v;
+        cin >> u >> v, u--, v--;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+        deg[u]++;
+        deg[v]++;
     }
 
+    function<void(int, int)> dfs = [&](int i, int p) {
+        par[i] = p;
+        for (auto j: adj[i]) {
+            if (j != p) dfs(j, i);
+        }
+    };
+
+    dfs(0, -1);
+
+    while (q--) {
+        int x, v;
+        cin >> x >> v;
+        debug(x, v);
+        x--;
+
+        if (x == 0) {
+            cout << 0 << endl;
+            continue;
+        }
+
+        x = par[x];
+
+        if (x == 0) {
+            cout << 1 << endl;
+            continue;
+        }
+
+        int ans = 0;
+
+        vector<int> vals;
+
+        while (x != 0) {
+            if (par[x] == 0) {
+                ans += deg[x] * 2 - 1;
+                vals.push_back(1 - (deg[x] * 2 - 1));
+                break;
+            } else {
+                ans += deg[x] * 2;
+                vals.push_back(2 - (deg[x] * 2));
+                x = par[par[x]];
+            }
+        }
+
+        sort(all(vals));
+        debug(vals);
+        for (int i = 0; i < min(v, sz(vals)); i++) {
+            ans += vals[i];
+        }
+
+        cout << ans + 1 << endl;
+    }
 }
 
 int32_t main(int32_t argc, char **argv) {

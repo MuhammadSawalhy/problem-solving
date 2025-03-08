@@ -117,6 +117,17 @@ snippet arr
         cin >> a[i];
     }
 
+# Read a tree
+snippet tree
+    int n;
+    cin >> n;
+    vector<int> adj[n];
+    for (int i = 0; i < n - 1; i++) {
+        int u, v;
+        cin >> u >> v, u--, v--;
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
 
 # Primality test (Brute force)
 snippet code_is_prime
@@ -1470,14 +1481,15 @@ snippet code_scanner
         char const *o;
         Scanner() : o(in) { load(); }
         void load() { in[fread(in, 1, sizeof(in) - 4, stdin)] = 0; }
-        unsigned readInt() {
-            unsigned u = 0;
+        int readInt() {
+            int u = 0, sign = 1;
             while (*o && *o <= 32) ++o;
+            if (*o == '-') ++o, sign = -1;
             while (*o >= '0' && *o <= '9')
                 u = u * 10 + (*o++ - '0');
-            return u;
+            return u * sign;
         }
-        unsigned readDigit() {
+        char readDigit() {
             while (*o && *o <= 32) ++o;
             if (*o >= '0' && *o <= '9')
                 return *o++ - '0';
