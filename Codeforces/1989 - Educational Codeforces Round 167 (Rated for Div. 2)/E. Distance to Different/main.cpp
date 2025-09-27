@@ -84,49 +84,12 @@ int n, k;
 void solve() {
     cin >> n >> k;
 
-    Z cnt[k + 1];
-    cnt[1] = 1;
-
-    for (int i = 2; i <= k; i++) {
-        cnt[i] = Z(n).power(i);
-        for (int j = 1; j < k; j++) {
-            cnt[i] -= cnt[j] * ncr(i, j);
-        }
-    }
-
-    debug(n, k);
-    debug(cnt[k]);
-
-    Z ans = cnt[k] / fact[n];
-    cout << ans << endl;
-}
-
-Z count(int i, vector<int> &taken) {
-    if (i == n) {
-        bool ok = true;
-        for (int x = 1; x <= k; x++) ok &= !!taken[x];
-        return ok;
-    }
     Z ans = 0;
-    for (int x = 1; x <= k; x++) {
-        taken[x]++;
-        ans += count(i + 1, taken);
-        taken[x]--;
+    for (int splits = k; splits <= n; splits++) {
+        ans += ncr(n - 1, splits - 1);
     }
-    return ans;
-}
 
-void brute() {
-    cin >> n >> k;
-    if (n > 10) return;
-
-    vector<int> taken(k + 1);
-    auto cnt = count(0, taken);
-
-    debug(n, k);
-    debug(cnt);
-
-    cout << cnt / fact[n] << endl;
+    cout << ans << endl;
 }
 
 int32_t main(int32_t argc, char **argv) {
@@ -134,7 +97,7 @@ int32_t main(int32_t argc, char **argv) {
     cin.tie(NULL), cout.tie(NULL);
     build_fact();
 
-    brute();
+    solve();
 
     return 0;
 }

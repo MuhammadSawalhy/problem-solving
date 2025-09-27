@@ -1,0 +1,22 @@
+4
+3 3
+I love apples
+He likes apples
+I love cats
+They love dogs
+3 2
+Icy wake up
+wake Icy up
+wake up Icy
+4 3
+c o D E
+c o D s
+c O l S
+c o m E
+4 5
+a s k A
+d s D t
+O R i A
+a X b Y
+b a k A
+u s k J
