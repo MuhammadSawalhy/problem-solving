@@ -1,9 +1,6 @@
+// ﷽
 #include <bits/stdc++.h>
 using namespace std;
-#define int long long
-#define ll long long
-#define all(v) begin(v), end(v)
-#define rall(v) rbegin(v), rend(v)
 
 #ifdef SAWALHY
 #include "debug.hpp"
@@ -13,12 +10,21 @@ using namespace std;
 #define debug_bits(...) 0
 #endif
 
+#define vi vector<int>
+#define vvi vector<vector<int>>
+#define pii pair<int, int>
+#define vii vector<pii>
+#define all(v) v.begin(), v.end()
+#define rall(v) v.rbegin(), v.rend()
+#define minit(v, x) v = min(v, x)
+#define maxit(v, x) v = max(v, x)
+
 void solve() {
     ;
 }
 
-signed main() {
-    cin.tie(0)->sync_with_stdio(0);
+int32_t main(int32_t argc, char **argv) {
+    cin.tie(nullptr)->sync_with_stdio(false);
 
     int T = 1;
     cin >> T;

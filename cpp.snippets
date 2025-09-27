@@ -224,8 +224,7 @@ snippet code_sieve
 snippet code_fast_sieve
     std::vector<int> minp, primes;
     void sieve(int n) {
-        minp.assign(n + 1, 0);
-        primes.clear();
+        minp.assign(n + 1, 0), primes.clear();
 
         for (int i = 2; i <= n; i++) {
             if (minp[i] == 0) {
@@ -233,14 +232,10 @@ snippet code_fast_sieve
                 primes.push_back(i);
             }
 
-            for (auto p : primes) {
-                if (i * p > n) {
-                    break;
-                }
+            for (auto p: primes) {
+                if (i * p > n) break;
                 minp[i * p] = p;
-                if (p == minp[i]) {
-                    break;
-                }
+                if (p == minp[i]) break;
             }
         }
     }
@@ -876,6 +871,7 @@ snippet code_segtree
         Value() = default;
         Value(ll value) { sum = mn = mx = value; }
 
+        // make sure that: x + Value() == x
         Value &operator+=(const Value &other) {
             sum += other.sum;
             mn = min(mn, other.mn);
@@ -906,7 +902,7 @@ snippet code_segtree
                 *this = other;
             } else {
                 assert(other.state == relative);
-                value += other.value; // NOTE: merge updates
+                value += other.value;
             }
             return *this;
         }
@@ -916,6 +912,10 @@ snippet code_segtree
             // else other += value;
             // other.sum += value * (cnt - 1);
         }
+
+        // updates on all leafs (node.l == node.r) are applicable
+        // updates are applicable on decendant node values if it is applicable on the parent node
+        inline bool is_applicable(const Value &v) const { return true; }
 
         Update get(const Node &node) const { return *this; }
     };
@@ -961,8 +961,9 @@ snippet code_segtree
             for (int i = n - 1; i > 0; --i) pull(i);
         }
 
-        inline Value query(int i, int j) { return query(1, i, j); }
-        inline void update(int i, int j, const Update &val) { update(1, i, j, val); }
+        inline auto query(int i) { return query(1, i, i); }
+        inline auto query(int i, int j) { return query(1, i, j); }
+        inline auto update(int i, int j, const Update &val) { return update(1, i, j, val); }
 
         void pull(int i) {
             tree[i].value = tree[i << 1].value + tree[i << 1 | 1].value;
@@ -981,7 +982,7 @@ snippet code_segtree
 
         Value query(int i, int l, int r) {
             push(i);
-            if (tree[i].r < l || r < tree[i].l) return Value(); // default
+            if (tree[i].r < l || r < tree[i].l) return Value(); // Identity Value
             if (l <= tree[i].l && tree[i].r <= r) return tree[i].value;
             return query(i << 1, l, r) + query(i << 1 | 1, l, r);
         }
@@ -989,9 +990,9 @@ snippet code_segtree
         void update(int i, int l, int r, const Update &up) {
             push(i);
             if (tree[i].r < l || r < tree[i].l) return;
-            if (l <= tree[i].l && tree[i].r <= r) {
+            if (l <= tree[i].l && tree[i].r <= r && up.is_applicable(tree[i])) {
                 tree[i].update(up);
-                push(i); // to apply the update
+                push(i);
                 return;
             }
             update(i << 1, l, r, up.get(tree[i << 1]));
